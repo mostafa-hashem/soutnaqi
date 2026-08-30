@@ -104,12 +104,12 @@
   "videoPreviewUnavailable": "Video preview is not available for this file.",
   "dropHint": "Drag and drop an audio or video file here",
   "dropLoading": "Importing dropped file…",
-  "processIsolateVocals": "Isolate vocals",
-  "processIsolateMusic": "Isolate music",
-  "processIsolateVocalsLoading": "Isolating vocals with AI… this may take a few minutes.",
-  "processIsolateVocalsSuccess": "Vocals isolated successfully.",
-  "processIsolateMusicLoading": "Isolating music with AI… this may take a few minutes.",
-  "processIsolateMusicSuccess": "Music isolated successfully.",
+  "processIsolateVocals": "Vocals only",
+  "processIsolateMusic": "Music only",
+  "processIsolateVocalsLoading": "Extracting vocals with AI… this may take a few minutes.",
+  "processIsolateVocalsSuccess": "Vocals extracted successfully.",
+  "processIsolateMusicLoading": "Extracting music with AI… this may take a few minutes.",
+  "processIsolateMusicSuccess": "Music extracted successfully.",
   "separationAiHint": "AI separation (Demucs) — may take several minutes.",
   "separationNotConfigured": "Enable free separation: run tools/local_demucs_server on your PC and set SEPARATION_SERVER_URL in launch.json.",
   "separationLocalHint": "Local Demucs (free) — run the server on your PC. May take several minutes.",
@@ -127,6 +127,6 @@
   "operationTrim": "Trim",
   "operationExtractAudio": "Extract audio",
   "operationCompressVideo": "Compress video",
-  "operationIsolateVocals": "Isolate vocals",
-  "operationIsolateMusic": "Isolate music"
+  "operationIsolateVocals": "Vocals only",
+  "operationIsolateMusic": "Music only"
 }

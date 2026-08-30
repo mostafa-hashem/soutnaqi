@@ -94,12 +94,12 @@
   "videoPreviewUnavailable": "معاينة الفيدio غير متاحة لهذا الملف.",
   "dropHint": "اسحب ملف صوت أو فيدio وأفلته هنا",
   "dropLoading": "جاري استيراد الملف…",
-  "processIsolateVocals": "عزل الصوت",
-  "processIsolateMusic": "عزل الموسيقى",
-  "processIsolateVocalsLoading": "جاري عزل الصوت بالذكاء الاصطناعي… قد يستغرق دقائق.",
-  "processIsolateVocalsSuccess": "تم عزل الصوت بنجاح.",
-  "processIsolateMusicLoading": "جاري عزل الموسيقى بالذكاء الاصطناعي… قد يستغرق دقائق.",
-  "processIsolateMusicSuccess": "تم عزل الموسيقى بنجاح.",
+  "processIsolateVocals": "صوت فقط",
+  "processIsolateMusic": "موسيقى فقط",
+  "processIsolateVocalsLoading": "جاري استخراج الصوت بالذكاء الاصطناعي… قد يستغرق دقائق.",
+  "processIsolateVocalsSuccess": "تم استخراج الصوت بنجاح.",
+  "processIsolateMusicLoading": "جاري استخراج الموسيقى بالذكاء الاصطناعي… قد يستغرق دقائق.",
+  "processIsolateMusicSuccess": "تم استخراج الموسيقى بنجاح.",
   "separationAiHint": "الفصل بالذكاء الاصطناعي (Demucs) — قد يستغرق عدة دقائق.",
   "separationNotConfigured": "فعّل الفصل المجاني: شغّل tools/local_demucs_server على جهازك وأضف SEPARATION_SERVER_URL في launch.json.",
   "separationLocalHint": "Demucs محلي (مجاني) — شغّل السيرفر على جهازك. قد يستغرق عدة دقائق.",
@@ -117,6 +117,6 @@
   "operationTrim": "قص",
   "operationExtractAudio": "استخراج الصوت",
   "operationCompressVideo": "ضغط الفيدio",
-  "operationIsolateVocals": "عزل الصوت",
-  "operationIsolateMusic": "عزل الموسيقى"
+  "operationIsolateVocals": "صوت فقط",
+  "operationIsolateMusic": "موسيقى فقط"
 }

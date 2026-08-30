@@ -665,37 +665,37 @@ abstract class AppLocalizations {
   /// No description provided for @processIsolateVocals.
   ///
   /// In en, this message translates to:
-  /// **'Isolate vocals'**
+  /// **'Vocals only'**
   String get processIsolateVocals;
 
   /// No description provided for @processIsolateMusic.
   ///
   /// In en, this message translates to:
-  /// **'Isolate music'**
+  /// **'Music only'**
   String get processIsolateMusic;
 
   /// No description provided for @processIsolateVocalsLoading.
   ///
   /// In en, this message translates to:
-  /// **'Isolating vocals with AI… this may take a few minutes.'**
+  /// **'Extracting vocals with AI… this may take a few minutes.'**
   String get processIsolateVocalsLoading;
 
   /// No description provided for @processIsolateVocalsSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Vocals isolated successfully.'**
+  /// **'Vocals extracted successfully.'**
   String get processIsolateVocalsSuccess;
 
   /// No description provided for @processIsolateMusicLoading.
   ///
   /// In en, this message translates to:
-  /// **'Isolating music with AI… this may take a few minutes.'**
+  /// **'Extracting music with AI… this may take a few minutes.'**
   String get processIsolateMusicLoading;
 
   /// No description provided for @processIsolateMusicSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Music isolated successfully.'**
+  /// **'Music extracted successfully.'**
   String get processIsolateMusicSuccess;
 
   /// No description provided for @separationAiHint.
@@ -803,13 +803,13 @@ abstract class AppLocalizations {
   /// No description provided for @operationIsolateVocals.
   ///
   /// In en, this message translates to:
-  /// **'Isolate vocals'**
+  /// **'Vocals only'**
   String get operationIsolateVocals;
 
   /// No description provided for @operationIsolateMusic.
   ///
   /// In en, this message translates to:
-  /// **'Isolate music'**
+  /// **'Music only'**
   String get operationIsolateMusic;
 }
 

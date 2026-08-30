@@ -304,24 +304,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropLoading => 'Importing dropped file…';
 
   @override
-  String get processIsolateVocals => 'Isolate vocals';
+  String get processIsolateVocals => 'Vocals only';
 
   @override
-  String get processIsolateMusic => 'Isolate music';
+  String get processIsolateMusic => 'Music only';
 
   @override
   String get processIsolateVocalsLoading =>
-      'Isolating vocals with AI… this may take a few minutes.';
+      'Extracting vocals with AI… this may take a few minutes.';
 
   @override
-  String get processIsolateVocalsSuccess => 'Vocals isolated successfully.';
+  String get processIsolateVocalsSuccess => 'Vocals extracted successfully.';
 
   @override
   String get processIsolateMusicLoading =>
-      'Isolating music with AI… this may take a few minutes.';
+      'Extracting music with AI… this may take a few minutes.';
 
   @override
-  String get processIsolateMusicSuccess => 'Music isolated successfully.';
+  String get processIsolateMusicSuccess => 'Music extracted successfully.';
 
   @override
   String get separationAiHint =>
@@ -381,8 +381,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operationCompressVideo => 'Compress video';
 
   @override
-  String get operationIsolateVocals => 'Isolate vocals';
+  String get operationIsolateVocals => 'Vocals only';
 
   @override
-  String get operationIsolateMusic => 'Isolate music';
+  String get operationIsolateMusic => 'Music only';
 }
