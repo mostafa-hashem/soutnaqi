@@ -297,24 +297,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dropLoading => 'جاري استيراد الملف…';
 
   @override
-  String get processIsolateVocals => 'عزل الصوت';
+  String get processIsolateVocals => 'صوت فقط';
 
   @override
-  String get processIsolateMusic => 'عزل الموسيقى';
+  String get processIsolateMusic => 'موسيقى فقط';
 
   @override
   String get processIsolateVocalsLoading =>
-      'جاري عزل الصوت بالذكاء الاصطناعي… قد يستغرق دقائق.';
+      'جاري استخراج الصوت بالذكاء الاصطناعي… قد يستغرق دقائق.';
 
   @override
-  String get processIsolateVocalsSuccess => 'تم عزل الصوت بنجاح.';
+  String get processIsolateVocalsSuccess => 'تم استخراج الصوت بنجاح.';
 
   @override
   String get processIsolateMusicLoading =>
-      'جاري عزل الموسيقى بالذكاء الاصطناعي… قد يستغرق دقائق.';
+      'جاري استخراج الموسيقى بالذكاء الاصطناعي… قد يستغرق دقائق.';
 
   @override
-  String get processIsolateMusicSuccess => 'تم عزل الموسيقى بنجاح.';
+  String get processIsolateMusicSuccess => 'تم استخراج الموسيقى بنجاح.';
 
   @override
   String get separationAiHint =>
@@ -374,8 +374,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get operationCompressVideo => 'ضغط الفيدio';
 
   @override
-  String get operationIsolateVocals => 'عزل الصوت';
+  String get operationIsolateVocals => 'صوت فقط';
 
   @override
-  String get operationIsolateMusic => 'عزل الموسيقى';
+  String get operationIsolateMusic => 'موسيقى فقط';
 }
