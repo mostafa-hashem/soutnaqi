@@ -1,0 +1,88 @@
+---
+description: قواعد مشروع صوت نقي — استدعِها بـ @rules عند العمل على الكود
+alwaysApply: false
+---
+
+# قواعد صوت نقي
+
+اتبع هذا الملف بالكامل بعد استدعائه. الملفات الأخرى في `.cursor/rules/` تفصيل لنفس القواعد.
+
+## المشروع
+
+تطبيق Flutter ثنائي اللغة (ar/en) لمعالجة الصوت والفيديو: قص، ترميز، فصل مصادر، موجة، تاريخ مشاريع.
+
+- Package: `soutnaqi`
+- حالة: `flutter_bloc` Cubits + `Equatable`
+- معالجة: FFmpeg على IO، stubs على الويب
+- UI: Material 3، `hugeicons`، `google_fonts`
+
+لا تضف GetX أو Riverpod أو Provider.
+
+## البنية
+
+```
+lib/features/<feature>/{cubit,data,ui}
+lib/core/{theme,widgets,config,errors,logging,toast,layout,constants}
+lib/l10n/
+```
+
+- ميزة جديدة = مجلد تحت `features`. `core/widgets` فقط عند إعادة الاستخدام.
+- الاستيراد: `package:soutnaqi/...` دائماً.
+- المنصات: `*_platform.dart` مع `*_io.dart` / `*_stub.dart`.
+- لا منطق FFmpeg داخل `ui/`.
+
+## Dart
+
+- `const` constructors و`super.key`.
+- حالة: `Equatable` + `copyWith`. الحقول الخاصة `_`.
+- لا `print` — استخدم `appLog.d` / `appLog.e`.
+- الألوان من `context.accentPrimary` ونظائرها. لا `Color(0xFF…)` في الشاشات.
+- أيقونات: `HugeIconsStrokeRounded.*`.
+- النصوص من `AppLocalizations.of(context)` فقط.
+- بعد تعديل UI: تحقق فاتح/داكن وRTL.
+
+## الهوية
+
+- اسم: صوت نقي / SoutNaqi. علامة: موجة بيضاء على مربّع `#2563EB`.
+- ثيم `Magliss*` إرث — لا نظام ألوان ثانٍ. التوكنات في `MaglissColorTokens`.
+- أزرق `#2563EB` / بنفسجي `#7C3AED`. خلفية `#F4F6FA` و`#0B0F17`.
+- اللوجو: `SoutNaqiLogo` فقط.
+- نص فوق accent: `context.onAccent`.
+- خط: Cairo للعربية، Inter للإنجليزية عبر `font*W*`.
+- زوايا: `AppRadii` (`sm 8 / md 12 / lg 16 / xl 20`).
+
+## ترجمة
+
+- القالب `lib/l10n/app_en.arb` ونظيره `app_ar.arb`. نفس المفتاح في الملفين.
+- أخطاء النطاق: `AppException.messageKey` → `appExceptionMessage`.
+- لا تلحم جملاً مترجمة. أضف placeholder في ARB.
+
+## الحالة
+
+- Cubit واحد لكل ميزة. `emit` بعد كل نتيجة.
+- `unawaited(...)` للمهام في الخلفية (مثل تحميل التاريخ).
+- ارمِ `AppException` من data، والتقطه في UI مع `AppToast`.
+
+## المنصات
+
+```dart
+import 'service_stub.dart'
+    if (dart.library.io) 'service_io.dart';
+```
+
+- ويب: `isProcessingSupported == false` و`processingWebUnsupported`.
+- لا `dart:io` خارج `*_io.dart`.
+- كل عملية جديدة تحتاج IO وstub معاً.
+
+## أخطاء وسجلات
+
+- لا تعرض `error.toString()` للمستخدم.
+- مفتاح جديد: الاستخدام + `app_en.arb` + `app_ar.arb` + `app_exception_l10n.dart`.
+- Toast: `AppToast.showLoading / showSuccess / showFailure`.
+
+## الشاشات
+
+- عرض ≥ 800: سايدبار. أقل: AppBar + `ShellBottomNav`.
+- حواف: `maglissShellScrollPadding` / `maglissBottomNavPadding`.
+- التبويبات: `workspace`, `history`, `settings`. الافتراضي workspace. لا تبويب Home.
+- على الموبايل لا تكرر عنوان التبويب داخل الصفحة إذا كان AppBar يعرضه.

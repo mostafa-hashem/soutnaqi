@@ -1,0 +1,5 @@
+demucs>=4.0.0
+fastapi>=0.115.0
+numpy>=2.0.0
+python-multipart>=0.0.9
+uvicorn>=0.32.0

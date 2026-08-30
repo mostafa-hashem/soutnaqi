@@ -1,0 +1,18 @@
+---
+description: IO / web / stub conditional imports for processing
+alwaysApply: false
+---
+
+# تقسيم المنصات
+
+النمط المعتمد:
+
+```dart
+import 'service_stub.dart'
+    if (dart.library.io) 'service_io.dart';
+```
+
+- الويب: stub يوضح أن المعالجة غير مدعومة (`isProcessingSupported == false`) ويرمي `processingWebUnsupported`.
+- IO: التنفيذ الحقيقي (FFmpeg / path_provider / ملفات).
+- لا تستخدم `dart:io` داخل ملفات UI أو ملفات غير `*_io.dart`.
+- أضف المنصتين معاً عند إضافة عملية جديدة (صوت/فيديو/موجة/فصل). لا تترك IO بدون stub.

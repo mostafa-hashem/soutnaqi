@@ -1,0 +1,22 @@
+---
+description: Cubit, Equatable state, and async emit patterns
+alwaysApply: false
+---
+
+# الحالة
+
+- Cubit واحد لكل ميزة. الحالة `Equatable` مع `copyWith`.
+- `emit` بعد كل نتيجة. لا تحتفظ بنسخة UI من الحالة خارج الـ Cubit.
+- `unawaited(...)` للمهام التي لا ينتظرها المستخدم (تحميل التاريخ عند تغيير التبويب).
+- الفشل: ارمِ `AppException` من الـ repository/service، والتقطه في UI مع `AppToast`.
+- لا تستدعِ FFmpeg من ملف `ui/`.
+
+```dart
+emit(state.copyWith(isSubmitting: true));
+try {
+  await _repository.saveProject(localPath: path, fileName: fileName);
+} on AppException {
+  emit(state.copyWith(isSubmitting: false));
+  rethrow;
+}
+```

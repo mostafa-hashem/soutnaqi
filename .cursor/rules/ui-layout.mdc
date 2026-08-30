@@ -1,0 +1,14 @@
+---
+description: Shell layout, insets, and screen composition
+alwaysApply: false
+---
+
+# الشاشات والتخطيط
+
+- الصدفة: شريط جانبي من عرض `kShellSidebarBreakpoint` (800)، وإلا AppBar + `ShellBottomNav`.
+- الحواف الآمنة: `context.maglissShellScrollPadding()` و`maglissBottomNavPadding()`. لا تضف `viewPadding` يدوياً.
+- الألوان: `context.webBackground` للصفحة، `context.surfacePrimary` للبطاقات.
+- الخطوط تحتاج `SettingsCubit` عبر `context.read` ثم `font14W400(...)`.
+- التبويبات: `ShellTab` (`workspace`, `history`, `settings`). الافتراضي workspace. لا تضف Route للتبويب؛ أضفه في الصدفة.
+- على الموبايل AppBar يحمل عنوان التبويب — لا تكرر العنوان داخل الصفحة.
+- اللوجو: `SoutNaqiLogo` في السبلاش والسايدبار والإعدادات.
