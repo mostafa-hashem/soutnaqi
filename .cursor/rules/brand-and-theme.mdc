@@ -1,0 +1,15 @@
+---
+description: SoutNaqi visual identity — original blue palette and simple wave mark
+alwaysApply: false
+---
+
+# الهوية البصرية
+
+الاسم: **صوت نقي / SoutNaqi**. العلامة: موجة بيضاء واحدة على مربّع أزرق `#2563EB`.
+
+- الثيم باسم `Magliss*` (إرث). لا تُنشئ نظام ألوان موازياً. التوكنات في `MaglissColorTokens`.
+- الألوان الأصلية: أزرق `#2563EB` / بنفسجي `#7C3AED`، خلفية `#F4F6FA` و`#0B0F17`.
+- اللوجو: `SoutNaqiLogo` فقط. لا تضف قطرة أو ذهب أو زخرفة.
+- نص فوق accent: `context.onAccent`.
+- الخط: Cairo للعربية، Inter للإنجليزية عبر `font*W*`.
+- الزوايا: `AppRadii` (`sm 8 / md 12 / lg 16 / xl 20`).

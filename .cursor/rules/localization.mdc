@@ -1,0 +1,13 @@
+---
+description: ARB localization and bilingual UI rules
+alwaysApply: false
+---
+
+# الترجمة
+
+- المصدر: `lib/l10n/app_en.arb` (قالب) و`app_ar.arb`. الإخراج: `AppLocalizations`.
+- أي نص جديد يظهر للمستخدم يُضاف في **الملفين** بنفس المفتاح.
+- استخدم `AppLocalizations.of(context)` (الـ getter غير nullable).
+- أخطاء النطاق: مفتاح في `AppException.messageKey` يُترجم عبر `appExceptionMessage`.
+- لا تلحم جملاً مترجمة في الكود. أضف placeholder في ARB إذا احتجت قيمة ديناميكية.
+- الواجهة يجب أن تعمل RTL (`ar`) وLTR (`en`) دون قلب تخطيط يدوي إلا للوجو/الموجة.

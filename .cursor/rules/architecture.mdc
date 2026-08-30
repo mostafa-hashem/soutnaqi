@@ -1,0 +1,18 @@
+---
+description: Feature-first folder layout and import conventions
+alwaysApply: false
+---
+
+# البنية
+
+```
+lib/features/<feature>/{cubit,data,ui}
+lib/core/{theme,widgets,config,errors,logging,toast,layout,constants}
+lib/l10n/
+```
+
+- ميزة جديدة = مجلد جديد تحت `features`، وليس ملفات داخل `core`.
+- `core/widgets` فقط للويدجت المستخدمة في أكثر من ميزة.
+- الاستيراد: `package:soutnaqi/...` دائماً. لا تستخدم imports نسبية بين المجلدات.
+- المنصات: `*_platform.dart` يصدّر IO أو stub عبر conditional import.
+- لا تضع منطق معالجة في ملفات UI. Cubit يستدعي Service/Repository ثم `emit`.

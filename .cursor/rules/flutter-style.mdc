@@ -1,0 +1,22 @@
+---
+description: Dart/Flutter style for SoutNaqi
+alwaysApply: false
+---
+
+# أسلوب Dart
+
+- `const` constructors و`super.key` في كل ويدجت.
+- الحالة: `Equatable` + `copyWith`. الحقول الخاصة تبدأ بـ `_`.
+- لا `print`. استخدم `appLog.d` / `appLog.e`.
+- لا تلون يدوياً بـ `Color(0xFF…)` في الشاشات. استخدم `context.accentPrimary` ونظائرها من `MaglissContextColors`.
+- الأيقونات: `HugeIconsStrokeRounded.*` وليس Material Icons إلا لضرورة.
+- النصوص الظاهرة للمستخدم من `AppLocalizations.of(context)` فقط.
+- بعد تعديل UI: أبقِ الوضع الفاتح/الداكن وRTL العربي متوافقين.
+
+```dart
+// ❌
+Text('مرحباً', style: TextStyle(color: Color(0xFF2563EB)));
+
+// ✅
+Text(l10n.appName, style: font16W600(settingsCubit: settingsCubit, color: context.textPrimary));
+```

@@ -1,0 +1,12 @@
+---
+description: AppException, logging, and toast conventions
+alwaysApply: false
+---
+
+# الأخطاء والسجلات
+
+- `AppException(messageKey: 'processingFailed')` — المفتاح يطابق ARB و`appExceptionMessage`.
+- لا تعرض `error.toString()` للمستخدم.
+- `appLog.d` للمسار الطبيعي، `appLog.e(..., error:, stackTrace:)` للفشل.
+- التغذية الراجعة: `AppToast.showLoading / showSuccess / showFailure` مع `settingsCubit`.
+- أضف المفتاح الجديد في: `AppException` الاستخدام، `app_en.arb`، `app_ar.arb`، و`app_exception_l10n.dart`.

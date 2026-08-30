@@ -1,0 +1,15 @@
+---
+description: What SoutNaqi is, the stack, and how the agent should work in this repo
+alwaysApply: false
+---
+
+# صوت نقي — SoutNaqi
+
+تطبيق Flutter ثنائي اللغة (عربي/إنجليزي) لمعالجة الصوت والفيديو: قص، ترميز، فصل مصادر، موجة صوتية، وتاريخ المشاريع.
+
+- Package: `soutnaqi`
+- الحالة: `flutter_bloc` Cubits + `Equatable`
+- المعالجة: FFmpeg على IO، stubs على الويب
+- الواجهة: Material 3، `hugeicons`، `google_fonts`
+
+قبل أي تغيير: طابق البنية الحالية في `lib/features/<name>/{cubit,data,ui}` و`lib/core`. لا تضف طبقات جديدة (GetX، Riverpod، Provider) ولا تخلط ألوان/خطوط خارج نظام الهوية.
