@@ -8,5 +8,8 @@ String separationHintFor(AppLocalizations l10n) {
   if (AppEnv.isReplicateSeparationConfigured) {
     return l10n.separationCloudHint;
   }
+  if (AppEnv.isOnDeviceSeparationSupported) {
+    return l10n.separationOnDeviceHint;
+  }
   return l10n.separationAiHint;
 }

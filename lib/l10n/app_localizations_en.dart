@@ -73,6 +73,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceSection => 'Appearance';
 
   @override
+  String get separationSection => 'Separation';
+
+  @override
   String get aboutSection => 'About';
 
   @override
@@ -352,6 +355,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get separationTimeout => 'Separation timed out. Try a shorter file.';
+
+  @override
+  String get separationOnDeviceHint =>
+      'On-device separation (free, fully offline) — first use downloads a one-time model. May take several minutes.';
+
+  @override
+  String get separationModelSection => 'On-device model';
+
+  @override
+  String get onDeviceModelDownloadFailed =>
+      'Couldn\'t download the on-device separation model. Check your connection and try again.';
+
+  @override
+  String get onDeviceModelCorrupted =>
+      'The downloaded separation model appears corrupted. Try again.';
+
+  @override
+  String get onDeviceInsufficientStorage =>
+      'Not enough free storage to download the separation model.';
+
+  @override
+  String get separationModelNotDownloaded =>
+      'Not downloaded — needed the first time you separate vocals.';
+
+  @override
+  String separationModelDownloading(int percent) {
+    return 'Downloading… $percent%';
+  }
+
+  @override
+  String separationModelReady(String size) {
+    return 'Ready — $size on device';
+  }
+
+  @override
+  String get separationModelDownloadAction => 'Download';
+
+  @override
+  String get separationModelDeleteAction => 'Delete';
 
   @override
   String get historyShareLoading => 'Preparing share…';
