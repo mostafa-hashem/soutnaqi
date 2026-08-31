@@ -9,6 +9,7 @@ import 'package:soutnaqi/features/export/data/local_export_platform.dart';
 import 'package:soutnaqi/features/history/cubit/history_cubit.dart';
 import 'package:soutnaqi/features/history/data/project_history_repository.dart';
 import 'package:soutnaqi/features/media/data/media_picker_repository.dart';
+import 'package:soutnaqi/features/separation/cubit/on_device_model_cubit.dart';
 import 'package:soutnaqi/features/separation/data/separation_platform.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/shell/cubit/shell_cubit.dart';
@@ -61,6 +62,7 @@ class _AppBootstrapState extends State<AppBootstrap> {
         BlocProvider(
           create: (_) => HistoryCubit(repository: _historyRepository),
         ),
+        BlocProvider(create: (_) => OnDeviceModelCubit()),
         BlocProvider(
           create: (_) => WorkspaceCubit(
             mediaPickerRepository: MediaPickerRepository(),
