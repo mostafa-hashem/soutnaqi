@@ -17,6 +17,7 @@ String appExceptionMessage(AppException exception, AppLocalizations l10n) {
     'historySaveFailed' => l10n.historySaveFailed,
     'historyDeleteFailed' => l10n.historyDeleteFailed,
     'separationNotConfigured' => l10n.separationNotConfigured,
+    'separationModelRequired' => l10n.separationModelRequired,
     'separationServerUnreachable' => l10n.separationServerUnreachable,
     'separationFailed' => l10n.separationFailed,
     'separationInsufficientCredit' => l10n.separationInsufficientCredit,

@@ -713,8 +713,14 @@ abstract class AppLocalizations {
   /// No description provided for @separationNotConfigured.
   ///
   /// In en, this message translates to:
-  /// **'Enable free separation: run tools/local_demucs_server on your PC and set SEPARATION_SERVER_URL in launch.json.'**
+  /// **'Vocal separation is not available on web. Run the app on Android, iOS, or desktop.'**
   String get separationNotConfigured;
+
+  /// No description provided for @separationModelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the on-device separation model first — open Settings → On-device model → Download.'**
+  String get separationModelRequired;
 
   /// No description provided for @separationLocalHint.
   ///
@@ -755,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @separationOnDeviceHint.
   ///
   /// In en, this message translates to:
-  /// **'On-device separation (free, fully offline) — first use downloads a one-time model. May take several minutes.'**
+  /// **'On-device separation (free, fully offline). Download the model once from Settings → On-device model before you start.'**
   String get separationOnDeviceHint;
 
   /// No description provided for @separationModelSection.

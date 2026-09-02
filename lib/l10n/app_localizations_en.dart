@@ -332,7 +332,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get separationNotConfigured =>
-      'Enable free separation: run tools/local_demucs_server on your PC and set SEPARATION_SERVER_URL in launch.json.';
+      'Vocal separation is not available on web. Run the app on Android, iOS, or desktop.';
+
+  @override
+  String get separationModelRequired =>
+      'Download the on-device separation model first — open Settings → On-device model → Download.';
 
   @override
   String get separationLocalHint =>
@@ -358,7 +362,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get separationOnDeviceHint =>
-      'On-device separation (free, fully offline) — first use downloads a one-time model. May take several minutes.';
+      'On-device separation (free, fully offline). Download the model once from Settings → On-device model before you start.';
 
   @override
   String get separationModelSection => 'On-device model';

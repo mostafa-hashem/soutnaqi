@@ -55,19 +55,9 @@ class OnDeviceSeparationService implements SeparationService {
       );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
 
-      onProgress?.call(
-        const SeparationProgress(stage: SeparationStage.loadingModel),
-      );
-      await _modelRepository.ensureModelDownloaded(
-        onProgress: (downloadProgress) {
-          onProgress?.call(
-            SeparationProgress(
-              stage: SeparationStage.loadingModel,
-              progress: downloadProgress,
-            ),
-          );
-        },
-      );
+      if (!await _modelRepository.isModelCached()) {
+        throw const AppException(messageKey: 'separationModelRequired');
+      }
 
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.preparingAudio, progress: 1),

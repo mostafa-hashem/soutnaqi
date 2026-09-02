@@ -325,7 +325,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get separationNotConfigured =>
-      'فعّل الفصل المجاني: شغّل tools/local_demucs_server على جهازك وأضف SEPARATION_SERVER_URL في launch.json.';
+      'فصل الصوت غير متاح على الويب. شغّل التطبيق على Android أو iOS أو سطح المكتب.';
+
+  @override
+  String get separationModelRequired =>
+      'حمّل نموذج الفصل على الجهاز أولاً — من الإعدادات → نموذج الفصل على الجهاز → تنزيل.';
 
   @override
   String get separationLocalHint =>
@@ -351,7 +355,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get separationOnDeviceHint =>
-      'الفصل على الجهاز (مجاني، بدون إنترنت بالكامل) — يتم تنزيل نموذج مرة واحدة عند أول استخدام. قد يستغرق عدة دقائق.';
+      'الفصل على الجهاز (مجاني، بدون إنترنت بالكامل). نزّل النموذج مرة واحدة من الإعدادات → نموذج الفصل على الجهاز قبل البدء.';
 
   @override
   String get separationModelSection => 'نموذج الفصل على الجهاز';

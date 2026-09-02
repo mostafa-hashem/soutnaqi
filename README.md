@@ -2,7 +2,7 @@
 
 A bilingual (Arabic / English) Flutter app for everyday audio and video work on your phone or desktop — trim clips, convert formats, preview waveforms, split vocals from instrumentals, and keep a local project history.
 
-Processing runs on-device where possible (FFmpeg on Android, iOS, and desktop). Vocal separation can use a **free local Demucs server** on your PC, or optionally Replicate if you already have an API token.
+Processing runs on-device where possible (FFmpeg on Android, iOS, and desktop). **Vocal separation runs fully on the phone** via an ONNX Demucs model — no PC server required by default.
 
 ## What it does
 
@@ -11,12 +11,12 @@ Processing runs on-device where possible (FFmpeg on Android, iOS, and desktop). 
 | **Workspace** | Pick audio or video, trim on a timeline, play back, export |
 | **Audio** | Transcode between common formats (MP3, AAC, WAV, FLAC, OGG, …) |
 | **Video** | Extract audio, mute audio, compress |
-| **Separation** | Pull out vocals or instrumental stems (needs server config — see below) |
+| **Separation** | Pull out vocals or instrumental stems on-device (after a one-time model download) |
 | **Waveform** | Visual preview of the loaded audio |
 | **History** | Reopen recent projects stored on the device |
-| **Settings** | Light / dark theme, language toggle |
+| **Settings** | Light / dark theme, language toggle, on-device model download |
 
-Web builds are supported for browsing the UI, but heavy processing is disabled there — use a mobile or desktop target for real edits.
+Web builds are supported for browsing the UI, but heavy processing and separation are disabled there — use a mobile or desktop target for real edits.
 
 ## Screenshots
 
@@ -27,7 +27,7 @@ _Add screenshots here before publishing._
 - Flutter SDK **3.8+** ([install guide](https://docs.flutter.dev/get-started/install))
 - A device or emulator (Android, iOS, Windows, macOS, or Linux)
 - **FFmpeg** is bundled via `ffmpeg_kit_flutter` on IO targets — no separate install for basic editing
-- For **vocal separation**: Python 3.10+ and the local server in `tools/local_demucs_server` (or a Replicate API token)
+- For **on-device vocal separation**: ~160 MB free storage for the one-time model download (Wi‑Fi recommended)
 
 ## Quick start — run the app
 
@@ -38,66 +38,55 @@ flutter pub get
 flutter run
 ```
 
+No extra config is needed for the default on-device separation path.
+
 ### Optional: dart defines
 
-Copy the example config and edit it with your PC's LAN IP when using local separation:
+Advanced backends are opt-in via `dart_defines.json` (gitignored). Copy the example if you need them:
 
 ```bash
 cp dart_defines.example.json dart_defines.json
 ```
 
-`dart_defines.json` is gitignored so your IP and tokens stay local.
+Leave both keys empty for on-device separation only:
 
-If you use VS Code / Cursor, the included `.vscode/launch.json` already passes `--dart-define-from-file=dart_defines.json`.
+```json
+{
+  "SEPARATION_SERVER_URL": "",
+  "REPLICATE_API_TOKEN": ""
+}
+```
 
-Run from the terminal instead:
+If you use VS Code / Cursor, `.vscode/launch.json` passes `--dart-define-from-file=dart_defines.json` when that file exists.
+
+Run from the terminal:
 
 ```bash
 flutter run --dart-define-from-file=dart_defines.json
 ```
 
-## Vocal separation — local Demucs server
+## Vocal separation — on-device (default)
 
-Separation does not run inside the Flutter app. You run a small FastAPI wrapper on your computer; the phone sends audio over Wi‑Fi and gets back a WAV stem.
+Separation uses an ONNX export of HT-Demucs FT directly on the phone. After the model is cached, every run is fully offline.
 
-### 1. One-time setup
+### Before your first separation
 
-```powershell
-cd tools\local_demucs_server
-python -m venv .venv
-.\.venv\Scripts\activate        # macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-```
+1. Open the app on **Android or iOS** (or desktop).
+2. Go to **Settings → On-device model**.
+3. Tap **Download** and wait for the ~160 MB model to finish.
+4. Return to **Workspace**, import media, then use **Vocals only** or **Music only**.
 
-The first `pip install` pulls PyTorch and Demucs weights (~1–2 GB). FFmpeg must be on your `PATH` (`winget install ffmpeg` on Windows works).
+The first separation after each app launch may spend ~30 seconds preparing the AI engine (NNAPI on Android). Keep the app open — a progress overlay shows each stage.
 
-### 2. Start the server
+### Optional: local Demucs server on your PC
 
-```powershell
-python server.py
-```
+If you prefer running Demucs on a computer instead, set `SEPARATION_SERVER_URL` in `dart_defines.json`. The app prefers the local server when that key is set.
 
-Listens on `http://0.0.0.0:8765`. Check it locally: [http://localhost:8765/health](http://localhost:8765/health) should return `{"status":"ok"}`.
+See [`tools/local_demucs_server/README.md`](tools/local_demucs_server/README.md) for setup.
 
-### 3. Point the app at your PC
+### Optional: Replicate
 
-Find your machine's LAN address (`ipconfig` on Windows, `ip addr` on Linux). Phone and PC must be on the **same network**.
-
-In `dart_defines.json`:
-
-```json
-{
-  "SEPARATION_SERVER_URL": "http://192.168.1.100:8765"
-}
-```
-
-Allow **port 8765** through the firewall if the phone cannot reach the server. Test from the phone browser: `http://192.168.1.100:8765/health`.
-
-### Alternative: Replicate
-
-Set `REPLICATE_API_TOKEN` in `dart_defines.json` instead. The app prefers the local server when `SEPARATION_SERVER_URL` is set.
-
-More detail: [`tools/local_demucs_server/README.md`](tools/local_demucs_server/README.md)
+Set `REPLICATE_API_TOKEN` in `dart_defines.json` for cloud separation. Local server URL takes priority when both are set.
 
 ## Project layout
 
@@ -121,13 +110,13 @@ lib/
 ├── features/
 │   ├── shell/                # navigation shell (sidebar / bottom nav)
 │   ├── splash/
-│   ├── workspace/          # main editor (cubit + ui)
+│   ├── workspace/            # main editor (cubit + ui)
 │   ├── history/
 │   ├── settings/
-│   ├── audio_processing/   # FFmpeg audio ops (data layer)
+│   ├── audio_processing/     # FFmpeg audio ops (data layer)
 │   ├── video_processing/
 │   ├── waveform/
-│   ├── separation/           # local server + Replicate clients
+│   ├── separation/           # on-device ONNX + optional server/cloud
 │   ├── export/
 │   └── media/                # file picking, video player factories
 └── l10n/                     # ARB files + generated localizations
@@ -147,9 +136,10 @@ Processing services (`audio_processing`, `video_processing`, etc.) are data-only
 - Flutter / Dart 3.8
 - `flutter_bloc` + `equatable`
 - `ffmpeg_kit_flutter_new_min` for on-device transcoding
+- `onnxruntime_v2` for on-device Demucs separation
 - `just_audio`, `video_player`
 - `hugeicons`, Cairo + Inter fonts
-- Local server: FastAPI + Demucs + uvicorn
+- Optional local server: FastAPI + Demucs + uvicorn
 
 ## Localization
 
