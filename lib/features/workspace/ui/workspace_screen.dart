@@ -13,6 +13,7 @@ import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_empty_state.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_loaded_view.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/workspace_processing_overlay.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
 class WorkspaceScreen extends StatelessWidget {
@@ -39,11 +40,22 @@ class WorkspaceScreen extends StatelessWidget {
                   state: state,
                 );
 
-          if (!kIsWeb) return content;
+          final wrapped = Stack(
+            fit: StackFit.expand,
+            children: [
+              content,
+              WorkspaceProcessingOverlay(
+                settingsCubit: settingsCubit,
+                state: state,
+              ),
+            ],
+          );
+
+          if (!kIsWeb) return wrapped;
 
           return _WebDropZone(
             settingsCubit: settingsCubit,
-            child: content,
+            child: wrapped,
           );
         },
       ),

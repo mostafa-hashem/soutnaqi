@@ -1,3 +1,4 @@
+import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 
 abstract class SeparationService {
@@ -6,5 +7,6 @@ abstract class SeparationService {
   Future<String> separate({
     required String inputAudioPath,
     required SeparationTarget target,
+    SeparationProgressCallback? onProgress,
   });
 }

@@ -21,6 +21,7 @@
   "workspaceTitle": "مساحة العمل",
   "workspaceSubtitle": "استورد الوسائط وابدأ المعالجة.",
   "appearanceSection": "المظهر",
+  "separationSection": "فصل الصوت",
   "aboutSection": "حول التطبيق",
   "appVersion": "الإصدار {version}",
   "themeSection": "السمة",
@@ -108,6 +109,45 @@
   "separationFailed": "فشل الفصل بالذكاء الاصطناعي. جرّب ملفاً آخر.",
   "separationInsufficientCredit": "رصيد Replicate غير كافٍ. أضف رصيداً من replicate.com/account/billing ثم حاول مجدداً.",
   "separationTimeout": "انتهت مهلة الفصل. جرّب ملفاً أقصر.",
+  "separationOnDeviceHint": "الفصل على الجهاز (مجاني، بدون إنترنت بالكامل) — يتم تنزيل نموذج مرة واحدة عند أول استخدام. قد يستغرق عدة دقائق.",
+  "separationModelSection": "نموذج الفصل على الجهاز",
+  "onDeviceModelDownloadFailed": "تعذّر تنزيل نموذج الفصل على الجهاز. تحقق من اتصالك وحاول مجدداً.",
+  "onDeviceModelCorrupted": "يبدو أن النموذج الذي تم تنزيله تالف. حاول مجدداً.",
+  "onDeviceInsufficientStorage": "لا توجد مساحة تخزين كافية لتنزيل نموذج الفصل.",
+  "separationModelNotDownloaded": "غير مُنزَّل — سيُطلب عند أول استخدام لفصل الصوت.",
+  "separationModelDownloading": "جاري التنزيل… {percent}%",
+  "@separationModelDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "separationModelReady": "جاهز — {size} على الجهاز",
+  "@separationModelReady": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "separationModelDownloadAction": "تنزيل",
+  "separationModelDeleteAction": "حذف",
+  "separationProgressPreparingAudio": "جاري تجهيز الصوت…",
+  "separationProgressExtractingAudio": "جاري استخراج الصوت من الفيدio…",
+  "separationProgressLoadingModel": "جاري تحميل نموذج الفصل…",
+  "separationProgressWarmingUp": "جاري تجهيز محرك الذكاء الاصطناعي (مرة واحدة فقط)…",
+  "separationProgressSeparating": "جاري فصل الصوت… {current}/{total}",
+  "@separationProgressSeparating": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "separationProgressSeparatingIndeterminate": "جاري فصل الصوت بالذكاء الاصطناعي…",
+  "separationProgressEncoding": "جاري حفظ النتيجة…",
+  "separationProgressFinalizingVideo": "جاري دمج الصوت المفصول في الفيدio…",
+  "separationProgressKeepOpen": "اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.",
   "historyShareLoading": "جاري تجهيز المشاركة…",
   "historyShareSuccess": "تم فتح نافذة المشاركة.",
   "homeOpenWorkspace": "فتح مساحة العمل",

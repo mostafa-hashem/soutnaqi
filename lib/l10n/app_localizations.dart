@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get appearanceSection;
 
+  /// No description provided for @separationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Separation'**
+  String get separationSection;
+
   /// No description provided for @aboutSection.
   ///
   /// In en, this message translates to:
@@ -745,6 +751,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Separation timed out. Try a shorter file.'**
   String get separationTimeout;
+
+  /// No description provided for @separationOnDeviceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device separation (free, fully offline) — first use downloads a one-time model. May take several minutes.'**
+  String get separationOnDeviceHint;
+
+  /// No description provided for @separationModelSection.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device model'**
+  String get separationModelSection;
+
+  /// No description provided for @onDeviceModelDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download the on-device separation model. Check your connection and try again.'**
+  String get onDeviceModelDownloadFailed;
+
+  /// No description provided for @onDeviceModelCorrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded separation model appears corrupted. Try again.'**
+  String get onDeviceModelCorrupted;
+
+  /// No description provided for @onDeviceInsufficientStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough free storage to download the separation model.'**
+  String get onDeviceInsufficientStorage;
+
+  /// No description provided for @separationModelNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded — needed the first time you separate vocals.'**
+  String get separationModelNotDownloaded;
+
+  /// No description provided for @separationModelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading… {percent}%'**
+  String separationModelDownloading(int percent);
+
+  /// No description provided for @separationModelReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready — {size} on device'**
+  String separationModelReady(String size);
+
+  /// No description provided for @separationModelDownloadAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get separationModelDownloadAction;
+
+  /// No description provided for @separationModelDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get separationModelDeleteAction;
+
+  /// No description provided for @separationProgressPreparingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing audio…'**
+  String get separationProgressPreparingAudio;
+
+  /// No description provided for @separationProgressExtractingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting audio from video…'**
+  String get separationProgressExtractingAudio;
+
+  /// No description provided for @separationProgressLoadingModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading separation model…'**
+  String get separationProgressLoadingModel;
+
+  /// No description provided for @separationProgressWarmingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing AI engine (first time only)…'**
+  String get separationProgressWarmingUp;
+
+  /// No description provided for @separationProgressSeparating.
+  ///
+  /// In en, this message translates to:
+  /// **'Separating audio… {current}/{total}'**
+  String separationProgressSeparating(int current, int total);
+
+  /// No description provided for @separationProgressSeparatingIndeterminate.
+  ///
+  /// In en, this message translates to:
+  /// **'Separating audio with AI…'**
+  String get separationProgressSeparatingIndeterminate;
+
+  /// No description provided for @separationProgressEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving result…'**
+  String get separationProgressEncoding;
+
+  /// No description provided for @separationProgressFinalizingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging separated audio into video…'**
+  String get separationProgressFinalizingVideo;
+
+  /// No description provided for @separationProgressKeepOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the app open — this may take a few minutes.'**
+  String get separationProgressKeepOpen;
 
   /// No description provided for @historyShareLoading.
   ///

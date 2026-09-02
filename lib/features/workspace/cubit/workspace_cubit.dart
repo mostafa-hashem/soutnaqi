@@ -15,6 +15,7 @@ import 'package:soutnaqi/features/history/data/models/project_record.dart';
 import 'package:soutnaqi/features/history/data/project_history_repository.dart';
 import 'package:soutnaqi/features/media/data/media_picker_repository.dart';
 import 'package:soutnaqi/features/media/data/models/media_file.dart';
+import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 import 'package:soutnaqi/features/video_processing/data/video_operation.dart';
@@ -193,6 +194,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         activeOperation: operation,
         clearProcessed: true,
         clearHistoryPath: true,
+        processingPhase: WorkspaceProcessingPhase.generic,
       ),
     );
 
@@ -210,6 +212,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           processedPath: outputPath,
           playbackSource: PlaybackSource.processed,
           clearOperation: true,
+          clearProcessingOverlay: true,
           lastOperation: _operationKey(operation),
         ),
       );
@@ -225,10 +228,22 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         ),
       );
     } on AppException {
-      emit(state.copyWith(status: WorkspaceStatus.ready, clearOperation: true));
+      emit(
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearOperation: true,
+          clearProcessingOverlay: true,
+        ),
+      );
       rethrow;
     } catch (error) {
-      emit(state.copyWith(status: WorkspaceStatus.ready, clearOperation: true));
+      emit(
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearOperation: true,
+          clearProcessingOverlay: true,
+        ),
+      );
       throw AppException(messageKey: 'processingFailed', cause: error);
     }
   }
@@ -243,6 +258,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         activeOperation: operation,
         clearProcessed: true,
         clearHistoryPath: true,
+        processingPhase: WorkspaceProcessingPhase.preparingAudio,
       ),
     );
 
@@ -250,16 +266,29 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       final outputPath = await _separationService.separate(
         inputAudioPath: media.path!,
         target: _separationTargetFromAudioOperation(operation),
+        onProgress: _reportSeparationProgress,
       );
       await _applySeparatedAudio(
         outputPath: outputPath,
         operationKey: _operationKey(operation),
       );
     } on AppException {
-      emit(state.copyWith(status: WorkspaceStatus.ready, clearOperation: true));
+      emit(
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearOperation: true,
+          clearProcessingOverlay: true,
+        ),
+      );
       rethrow;
     } catch (error) {
-      emit(state.copyWith(status: WorkspaceStatus.ready, clearOperation: true));
+      emit(
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearOperation: true,
+          clearProcessingOverlay: true,
+        ),
+      );
       throw AppException(messageKey: 'separationFailed', cause: error);
     }
   }
@@ -274,6 +303,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         activeVideoOperation: operation,
         clearProcessed: true,
         clearHistoryPath: true,
+        processingPhase: WorkspaceProcessingPhase.extractingAudio,
       ),
     );
 
@@ -285,6 +315,14 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       final separatedAudioPath = await _separationService.separate(
         inputAudioPath: audioPath,
         target: _separationTargetFromVideoOperation(operation),
+        onProgress: _reportSeparationProgress,
+      );
+      emit(
+        state.copyWith(
+          processingPhase: WorkspaceProcessingPhase.finalizingVideo,
+          updateProcessingProgress: true,
+          clearProcessingChunks: true,
+        ),
       );
       final outputPath = await _videoProcessingService.replaceAudioTrack(
         videoPath: media.path!,
@@ -297,20 +335,52 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           processedPath: outputPath,
           playbackSource: PlaybackSource.processed,
           clearVideoOperation: true,
+          clearProcessingOverlay: true,
           lastOperation: _videoOperationKey(operation),
         ),
       );
     } on AppException {
       emit(
-        state.copyWith(status: WorkspaceStatus.ready, clearVideoOperation: true),
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearVideoOperation: true,
+          clearProcessingOverlay: true,
+        ),
       );
       rethrow;
     } catch (error) {
       emit(
-        state.copyWith(status: WorkspaceStatus.ready, clearVideoOperation: true),
+        state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearVideoOperation: true,
+          clearProcessingOverlay: true,
+        ),
       );
       throw AppException(messageKey: 'separationFailed', cause: error);
     }
+  }
+
+  void _reportSeparationProgress(SeparationProgress progress) {
+    if (isClosed) return;
+
+    final phase = switch (progress.stage) {
+      SeparationStage.preparingAudio => WorkspaceProcessingPhase.preparingAudio,
+      SeparationStage.loadingModel => WorkspaceProcessingPhase.loadingModel,
+      SeparationStage.warmingUpEngine => WorkspaceProcessingPhase.warmingUpEngine,
+      SeparationStage.separating => WorkspaceProcessingPhase.separating,
+      SeparationStage.encodingOutput => WorkspaceProcessingPhase.encodingOutput,
+    };
+
+    emit(
+      state.copyWith(
+        processingPhase: phase,
+        updateProcessingProgress: true,
+        processingProgress: progress.progress,
+        clearProcessingChunks: phase != WorkspaceProcessingPhase.separating,
+        processingChunkCurrent: progress.chunkIndex,
+        processingChunkTotal: progress.totalChunks,
+      ),
+    );
   }
 
   Future<void> _applySeparatedAudio({

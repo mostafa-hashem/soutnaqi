@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/core/storage/preferences_store.dart';
+import 'package:soutnaqi/features/separation/data/separation_platform.dart';
 
 /// Warms platform channels after the first frame is drawn.
 class AppPlatform {
@@ -22,6 +25,7 @@ class AppPlatform {
     try {
       await PreferencesStore.instance.ensureInitialized();
       appLog.d('✅ Platform channels ready');
+      unawaited(warmUpSeparationIfReady());
     } catch (error, stackTrace) {
       appLog.e(
         '⚡ Platform warm-up deferred',
