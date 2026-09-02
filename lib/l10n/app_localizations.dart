@@ -812,6 +812,60 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get separationModelDeleteAction;
 
+  /// No description provided for @separationProgressPreparingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing audio…'**
+  String get separationProgressPreparingAudio;
+
+  /// No description provided for @separationProgressExtractingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting audio from video…'**
+  String get separationProgressExtractingAudio;
+
+  /// No description provided for @separationProgressLoadingModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading separation model…'**
+  String get separationProgressLoadingModel;
+
+  /// No description provided for @separationProgressWarmingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing AI engine (first time only)…'**
+  String get separationProgressWarmingUp;
+
+  /// No description provided for @separationProgressSeparating.
+  ///
+  /// In en, this message translates to:
+  /// **'Separating audio… {current}/{total}'**
+  String separationProgressSeparating(int current, int total);
+
+  /// No description provided for @separationProgressSeparatingIndeterminate.
+  ///
+  /// In en, this message translates to:
+  /// **'Separating audio with AI…'**
+  String get separationProgressSeparatingIndeterminate;
+
+  /// No description provided for @separationProgressEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving result…'**
+  String get separationProgressEncoding;
+
+  /// No description provided for @separationProgressFinalizingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging separated audio into video…'**
+  String get separationProgressFinalizingVideo;
+
+  /// No description provided for @separationProgressKeepOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the app open — this may take a few minutes.'**
+  String get separationProgressKeepOpen;
+
   /// No description provided for @historyShareLoading.
   ///
   /// In en, this message translates to:

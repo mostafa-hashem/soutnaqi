@@ -143,6 +143,21 @@
   },
   "separationModelDownloadAction": "Download",
   "separationModelDeleteAction": "Delete",
+  "separationProgressPreparingAudio": "Preparing audio…",
+  "separationProgressExtractingAudio": "Extracting audio from video…",
+  "separationProgressLoadingModel": "Loading separation model…",
+  "separationProgressWarmingUp": "Preparing AI engine (first time only)…",
+  "separationProgressSeparating": "Separating audio… {current}/{total}",
+  "@separationProgressSeparating": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "separationProgressSeparatingIndeterminate": "Separating audio with AI…",
+  "separationProgressEncoding": "Saving result…",
+  "separationProgressFinalizingVideo": "Merging separated audio into video…",
+  "separationProgressKeepOpen": "Keep the app open — this may take a few minutes.",
   "historyShareLoading": "Preparing share…",
   "historyShareSuccess": "Share sheet opened.",
   "homeOpenWorkspace": "Open workspace",

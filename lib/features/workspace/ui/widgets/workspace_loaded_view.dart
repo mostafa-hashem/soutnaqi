@@ -123,16 +123,14 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processAudio(AudioOperation.noiseReduction),
                       ),
-                      onIsolateVocals: () => _runToast(
+                      onIsolateVocals: () => _runSeparation(
                         context,
-                        loading: l10n.processIsolateVocalsLoading,
                         success: l10n.processIsolateVocalsSuccess,
                         action: () =>
                             cubit.processAudio(AudioOperation.isolateVocals),
                       ),
-                      onIsolateMusic: () => _runToast(
+                      onIsolateMusic: () => _runSeparation(
                         context,
-                        loading: l10n.processIsolateMusicLoading,
                         success: l10n.processIsolateMusicSuccess,
                         action: () =>
                             cubit.processAudio(AudioOperation.isolateMusic),
@@ -156,16 +154,14 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processVideo(VideoOperation.compress),
                       ),
-                      onIsolateVocals: () => _runToast(
+                      onIsolateVocals: () => _runSeparation(
                         context,
-                        loading: l10n.processIsolateVocalsLoading,
                         success: l10n.processIsolateVocalsSuccess,
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateVocals),
                       ),
-                      onIsolateMusic: () => _runToast(
+                      onIsolateMusic: () => _runSeparation(
                         context,
-                        loading: l10n.processIsolateMusicLoading,
                         success: l10n.processIsolateMusicSuccess,
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateMusic),
@@ -253,6 +249,32 @@ class WorkspaceLoadedView extends StatelessWidget {
         context,
         settingsCubit: settingsCubit,
         message: l10n.saveToHistorySuccess,
+      );
+    } on AppException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: appExceptionMessage(error, l10n),
+      );
+    }
+  }
+
+  Future<void> _runSeparation(
+    BuildContext context, {
+    required String success,
+    required Future<void> Function() action,
+  }) async {
+    final settingsCubit = context.read<SettingsCubit>();
+    final l10n = AppLocalizations.of(context);
+
+    try {
+      await action();
+      if (!context.mounted) return;
+      AppToast.showSuccess(
+        context,
+        settingsCubit: settingsCubit,
+        message: success,
       );
     } on AppException catch (error) {
       if (!context.mounted) return;

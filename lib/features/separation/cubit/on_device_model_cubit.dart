@@ -1,9 +1,11 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/cubit/on_device_model_state.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_repository.dart';
+import 'package:soutnaqi/features/separation/data/separation_platform.dart';
 
 /// Drives the "on-device model" row in Settings — lets a user check
 /// whether the separation model is cached, download it ahead of time, or
@@ -27,6 +29,7 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
             cachedSizeBytes: size,
           ),
         );
+        unawaited(warmUpSeparationIfReady());
       } else {
         emit(const OnDeviceModelState(status: OnDeviceModelStatus.notDownloaded));
       }
@@ -53,6 +56,7 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
         },
       );
       await refresh();
+      unawaited(warmUpSeparationIfReady());
     } on AppException catch (error) {
       emit(
         state.copyWith(

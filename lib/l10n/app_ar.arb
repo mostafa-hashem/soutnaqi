@@ -133,6 +133,21 @@
   },
   "separationModelDownloadAction": "تنزيل",
   "separationModelDeleteAction": "حذف",
+  "separationProgressPreparingAudio": "جاري تجهيز الصوت…",
+  "separationProgressExtractingAudio": "جاري استخراج الصوت من الفيدio…",
+  "separationProgressLoadingModel": "جاري تحميل نموذج الفصل…",
+  "separationProgressWarmingUp": "جاري تجهيز محرك الذكاء الاصطناعي (مرة واحدة فقط)…",
+  "separationProgressSeparating": "جاري فصل الصوت… {current}/{total}",
+  "@separationProgressSeparating": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "separationProgressSeparatingIndeterminate": "جاري فصل الصوت بالذكاء الاصطناعي…",
+  "separationProgressEncoding": "جاري حفظ النتيجة…",
+  "separationProgressFinalizingVideo": "جاري دمج الصوت المفصول في الفيدio…",
+  "separationProgressKeepOpen": "اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.",
   "historyShareLoading": "جاري تجهيز المشاركة…",
   "historyShareSuccess": "تم فتح نافذة المشاركة.",
   "homeOpenWorkspace": "فتح مساحة العمل",

@@ -389,6 +389,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get separationModelDeleteAction => 'حذف';
 
   @override
+  String get separationProgressPreparingAudio => 'جاري تجهيز الصوت…';
+
+  @override
+  String get separationProgressExtractingAudio =>
+      'جاري استخراج الصوت من الفيدio…';
+
+  @override
+  String get separationProgressLoadingModel => 'جاري تحميل نموذج الفصل…';
+
+  @override
+  String get separationProgressWarmingUp =>
+      'جاري تجهيز محرك الذكاء الاصطناعي (مرة واحدة فقط)…';
+
+  @override
+  String separationProgressSeparating(int current, int total) {
+    return 'جاري فصل الصوت… $current/$total';
+  }
+
+  @override
+  String get separationProgressSeparatingIndeterminate =>
+      'جاري فصل الصوت بالذكاء الاصطناعي…';
+
+  @override
+  String get separationProgressEncoding => 'جاري حفظ النتيجة…';
+
+  @override
+  String get separationProgressFinalizingVideo =>
+      'جاري دمج الصوت المفصول في الفيدio…';
+
+  @override
+  String get separationProgressKeepOpen =>
+      'اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.';
+
+  @override
   String get historyShareLoading => 'جاري تجهيز المشاركة…';
 
   @override

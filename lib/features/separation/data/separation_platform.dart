@@ -23,3 +23,12 @@ SeparationService createSeparationService() {
   }
   return on_device_impl.createOnDeviceSeparationService();
 }
+
+/// Pre-compiles the on-device ONNX session when that backend is active.
+Future<void> warmUpSeparationIfReady() async {
+  if (AppEnv.isLocalSeparationConfigured ||
+      AppEnv.isReplicateSeparationConfigured) {
+    return;
+  }
+  await on_device_impl.warmUpOnDeviceSeparationIfReady();
+}

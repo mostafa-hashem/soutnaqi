@@ -11,6 +11,7 @@ import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 import 'package:uuid/uuid.dart';
@@ -39,6 +40,7 @@ class ReplicateSeparationService implements SeparationService {
   Future<String> separate({
     required String inputAudioPath,
     required SeparationTarget target,
+    SeparationProgressCallback? onProgress,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -47,10 +49,19 @@ class ReplicateSeparationService implements SeparationService {
     appLog.d('⚡ Starting AI stem separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.preparingAudio),
+      );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.separating),
+      );
       final uploadedUrl = await _uploadAudio(preparedPath);
       final output = await _createAndAwaitPrediction(uploadedUrl);
       appLog.d('🔍 Demucs output keys: ${output.keys.join(', ')}');
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.encodingOutput),
+      );
       final wavPath = await switch (target) {
         SeparationTarget.vocals => _downloadResolvedStem(
             output: output,

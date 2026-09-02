@@ -6,6 +6,7 @@ import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 import 'package:uuid/uuid.dart';
@@ -28,6 +29,7 @@ class LocalSeparationService implements SeparationService {
   Future<String> separate({
     required String inputAudioPath,
     required SeparationTarget target,
+    SeparationProgressCallback? onProgress,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -36,10 +38,19 @@ class LocalSeparationService implements SeparationService {
     appLog.d('⚡ Starting local Demucs separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.preparingAudio),
+      );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.separating),
+      );
       final wavBytes = await _requestSeparation(
         wavPath: preparedPath,
         target: target,
+      );
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.encodingOutput),
       );
       final directory = await getTemporaryDirectory();
       final wavOutput = '${directory.path}/soutnaqi_${_uuid.v4()}.wav';

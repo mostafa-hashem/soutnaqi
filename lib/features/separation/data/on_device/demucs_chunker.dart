@@ -91,6 +91,7 @@ class DemucsChunker {
       }
 
       onProgress?.call(i + 1, chunkCount);
+      await Future<void>.delayed(Duration.zero);
     }
 
     return List.generate(sourceCount, (s) {

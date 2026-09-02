@@ -9,14 +9,18 @@ import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.d
 import 'package:soutnaqi/features/separation/data/on_device/demucs_chunker.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_repository.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
-import 'package:soutnaqi/features/separation/data/on_device/onnx_inference_runner.dart';
+import 'package:soutnaqi/features/separation/data/on_device/on_device_separation_engine.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 import 'package:uuid/uuid.dart';
 
 SeparationService createOnDeviceSeparationService() =>
     OnDeviceSeparationService();
+
+Future<void> warmUpOnDeviceSeparationIfReady() =>
+    OnDeviceSeparationEngine.instance.warmUpInBackgroundIfReady();
 
 /// Fully offline separation via a Demucs model exported to ONNX
 /// (see [OnDeviceModelSpec]). No server, no per-request network call — the
@@ -28,27 +32,16 @@ class OnDeviceSeparationService implements SeparationService {
   static const _uuid = Uuid();
 
   final OnDeviceModelRepository _modelRepository;
-
-  // ONNX Runtime compiles the model's NNAPI-eligible subgraph partitions the
-  // first time a session actually runs — a real, non-trivial cost (dozens+
-  // of partitions on this model). Caching the runner for the service's
-  // lifetime means only the *first* separation pays that cost; every one
-  // after it reuses the already-compiled session.
-  OnnxInferenceRunner? _runner;
+  final OnDeviceSeparationEngine _engine = OnDeviceSeparationEngine.instance;
 
   @override
   bool get isSupported => AppEnv.isOnDeviceSeparationSupported;
-
-  Future<OnnxInferenceRunner> _ensureRunner() async {
-    return _runner ??= await OnnxInferenceRunner.load(
-      await _modelRepository.modelPath(),
-    );
-  }
 
   @override
   Future<String> separate({
     required String inputAudioPath,
     required SeparationTarget target,
+    SeparationProgressCallback? onProgress,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -57,15 +50,46 @@ class OnDeviceSeparationService implements SeparationService {
     appLog.d('⚡ Starting on-device Demucs separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.preparingAudio),
+      );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
-      await _modelRepository.ensureModelDownloaded();
 
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.loadingModel),
+      );
+      await _modelRepository.ensureModelDownloaded(
+        onProgress: (downloadProgress) {
+          onProgress?.call(
+            SeparationProgress(
+              stage: SeparationStage.loadingModel,
+              progress: downloadProgress,
+            ),
+          );
+        },
+      );
+
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.preparingAudio, progress: 1),
+      );
       final mix = await AudioTensorCodec.decodeWav(preparedPath);
-      final runner = await _ensureRunner();
+      await Future<void>.delayed(Duration.zero);
+
+      final runner = await _engine.ensureRunner(onProgress: onProgress);
 
       final stems = await DemucsChunker.process(
         mix: mix,
         runChunk: runner.runChunk,
+        onProgress: (chunkIndex, totalChunks) {
+          onProgress?.call(
+            SeparationProgress(
+              stage: SeparationStage.separating,
+              progress: chunkIndex / totalChunks,
+              chunkIndex: chunkIndex,
+              totalChunks: totalChunks,
+            ),
+          );
+        },
       );
 
       final vocals = stems[OnDeviceModelSpec.vocalsStemIndex];
@@ -73,6 +97,9 @@ class OnDeviceSeparationService implements SeparationService {
           ? vocals
           : _subtractVocals(mix: mix, vocals: vocals);
 
+      onProgress?.call(
+        const SeparationProgress(stage: SeparationStage.encodingOutput),
+      );
       final directory = await getTemporaryDirectory();
       final wavOutput = '${directory.path}/soutnaqi_${_uuid.v4()}.wav';
       await AudioTensorCodec.encodeWav(

@@ -396,6 +396,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get separationModelDeleteAction => 'Delete';
 
   @override
+  String get separationProgressPreparingAudio => 'Preparing audio…';
+
+  @override
+  String get separationProgressExtractingAudio =>
+      'Extracting audio from video…';
+
+  @override
+  String get separationProgressLoadingModel => 'Loading separation model…';
+
+  @override
+  String get separationProgressWarmingUp =>
+      'Preparing AI engine (first time only)…';
+
+  @override
+  String separationProgressSeparating(int current, int total) {
+    return 'Separating audio… $current/$total';
+  }
+
+  @override
+  String get separationProgressSeparatingIndeterminate =>
+      'Separating audio with AI…';
+
+  @override
+  String get separationProgressEncoding => 'Saving result…';
+
+  @override
+  String get separationProgressFinalizingVideo =>
+      'Merging separated audio into video…';
+
+  @override
+  String get separationProgressKeepOpen =>
+      'Keep the app open — this may take a few minutes.';
+
+  @override
   String get historyShareLoading => 'Preparing share…';
 
   @override

@@ -4,6 +4,18 @@ import 'package:soutnaqi/features/audio_processing/data/audio_operation.dart';
 import 'package:soutnaqi/features/media/data/models/media_file.dart';
 import 'package:soutnaqi/features/video_processing/data/video_operation.dart';
 
+enum WorkspaceProcessingPhase {
+  none,
+  preparingAudio,
+  extractingAudio,
+  loadingModel,
+  warmingUpEngine,
+  separating,
+  encodingOutput,
+  finalizingVideo,
+  generic,
+}
+
 enum WorkspaceStatus {
   empty,
   picking,
@@ -35,6 +47,10 @@ class WorkspaceState extends Equatable {
     this.isSavingToHistory = false,
     this.historyPath,
     this.lastOperation,
+    this.processingPhase = WorkspaceProcessingPhase.none,
+    this.processingProgress,
+    this.processingChunkCurrent,
+    this.processingChunkTotal,
   });
 
   final WorkspaceStatus status;
@@ -56,6 +72,19 @@ class WorkspaceState extends Equatable {
   final bool isSavingToHistory;
   final String? historyPath;
   final String? lastOperation;
+  final WorkspaceProcessingPhase processingPhase;
+  final double? processingProgress;
+  final int? processingChunkCurrent;
+  final int? processingChunkTotal;
+
+  bool get hasProcessingOverlay =>
+      status == WorkspaceStatus.processing &&
+      processingPhase != WorkspaceProcessingPhase.none;
+
+  bool get showSeparationKeepOpenHint =>
+      processingPhase == WorkspaceProcessingPhase.warmingUpEngine ||
+      processingPhase == WorkspaceProcessingPhase.separating ||
+      processingPhase == WorkspaceProcessingPhase.loadingModel;
 
   bool get hasMedia => media != null;
   bool get hasProcessedOutput =>
@@ -94,12 +123,19 @@ class WorkspaceState extends Equatable {
     bool? isSavingToHistory,
     String? historyPath,
     String? lastOperation,
+    WorkspaceProcessingPhase? processingPhase,
+    double? processingProgress,
+    int? processingChunkCurrent,
+    int? processingChunkTotal,
     bool clearMedia = false,
     bool clearProcessed = false,
     bool clearOperation = false,
     bool clearVideoOperation = false,
     bool clearHistoryPath = false,
     bool clearLastOperation = false,
+    bool clearProcessingOverlay = false,
+    bool updateProcessingProgress = false,
+    bool clearProcessingChunks = false,
   }) {
     return WorkspaceState(
       status: status ?? this.status,
@@ -127,6 +163,20 @@ class WorkspaceState extends Equatable {
       historyPath: clearHistoryPath ? null : (historyPath ?? this.historyPath),
       lastOperation:
           clearLastOperation ? null : (lastOperation ?? this.lastOperation),
+      processingPhase: clearProcessingOverlay
+          ? WorkspaceProcessingPhase.none
+          : (processingPhase ?? this.processingPhase),
+      processingProgress: clearProcessingOverlay
+          ? null
+          : (updateProcessingProgress
+              ? processingProgress
+              : this.processingProgress),
+      processingChunkCurrent: clearProcessingOverlay || clearProcessingChunks
+          ? null
+          : (processingChunkCurrent ?? this.processingChunkCurrent),
+      processingChunkTotal: clearProcessingOverlay || clearProcessingChunks
+          ? null
+          : (processingChunkTotal ?? this.processingChunkTotal),
     );
   }
 
@@ -151,5 +201,9 @@ class WorkspaceState extends Equatable {
         isSavingToHistory,
         historyPath,
         lastOperation,
+        processingPhase,
+        processingProgress,
+        processingChunkCurrent,
+        processingChunkTotal,
       ];
 }
