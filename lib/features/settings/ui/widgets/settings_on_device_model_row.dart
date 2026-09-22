@@ -11,6 +11,7 @@ import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/features/separation/cubit/on_device_model_cubit.dart';
 import 'package:soutnaqi/features/separation/cubit/on_device_model_state.dart';
+import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
@@ -95,9 +96,11 @@ class _SettingsOnDeviceModelRowState extends State<SettingsOnDeviceModelRow> {
   }
 
   String _statusText(AppLocalizations l10n, OnDeviceModelState state) {
+    final modelSize = _formatSize(OnDeviceModelSpec.expectedSizeBytes);
     return switch (state.status) {
       OnDeviceModelStatus.checking => l10n.toastLoading,
-      OnDeviceModelStatus.notDownloaded => l10n.separationModelNotDownloaded,
+      OnDeviceModelStatus.notDownloaded =>
+        l10n.separationModelNotDownloaded(modelSize),
       OnDeviceModelStatus.downloading => l10n.separationModelDownloading(
           (state.downloadProgress * 100).round(),
         ),

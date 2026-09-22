@@ -125,7 +125,14 @@
   "onDeviceModelDownloadFailed": "Couldn't download the on-device separation model. Check your connection and try again.",
   "onDeviceModelCorrupted": "The downloaded separation model appears corrupted. Try again.",
   "onDeviceInsufficientStorage": "Not enough free storage to download the separation model.",
-  "separationModelNotDownloaded": "Not downloaded — needed the first time you separate vocals.",
+  "separationModelNotDownloaded": "Not downloaded — {size}",
+  "@separationModelNotDownloaded": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "separationModelDownloading": "Downloading… {percent}%",
   "@separationModelDownloading": {
     "placeholders": {

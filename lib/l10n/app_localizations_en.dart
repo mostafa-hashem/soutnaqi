@@ -380,8 +380,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not enough free storage to download the separation model.';
 
   @override
-  String get separationModelNotDownloaded =>
-      'Not downloaded — needed the first time you separate vocals.';
+  String separationModelNotDownloaded(String size) {
+    return 'Not downloaded — $size';
+  }
 
   @override
   String separationModelDownloading(int percent) {

@@ -791,8 +791,8 @@ abstract class AppLocalizations {
   /// No description provided for @separationModelNotDownloaded.
   ///
   /// In en, this message translates to:
-  /// **'Not downloaded — needed the first time you separate vocals.'**
-  String get separationModelNotDownloaded;
+  /// **'Not downloaded — {size}'**
+  String separationModelNotDownloaded(String size);
 
   /// No description provided for @separationModelDownloading.
   ///

@@ -115,7 +115,14 @@
   "onDeviceModelDownloadFailed": "تعذّر تنزيل نموذج الفصل على الجهاز. تحقق من اتصالك وحاول مجدداً.",
   "onDeviceModelCorrupted": "يبدو أن النموذج الذي تم تنزيله تالف. حاول مجدداً.",
   "onDeviceInsufficientStorage": "لا توجد مساحة تخزين كافية لتنزيل نموذج الفصل.",
-  "separationModelNotDownloaded": "غير مُنزَّل — سيُطلب عند أول استخدام لفصل الصوت.",
+  "separationModelNotDownloaded": "غير مُنزَّل — {size}",
+  "@separationModelNotDownloaded": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "separationModelDownloading": "جاري التنزيل… {percent}%",
   "@separationModelDownloading": {
     "placeholders": {

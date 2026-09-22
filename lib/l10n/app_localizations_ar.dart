@@ -373,8 +373,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا توجد مساحة تخزين كافية لتنزيل نموذج الفصل.';
 
   @override
-  String get separationModelNotDownloaded =>
-      'غير مُنزَّل — سيُطلب عند أول استخدام لفصل الصوت.';
+  String separationModelNotDownloaded(String size) {
+    return 'غير مُنزَّل — $size';
+  }
 
   @override
   String separationModelDownloading(int percent) {
