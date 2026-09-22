@@ -51,6 +51,7 @@ class _WorkspaceProcessingOverlayState
         : separationProgressTitle(l10n, state);
     final subtitle =
         _cancelRequested ? null : separationProgressSubtitle(l10n, state);
+    final eta = _cancelRequested ? null : separationProgressEta(l10n, state);
     final progress = state.processingProgress;
     final showCancel = widget.onCancel != null &&
         state.canCancelSeparation &&
@@ -109,6 +110,16 @@ class _WorkspaceProcessingOverlayState
                         style: font14W400(
                           settingsCubit: settingsCubit,
                           color: context.textSecondary,
+                        ),
+                      ),
+                    ],
+                    if (eta != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        eta,
+                        style: font14W600(
+                          settingsCubit: settingsCubit,
+                          color: context.textPrimary,
                         ),
                       ),
                     ],

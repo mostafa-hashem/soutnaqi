@@ -31,6 +31,20 @@ String? separationProgressSubtitle(
   return l10n.separationProgressKeepOpen;
 }
 
+String? separationProgressEta(
+  AppLocalizations l10n,
+  WorkspaceState state,
+) {
+  final eta = state.processingEta;
+  if (eta == null) return null;
+  if (eta.inSeconds < 45) {
+    final seconds = eta.inSeconds < 5 ? 5 : ((eta.inSeconds + 4) ~/ 5) * 5;
+    return l10n.separationProgressEtaSeconds(seconds);
+  }
+  final minutes = (eta.inSeconds / 60).ceil();
+  return l10n.separationProgressEtaMinutes(minutes);
+}
+
 String _separatingTitle(AppLocalizations l10n, WorkspaceState state) {
   final current = state.processingChunkCurrent;
   final total = state.processingChunkTotal;

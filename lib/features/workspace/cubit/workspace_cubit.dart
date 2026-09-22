@@ -55,6 +55,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   StreamSubscription<Duration?>? _durationSubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   SeparationCancelToken? _separationCancelToken;
+  DateTime? _separatingStartedAt;
 
   Future<void> initialize() async {
     _positionSubscription = _player.positionStream.listen((position) {
@@ -256,6 +257,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
     final cancelToken = SeparationCancelToken();
     _separationCancelToken = cancelToken;
+    _separatingStartedAt = null;
 
     emit(
       state.copyWith(
@@ -313,6 +315,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
     final cancelToken = SeparationCancelToken();
     _separationCancelToken = cancelToken;
+    _separatingStartedAt = null;
 
     emit(
       state.copyWith(
@@ -407,16 +410,41 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       SeparationStage.encodingOutput => WorkspaceProcessingPhase.encodingOutput,
     };
 
+    final isSeparating = phase == WorkspaceProcessingPhase.separating;
+    if (!isSeparating) {
+      _separatingStartedAt = null;
+    } else {
+      _separatingStartedAt ??= DateTime.now();
+    }
+
     emit(
       state.copyWith(
         processingPhase: phase,
         updateProcessingProgress: true,
         processingProgress: progress.progress,
-        clearProcessingChunks: phase != WorkspaceProcessingPhase.separating,
+        clearProcessingChunks: !isSeparating,
         processingChunkCurrent: progress.chunkIndex,
         processingChunkTotal: progress.totalChunks,
+        updateProcessingEta: isSeparating,
+        processingEta: isSeparating
+            ? _estimateRemaining(
+                current: progress.chunkIndex,
+                total: progress.totalChunks,
+              )
+            : null,
       ),
     );
+  }
+
+  Duration? _estimateRemaining({required int? current, required int? total}) {
+    final startedAt = _separatingStartedAt;
+    if (startedAt == null || current == null || total == null) return null;
+    if (current <= 0 || total <= current) return null;
+    final elapsedMs = DateTime.now().difference(startedAt).inMilliseconds;
+    if (elapsedMs < 400) return null;
+    final remainingMs = (elapsedMs / current * (total - current)).round();
+    if (remainingMs <= 0) return null;
+    return Duration(milliseconds: remainingMs);
   }
 
   Future<void> _applySeparatedAudio({

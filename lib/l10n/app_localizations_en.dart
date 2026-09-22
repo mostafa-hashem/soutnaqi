@@ -438,6 +438,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep the app open — this may take a few minutes.';
 
   @override
+  String separationProgressEtaMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'About $minutes min remaining',
+      one: 'About 1 min remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String separationProgressEtaSeconds(int seconds) {
+    return 'About $seconds sec remaining';
+  }
+
+  @override
   String get separationCancelAction => 'Cancel';
 
   @override

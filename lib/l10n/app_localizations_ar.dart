@@ -431,6 +431,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.';
 
   @override
+  String separationProgressEtaMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'متبقي حوالي $minutes دقيقة',
+      few: 'متبقي حوالي $minutes دقائق',
+      two: 'متبقي حوالي دقيقتين',
+      one: 'متبقي حوالي دقيقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String separationProgressEtaSeconds(int seconds) {
+    return 'متبقي حوالي $seconds ثانية';
+  }
+
+  @override
   String get separationCancelAction => 'إلغاء';
 
   @override

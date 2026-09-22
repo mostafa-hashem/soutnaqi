@@ -167,6 +167,22 @@
   "separationProgressEncoding": "Saving result…",
   "separationProgressFinalizingVideo": "Merging separated audio into video…",
   "separationProgressKeepOpen": "Keep the app open — this may take a few minutes.",
+  "separationProgressEtaMinutes": "{minutes, plural, one{About 1 min remaining} other{About {minutes} min remaining}}",
+  "@separationProgressEtaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "separationProgressEtaSeconds": "About {seconds} sec remaining",
+  "@separationProgressEtaSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "separationCancelAction": "Cancel",
   "separationCancelling": "Cancelling…",
   "separationCancelled": "Separation cancelled.",

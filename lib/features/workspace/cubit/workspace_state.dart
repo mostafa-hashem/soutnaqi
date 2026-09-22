@@ -51,6 +51,7 @@ class WorkspaceState extends Equatable {
     this.processingProgress,
     this.processingChunkCurrent,
     this.processingChunkTotal,
+    this.processingEta,
   });
 
   final WorkspaceStatus status;
@@ -76,6 +77,9 @@ class WorkspaceState extends Equatable {
   final double? processingProgress;
   final int? processingChunkCurrent;
   final int? processingChunkTotal;
+
+  /// Remaining time estimated from chunk throughput while separating.
+  final Duration? processingEta;
 
   bool get hasProcessingOverlay =>
       status == WorkspaceStatus.processing &&
@@ -131,6 +135,7 @@ class WorkspaceState extends Equatable {
     double? processingProgress,
     int? processingChunkCurrent,
     int? processingChunkTotal,
+    Duration? processingEta,
     bool clearMedia = false,
     bool clearProcessed = false,
     bool clearOperation = false,
@@ -140,6 +145,7 @@ class WorkspaceState extends Equatable {
     bool clearProcessingOverlay = false,
     bool updateProcessingProgress = false,
     bool clearProcessingChunks = false,
+    bool updateProcessingEta = false,
   }) {
     return WorkspaceState(
       status: status ?? this.status,
@@ -181,6 +187,9 @@ class WorkspaceState extends Equatable {
       processingChunkTotal: clearProcessingOverlay || clearProcessingChunks
           ? null
           : (processingChunkTotal ?? this.processingChunkTotal),
+      processingEta: clearProcessingOverlay || clearProcessingChunks
+          ? null
+          : (updateProcessingEta ? processingEta : this.processingEta),
     );
   }
 
@@ -209,5 +218,6 @@ class WorkspaceState extends Equatable {
         processingProgress,
         processingChunkCurrent,
         processingChunkTotal,
+        processingEta,
       ];
 }

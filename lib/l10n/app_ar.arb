@@ -157,6 +157,22 @@
   "separationProgressEncoding": "جاري حفظ النتيجة…",
   "separationProgressFinalizingVideo": "جاري دمج الصوت المفصول في الفيدio…",
   "separationProgressKeepOpen": "اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.",
+  "separationProgressEtaMinutes": "{minutes, plural, =1{متبقي حوالي دقيقة} =2{متبقي حوالي دقيقتين} few{متبقي حوالي {minutes} دقائق} other{متبقي حوالي {minutes} دقيقة}}",
+  "@separationProgressEtaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "separationProgressEtaSeconds": "متبقي حوالي {seconds} ثانية",
+  "@separationProgressEtaSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "separationCancelAction": "إلغاء",
   "separationCancelling": "جاري الإلغاء…",
   "separationCancelled": "تم إلغاء الفصل.",

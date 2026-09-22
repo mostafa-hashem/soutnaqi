@@ -878,6 +878,18 @@ abstract class AppLocalizations {
   /// **'Keep the app open — this may take a few minutes.'**
   String get separationProgressKeepOpen;
 
+  /// No description provided for @separationProgressEtaMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, one{About 1 min remaining} other{About {minutes} min remaining}}'**
+  String separationProgressEtaMinutes(int minutes);
+
+  /// No description provided for @separationProgressEtaSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'About {seconds} sec remaining'**
+  String separationProgressEtaSeconds(int seconds);
+
   /// No description provided for @separationCancelAction.
   ///
   /// In en, this message translates to:
