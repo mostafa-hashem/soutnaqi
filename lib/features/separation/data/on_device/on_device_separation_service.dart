@@ -7,7 +7,7 @@ import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
-import 'package:soutnaqi/features/separation/data/on_device/demucs_chunker.dart';
+import 'package:soutnaqi/features/separation/data/on_device/mdx_separator.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_repository.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_separation_engine.dart';
@@ -50,16 +50,17 @@ StereoSamples _subtractVocals({
   final length = mix.length;
   final left = Float32List(length);
   final right = Float32List(length);
+  const gain = OnDeviceModelSpec.compensate;
   for (var i = 0; i < length; i++) {
-    left[i] = mix.left[i] - vocals.left[i];
-    right[i] = mix.right[i] - vocals.right[i];
+    left[i] = mix.left[i] - vocals.left[i] * gain;
+    right[i] = mix.right[i] - vocals.right[i] * gain;
   }
   return StereoSamples(left: left, right: right);
 }
 
-/// Fully offline separation via a Demucs model exported to ONNX
-/// (see [OnDeviceModelSpec]). No server, no per-request network call — the
-/// model is downloaded once and cached by [OnDeviceModelRepository].
+/// Fully offline separation via UVR-MDX-NET Voc FT (see [OnDeviceModelSpec]).
+/// No server, no per-request network call — the model is downloaded once and
+/// cached by [OnDeviceModelRepository].
 class OnDeviceSeparationService implements SeparationService {
   OnDeviceSeparationService({OnDeviceModelRepository? modelRepository})
       : _modelRepository = modelRepository ?? OnDeviceModelRepository();
@@ -83,7 +84,7 @@ class OnDeviceSeparationService implements SeparationService {
       throw const AppException(messageKey: 'separationNotConfigured');
     }
 
-    appLog.d('⚡ Starting on-device Demucs separation: $target');
+    appLog.d('⚡ Starting on-device MDX separation: $target');
     var preparedPath = inputAudioPath;
     try {
       cancelToken?.throwIfCancelled();
@@ -106,9 +107,9 @@ class OnDeviceSeparationService implements SeparationService {
       final runner = await _engine.ensureRunner(onProgress: onProgress);
       cancelToken?.throwIfCancelled();
 
-      final stems = await DemucsChunker.process(
+      final vocals = await MdxSeparator.separate(
         mix: mix,
-        runChunk: runner.runChunk,
+        runSpectrum: runner.runSpectrum,
         cancelToken: cancelToken,
         onProgress: (chunkIndex, totalChunks) {
           onProgress?.call(
@@ -124,7 +125,6 @@ class OnDeviceSeparationService implements SeparationService {
 
       cancelToken?.throwIfCancelled();
 
-      final vocals = stems[OnDeviceModelSpec.vocalsStemIndex];
       final targetSamples = target == SeparationTarget.vocals
           ? vocals
           : await _subtractVocalsInIsolate(mix, vocals);

@@ -20,7 +20,7 @@ class SeparationAudioIo {
       return localPath;
     }
 
-    appLog.d('🔍 Converting input to WAV for Demucs…');
+    appLog.d('🔍 Converting input to WAV for separation…');
     final directory = await getTemporaryDirectory();
     final wavPath = '${directory.path}/soutnaqi_${_uuid.v4()}.wav';
     final command =

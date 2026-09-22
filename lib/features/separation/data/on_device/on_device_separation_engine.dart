@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
-import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_repository.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/onnx_inference_runner.dart';
@@ -72,10 +71,8 @@ class OnDeviceSeparationEngine {
     final runner = _runner ??=
         await OnnxInferenceRunner.load(await _modelRepository.modelPath());
 
-    final silentLeft = Float32List(OnDeviceModelSpec.chunkSamples);
-    final silentRight = Float32List(OnDeviceModelSpec.chunkSamples);
-    await runner.runChunk(
-      StereoSamples(left: silentLeft, right: silentRight),
+    await runner.runSpectrum(
+      Float32List(OnDeviceModelSpec.spectrumElementCount),
     );
 
     _isWarmedUp = true;

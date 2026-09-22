@@ -19,11 +19,11 @@ class AppEnv {
   static bool get isReplicateSeparationConfigured =>
       replicateApiToken.isNotEmpty;
 
-  /// Free, fully offline option: an on-device ONNX Demucs model, downloaded
-  /// once and cached (see `features/separation/data/on_device`). Unlike the
-  /// two flags above this isn't a dart-define secret — it just reflects
-  /// whether the current platform is one the bundled ONNX Runtime plugin
-  /// supports (every platform except web).
+  /// Free, fully offline option: an on-device ONNX model (UVR-MDX-NET Voc FT),
+  /// downloaded once and cached (see `features/separation/data/on_device`).
+  /// Unlike the two flags above this isn't a dart-define secret — it just
+  /// reflects whether the current platform is one the bundled ONNX Runtime
+  /// plugin supports (every platform except web).
   static bool get isOnDeviceSeparationSupported => !kIsWeb;
 
   static bool get isSeparationConfigured =>

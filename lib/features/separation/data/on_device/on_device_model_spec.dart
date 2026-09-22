@@ -1,34 +1,50 @@
-/// Pinned specification for the on-device separation model: HT-Demucs FT
-/// (vocals specialist, fp16 weights), exported to ONNX.
+/// Pinned specification for the on-device separation model: UVR-MDX-NET Voc FT.
 ///
-/// Source: https://huggingface.co/StemSplitio/htdemucs-ft-vocals-onnx
-/// [expectedSizeBytes] and [expectedSha256] were verified against the
-/// actual downloaded file, and the chunking constants were verified against
-/// the model's own reference `infer.py` — do not change without
-/// re-verifying against the model card.
+/// A vocals-specialist MDX-Net (Conv-TDF), much smaller than HTDemucs, so it
+/// can run on a phone CPU without freezing the device. Parameters match the
+/// UVR model JSON for hash `77d07b2667ddf05b9e3175941b4454a0`:
+/// compensate 1.021, dim_f 3072, dim_t 2^8, n_fft 7680, primary stem Vocals.
+/// Hop is UVR's fixed 1024. Overlap 0.25 is the UVR default window blend.
+///
+/// Source file:
+/// https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Voc_FT.onnx
 class OnDeviceModelSpec {
   OnDeviceModelSpec._();
 
-  static const modelFileName = 'htdemucs_ft_vocals_fp16weights.onnx';
+  static const modelFileName = 'UVR-MDX-NET-Voc_FT.onnx';
+  static const legacyModelFileName = 'htdemucs_ft_vocals_fp16weights.onnx';
   static const downloadUrl =
-      'https://huggingface.co/StemSplitio/htdemucs-ft-vocals-onnx/resolve/main/$modelFileName';
-  static const expectedSizeBytes = 165612636;
+      'https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/$modelFileName';
+  static const expectedSizeBytes = 66762490;
   static const expectedSha256 =
-      '0cbe651f535415c9d26a7bb614f7d322dd5a080fa0298f2e50f478030a994dce';
+      '534b2070fcc7df514b13ef660dc8cbb328679c2374d04354a5c42bb14ecce111';
 
   static const sampleRate = 44100;
   static const channels = 2;
 
-  /// 7.8s segments, matching the model's fixed input length.
-  static const chunkSamples = 343980;
+  static const nFft = 7680;
+  static const hopLength = 1024;
+  static const dimF = 3072;
+  static const dimT = 256;
+  static const compensate = 1.021;
 
-  /// 25% overlap between consecutive chunks, linear-fade blended.
-  static const overlapSamples = chunkSamples ~/ 4;
-  static const strideSamples = chunkSamples - overlapSamples;
+  /// Half the FFT. UVR center-pads the mix by this much before chunking.
+  static const trimSamples = nFft ~/ 2;
 
-  static const sources = ['drums', 'bass', 'other', 'vocals'];
-  static const vocalsStemIndex = 3;
+  /// One model window: hop * (dim_t - 1). STFT of this length yields [dimT] frames.
+  static const chunkSamples = hopLength * (dimT - 1);
 
-  static const inputNodeName = 'mix';
-  static const outputNodeName = 'stems';
+  /// Distance between overlap-add windows at 25% overlap.
+  static const strideSamples = chunkSamples * 3 ~/ 4;
+
+  /// UVR's non-checkpoint chunk advance before the overlap step is applied.
+  static const genSize = chunkSamples - 2 * trimSamples;
+
+  static const frequencyBins = nFft ~/ 2 + 1;
+
+  static const inputNodeName = 'input';
+  static const outputNodeName = 'output';
+
+  /// `[batch, real/imag left+right, freq, time]`.
+  static const spectrumElementCount = 4 * dimF * dimT;
 }

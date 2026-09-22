@@ -11,7 +11,6 @@ import 'package:onnxruntime_v2/src/bindings/bindings.dart';
 import 'package:onnxruntime_v2/src/bindings/onnxruntime_bindings_generated.dart'
     as bg;
 import 'package:soutnaqi/core/logging/app_log.dart';
-import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 
 /// Top-level so [Isolate.run] does not capture unsendable locals from callers.
@@ -23,7 +22,7 @@ Future<int> _loadNativeSessionInIsolate(String modelPath, int threads) {
 /// pointer address; ownership transfers to the caller (do not release here).
 ///
 /// Spinning is disabled and the worker count stays at one core so the UI
-/// and the rest of the phone keep getting scheduled during HTDemucs.
+/// and the rest of the phone keep getting scheduled during separation.
 int _createNativeSession(String modelPath, int threads) {
   OrtEnv.instance.init();
   final api = OrtEnv.instance.ortApiPtr.ref;
@@ -149,9 +148,8 @@ void _appendXnnpack(ffi.Pointer<bg.OrtSessionOptions> options, int threads) {
 /// own persistent background isolate, so inference never blocks the UI
 /// thread.
 ///
-/// HTDemucs runs poorly on NNAPI (STFT / attention fall back to CPU with
-/// extra boundary copies), so the session prefers XNNPACK + CPU instead of
-/// [OrtSessionOptions.appendDefaultProviders].
+/// MDX-Net runs poorly when worker threads spin, so the session uses one
+/// XNNPACK thread plus the CPU fallback and disables intra/inter-op spinning.
 class OnnxInferenceRunner {
   OnnxInferenceRunner._(this._session);
 
@@ -161,7 +159,7 @@ class OnnxInferenceRunner {
   /// One core only. Extra workers plus spin-wait freeze the whole phone.
   static const _maxIntraOpThreads = 1;
 
-  /// One HTDemucs chunk can exceed the plugin's default 60s isolate timeout.
+  /// One chunk can exceed the plugin's default 60s isolate timeout.
   static const _chunkTimeout = Duration(minutes: 10);
 
   static Future<OnnxInferenceRunner> load(String modelPath) async {
@@ -171,8 +169,8 @@ class OnnxInferenceRunner {
     }
     final threads =
         Platform.numberOfProcessors.clamp(1, _maxIntraOpThreads);
-    // CreateSession + graph opt on a 165MB model is multi-second sync work —
-    // never do it on the UI isolate or Android reports ANR.
+    // CreateSession on the download is multi-second sync work — never do it
+    // on the UI isolate or Android reports ANR.
     final sessionAddress =
         await _loadNativeSessionInIsolate(modelPath, threads);
     appLog.d(
@@ -181,17 +179,12 @@ class OnnxInferenceRunner {
     return OnnxInferenceRunner._(OrtSession.fromAddress(sessionAddress));
   }
 
-  /// Runs one model-sized stereo chunk and returns the stem output shaped
-  /// `[source][channel][sample]`, source order matching
-  /// [OnDeviceModelSpec.sources].
-  Future<List<List<Float32List>>> runChunk(StereoSamples chunk) async {
-    final planar = Float32List(OnDeviceModelSpec.channels * chunk.length);
-    planar.setRange(0, chunk.length, chunk.left);
-    planar.setRange(chunk.length, chunk.length * 2, chunk.right);
-
+  /// Runs one spectrogram and returns the model's spectrum, same length as
+  /// [spectrum] (`[1, 4, dimF, dimT]` packed row-major).
+  Future<Float32List> runSpectrum(Float32List spectrum) async {
     final inputTensor = OrtValueTensor.createTensorWithDataList(
-      planar,
-      [1, OnDeviceModelSpec.channels, chunk.length],
+      spectrum,
+      const [1, 4, OnDeviceModelSpec.dimF, OnDeviceModelSpec.dimT],
     );
     final runOptions = OrtRunOptions();
     OrtValueTensor? outputTensor;
@@ -201,18 +194,20 @@ class OnnxInferenceRunner {
         runOptions,
         {OnDeviceModelSpec.inputNodeName: inputTensor},
         _chunkTimeout,
-        [OnDeviceModelSpec.outputNodeName],
+        const [OnDeviceModelSpec.outputNodeName],
       );
       outputTensor = outputs?.first as OrtValueTensor?;
       if (outputTensor == null) {
         throw StateError('On-device model produced no output');
       }
-      // Yield once so the UI can paint progress before the bulk copy.
       await Future<void>.delayed(Duration.zero);
-      final stems = _copyStemsFromTensor(outputTensor);
+      final predicted = _copyFloats(
+        outputTensor,
+        OnDeviceModelSpec.spectrumElementCount,
+      );
       stopwatch.stop();
       appLog.d('⚡ On-device chunk inference ${stopwatch.elapsedMilliseconds}ms');
-      return stems;
+      return predicted;
     } finally {
       inputTensor.release();
       outputTensor?.release();
@@ -220,14 +215,7 @@ class OnnxInferenceRunner {
     }
   }
 
-  /// Bulk-copies float32 stem data from native memory instead of walking
-  /// `tensor.value` (which builds nested `List<num>` element-by-element).
-  static List<List<Float32List>> _copyStemsFromTensor(OrtValueTensor tensor) {
-    final sourceCount = OnDeviceModelSpec.sources.length;
-    const channelCount = OnDeviceModelSpec.channels;
-    const samples = OnDeviceModelSpec.chunkSamples;
-    final elementCount = sourceCount * channelCount * samples;
-
+  static Float32List _copyFloats(OrtValueTensor tensor, int elementCount) {
     final dataPtrPtr = calloc<ffi.Pointer<ffi.Float>>();
     try {
       final statusPtr = OrtEnv.instance.ortApiPtr.ref.GetTensorMutableData
@@ -240,16 +228,9 @@ class OnnxInferenceRunner {
         dataPtrPtr.cast(),
       );
       OrtStatus.checkOrtStatus(statusPtr);
-
-      final view = dataPtrPtr.value.asTypedList(elementCount);
-      return List.generate(sourceCount, (s) {
-        return List.generate(channelCount, (c) {
-          final channel = Float32List(samples);
-          final start = (s * channelCount + c) * samples;
-          channel.setRange(0, samples, view, start);
-          return channel;
-        });
-      });
+      final copy = Float32List(elementCount);
+      copy.setRange(0, elementCount, dataPtrPtr.value.asTypedList(elementCount));
+      return copy;
     } finally {
       calloc.free(dataPtrPtr);
     }

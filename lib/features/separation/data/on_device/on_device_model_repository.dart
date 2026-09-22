@@ -50,6 +50,7 @@ class OnDeviceModelRepository {
   /// checks file size, not a full re-hash, to stay fast on every app
   /// launch — the checksum is verified once, right after download.
   Future<bool> isModelCached() async {
+    await _deleteLegacyModel();
     final file = await _modelFile();
     if (!await file.exists()) return false;
     final size = await file.length();
@@ -186,6 +187,16 @@ class OnDeviceModelRepository {
     final file = await _modelFile();
     if (await file.exists()) {
       await file.delete();
+    }
+  }
+
+  /// The previous HTDemucs file is ~166 MB and is no longer used.
+  Future<void> _deleteLegacyModel() async {
+    final dir = await _modelDirectory();
+    final legacy = File(p.join(dir.path, OnDeviceModelSpec.legacyModelFileName));
+    if (await legacy.exists()) {
+      appLog.d('🔍 Removing previous on-device model');
+      await legacy.delete();
     }
   }
 }
