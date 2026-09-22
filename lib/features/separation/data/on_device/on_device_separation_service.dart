@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +23,39 @@ SeparationService createOnDeviceSeparationService() =>
 
 Future<void> warmUpOnDeviceSeparationIfReady() =>
     OnDeviceSeparationEngine.instance.warmUpInBackgroundIfReady();
+
+/// Top-level isolate entry points — must not close over [separate]'s locals
+/// (`onProgress` → WorkspaceCubit → AudioPlayer is unsendable).
+Future<StereoSamples> _decodeWavInIsolate(String path) {
+  return Isolate.run(() => AudioTensorCodec.decodeWav(path));
+}
+
+Future<void> _encodeWavInIsolate(String outputPath, StereoSamples samples) {
+  return Isolate.run(
+    () => AudioTensorCodec.encodeWav(outputPath: outputPath, samples: samples),
+  );
+}
+
+Future<StereoSamples> _subtractVocalsInIsolate(
+  StereoSamples mix,
+  StereoSamples vocals,
+) {
+  return Isolate.run(() => _subtractVocals(mix: mix, vocals: vocals));
+}
+
+StereoSamples _subtractVocals({
+  required StereoSamples mix,
+  required StereoSamples vocals,
+}) {
+  final length = mix.length;
+  final left = Float32List(length);
+  final right = Float32List(length);
+  for (var i = 0; i < length; i++) {
+    left[i] = mix.left[i] - vocals.left[i];
+    right[i] = mix.right[i] - vocals.right[i];
+  }
+  return StereoSamples(left: left, right: right);
+}
 
 /// Fully offline separation via a Demucs model exported to ONNX
 /// (see [OnDeviceModelSpec]). No server, no per-request network call — the
@@ -66,8 +100,7 @@ class OnDeviceSeparationService implements SeparationService {
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.preparingAudio, progress: 1),
       );
-      final mix = await AudioTensorCodec.decodeWav(preparedPath);
-      await Future<void>.delayed(Duration.zero);
+      final mix = await _decodeWavInIsolate(preparedPath);
       cancelToken?.throwIfCancelled();
 
       final runner = await _engine.ensureRunner(onProgress: onProgress);
@@ -94,17 +127,14 @@ class OnDeviceSeparationService implements SeparationService {
       final vocals = stems[OnDeviceModelSpec.vocalsStemIndex];
       final targetSamples = target == SeparationTarget.vocals
           ? vocals
-          : _subtractVocals(mix: mix, vocals: vocals);
+          : await _subtractVocalsInIsolate(mix, vocals);
 
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.encodingOutput),
       );
       final directory = await getTemporaryDirectory();
       final wavOutput = '${directory.path}/soutnaqi_${_uuid.v4()}.wav';
-      await AudioTensorCodec.encodeWav(
-        outputPath: wavOutput,
-        samples: targetSamples,
-      );
+      await _encodeWavInIsolate(wavOutput, targetSamples);
       cancelToken?.throwIfCancelled();
 
       final outputPath = await SeparationAudioIo.encodeWavToM4a(wavOutput);
@@ -122,23 +152,5 @@ class OnDeviceSeparationService implements SeparationService {
         } catch (_) {}
       }
     }
-  }
-
-  /// The model's non-vocals stems (drums/bass/other) are explicitly
-  /// documented as "weakly-predicted by-products" — only the vocals row is
-  /// well-trained. Deriving instrumental as mix minus the (reliable) vocals
-  /// prediction avoids depending on those weak stems entirely.
-  StereoSamples _subtractVocals({
-    required StereoSamples mix,
-    required StereoSamples vocals,
-  }) {
-    final length = mix.length;
-    final left = Float32List(length);
-    final right = Float32List(length);
-    for (var i = 0; i < length; i++) {
-      left[i] = mix.left[i] - vocals.left[i];
-      right[i] = mix.right[i] - vocals.right[i];
-    }
-    return StereoSamples(left: left, right: right);
   }
 }

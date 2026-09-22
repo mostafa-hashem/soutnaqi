@@ -9,8 +9,9 @@ import 'package:soutnaqi/features/separation/data/on_device/onnx_inference_runne
 import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 
 /// Shared ONNX session for on-device separation. Caches the compiled session
-/// and pays the one-time NNAPI warm-up cost ahead of the user's first
-/// separation when possible.
+/// and pays the one-time session load + first-chunk warm-up ahead of the
+/// user's first separation when possible (session creation runs off the UI
+/// isolate to avoid ANRs).
 class OnDeviceSeparationEngine {
   OnDeviceSeparationEngine._();
 

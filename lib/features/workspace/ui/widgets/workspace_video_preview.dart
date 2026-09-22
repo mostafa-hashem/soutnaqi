@@ -33,6 +33,10 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
   VideoSourceResolver? _resolver;
   String? _activeUri;
   bool _hasError = false;
+  int _playerGeneration = 0;
+
+  bool get _isProcessing =>
+      widget.state.status == WorkspaceStatus.processing;
 
   @override
   void initState() {
@@ -43,15 +47,41 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
   @override
   void didUpdateWidget(covariant WorkspaceVideoPreview oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final wasProcessing =
+        oldWidget.state.status == WorkspaceStatus.processing;
     final sourceChanged = oldWidget.state.playbackSource !=
             widget.state.playbackSource ||
         oldWidget.state.processedPath != widget.state.processedPath;
-    if (sourceChanged) {
+
+    if (_isProcessing && !wasProcessing) {
+      _releaseDecoder();
+      return;
+    }
+    if (wasProcessing && !_isProcessing) {
+      _initializePlayer();
+      return;
+    }
+    if (sourceChanged && !_isProcessing) {
       _initializePlayer();
     }
   }
 
+  /// Hardware decode (MediaTek AVC + audio) stays alive while the preview
+  /// plays and fights ONNX for CPU and buffers until the process is killed.
+  Future<void> _releaseDecoder() async {
+    final generation = ++_playerGeneration;
+    final controller = _controller;
+    _controller = null;
+    if (mounted) setState(() {});
+    await controller?.pause();
+    if (generation != _playerGeneration) return;
+    await controller?.dispose();
+  }
+
   Future<void> _initializePlayer() async {
+    if (_isProcessing) return;
+
+    final generation = ++_playerGeneration;
     _resolver ??= createVideoSourceResolver();
     final useProcessed = widget.state.playbackSource == PlaybackSource.processed &&
         widget.state.hasProcessedOutput;
@@ -64,12 +94,18 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
       useProcessed: useProcessed,
     );
 
+    if (!mounted || generation != _playerGeneration) return;
+
     if (uri == null) {
       setState(() => _hasError = true);
       return;
     }
 
-    await _controller?.dispose();
+    final previous = _controller;
+    _controller = null;
+    await previous?.dispose();
+    if (!mounted || generation != _playerGeneration) return;
+
     _resolver!.disposeBlob(_activeUri);
     _activeUri = uri;
 
@@ -82,10 +118,13 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
 
     try {
       await controller.initialize();
-      if (!mounted) return;
+      if (!mounted || generation != _playerGeneration) {
+        await controller.dispose();
+        return;
+      }
       setState(() {});
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || generation != _playerGeneration) return;
       setState(() => _hasError = true);
     }
   }

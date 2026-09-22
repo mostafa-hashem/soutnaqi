@@ -19,6 +19,10 @@ class DemucsChunker {
 
   static final Float32List _window = _buildTransitionWindow();
 
+  /// Yield every this many samples so the UI isolate can process frames
+  /// during long overlap-add / normalize loops.
+  static const _yieldStride = 16384;
+
   static Float32List _buildTransitionWindow() {
     const segment = OnDeviceModelSpec.chunkSamples;
     const transition = OnDeviceModelSpec.overlapSamples;
@@ -30,6 +34,8 @@ class DemucsChunker {
     }
     return window;
   }
+
+  static Future<void> _yieldToUi() => Future<void>.delayed(Duration.zero);
 
   /// Runs [runChunk] once per model-sized chunk of [mix] and overlap-adds
   /// the results. [runChunk] receives one stereo chunk, zero-padded to
@@ -90,27 +96,38 @@ class DemucsChunker {
           final w = _window[j];
           outLeft[s][start + j] += stemLeft[j] * w;
           outRight[s][start + j] += stemRight[j] * w;
+          if (j != 0 && j % _yieldStride == 0) {
+            await _yieldToUi();
+          }
         }
       }
       for (var j = 0; j < chunkLength; j++) {
         weight[start + j] += _window[j];
+        if (j != 0 && j % _yieldStride == 0) {
+          await _yieldToUi();
+        }
       }
 
       onProgress?.call(i + 1, chunkCount);
-      await Future<void>.delayed(Duration.zero);
+      await _yieldToUi();
     }
 
     cancelToken?.throwIfCancelled();
 
-    return List.generate(sourceCount, (s) {
+    final results = <StereoSamples>[];
+    for (var s = 0; s < sourceCount; s++) {
       final left = Float32List(totalLength);
       final right = Float32List(totalLength);
       for (var j = 0; j < totalLength; j++) {
         final w = weight[j] < 1e-8 ? 1e-8 : weight[j];
         left[j] = outLeft[s][j] / w;
         right[j] = outRight[s][j] / w;
+        if (j != 0 && j % _yieldStride == 0) {
+          await _yieldToUi();
+        }
       }
-      return StereoSamples(left: left, right: right);
-    });
+      results.add(StereoSamples(left: left, right: right));
+    }
+    return results;
   }
 }
