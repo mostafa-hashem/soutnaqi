@@ -336,7 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get separationModelRequired =>
-      'Download the on-device separation model first — open Settings → On-device model → Download.';
+      'The separation model isn\'t downloaded yet.\nOpen Settings → On-device model → Download, then try again.';
 
   @override
   String get separationLocalHint =>
@@ -395,6 +395,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get separationModelDownloadAction => 'Download';
+
+  @override
+  String get separationModelCancelAction => 'Cancel';
 
   @override
   String get separationModelDeleteAction => 'Delete';

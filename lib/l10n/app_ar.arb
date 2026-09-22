@@ -103,7 +103,7 @@
   "processIsolateMusicSuccess": "تم استخراج الموسيقى بنجاح.",
   "separationAiHint": "الفصل بالذكاء الاصطناعي (Demucs) — قد يستغرق عدة دقائق.",
   "separationNotConfigured": "فصل الصوت غير متاح على الويب. شغّل التطبيق على Android أو iOS أو سطح المكتب.",
-  "separationModelRequired": "حمّل نموذج الفصل على الجهاز أولاً — من الإعدادات → نموذج الفصل على الجهاز → تنزيل.",
+  "separationModelRequired": "نموذج الفصل غير محمّل بعد.\nافتح الإعدادات → نموذج الفصل على الجهاز → تنزيل، ثم حاول مجدداً.",
   "separationLocalHint": "Demucs محلي (مجاني) — شغّل السيرفر على جهازك. قد يستغرق عدة دقائق.",
   "separationCloudHint": "Demucs عبر Replicate (مدفوع) — قد يستغرق عدة دقائق.",
   "separationServerUnreachable": "تعذّر الاتصال بسيرفر Demucs المحلي. تأكد أنه يعمل وأن الهاتف على نفس شبكة Wi‑Fi.",
@@ -133,6 +133,7 @@
     }
   },
   "separationModelDownloadAction": "تنزيل",
+  "separationModelCancelAction": "إلغاء",
   "separationModelDeleteAction": "حذف",
   "separationProgressPreparingAudio": "جاري تجهيز الصوت…",
   "separationProgressExtractingAudio": "جاري استخراج الصوت من الفيدio…",

@@ -34,34 +34,46 @@ class AppToast {
     );
   }
 
-  static void showSuccess(
-    BuildContext context, {
-    required SettingsCubit settingsCubit,
-    String? message,
-  }) {
-    dismiss();
-    _show(
-      context,
-      settingsCubit: settingsCubit,
-      phase: ToastPhase.success,
-      message: message ?? AppLocalizations.of(context).toastSuccess,
-      autoDismiss: true,
-    );
-  }
-
   static void showFailure(
     BuildContext context, {
     required SettingsCubit settingsCubit,
     String? message,
+    Duration? duration,
   }) {
     dismiss();
+    final resolved = message ?? AppLocalizations.of(context).toastFailure;
     _show(
       context,
       settingsCubit: settingsCubit,
       phase: ToastPhase.failure,
-      message: message ?? AppLocalizations.of(context).toastFailure,
+      message: resolved,
       autoDismiss: true,
+      duration: duration ?? _readableDuration(resolved),
     );
+  }
+
+  static void showSuccess(
+    BuildContext context, {
+    required SettingsCubit settingsCubit,
+    String? message,
+    Duration? duration,
+  }) {
+    dismiss();
+    final resolved = message ?? AppLocalizations.of(context).toastSuccess;
+    _show(
+      context,
+      settingsCubit: settingsCubit,
+      phase: ToastPhase.success,
+      message: resolved,
+      autoDismiss: true,
+      duration: duration ?? _readableDuration(resolved),
+    );
+  }
+
+  /// Keeps longer guidance messages on screen longer (min 3s, max 8s).
+  static Duration _readableDuration(String message) {
+    final ms = (2800 + message.length * 45).clamp(3000, 8000);
+    return Duration(milliseconds: ms);
   }
 
   static void _show(
@@ -70,6 +82,7 @@ class AppToast {
     required ToastPhase phase,
     required String message,
     bool autoDismiss = false,
+    Duration? duration,
   }) {
     dismiss();
 
@@ -106,25 +119,28 @@ class AppToast {
                       vertical: 12,
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (phase == ToastPhase.loading)
-                          AppLoadingAnimation(
-                            size: 28,
-                            color: colors.icon,
-                          )
-                        else
-                          HugeIcon(
-                            icon: phase == ToastPhase.success
-                                ? HugeIconsStrokeRounded.tick02
-                                : HugeIconsStrokeRounded.cancel01,
-                            color: colors.icon,
-                            size: 20,
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 1),
+                          child: phase == ToastPhase.loading
+                              ? AppLoadingAnimation(
+                                  size: 28,
+                                  color: colors.icon,
+                                )
+                              : HugeIcon(
+                                  icon: phase == ToastPhase.success
+                                      ? HugeIconsStrokeRounded.tick02
+                                      : HugeIconsStrokeRounded.cancel01,
+                                  color: colors.icon,
+                                  size: 20,
+                                ),
+                        ),
                         const SizedBox(width: 12),
                         Flexible(
                           child: Text(
                             message,
+                            textAlign: TextAlign.start,
                             style: font14W500(
                               settingsCubit: settingsCubit,
                               color: overlayContext.textPrimary,
@@ -145,7 +161,13 @@ class AppToast {
     overlay.insert(_currentEntry!);
 
     if (autoDismiss) {
-      Future<void>.delayed(const Duration(seconds: 3), dismiss);
+      final entry = _currentEntry;
+      Future<void>.delayed(
+        duration ?? const Duration(seconds: 3),
+        () {
+          if (_currentEntry == entry) dismiss();
+        },
+      );
     }
   }
 

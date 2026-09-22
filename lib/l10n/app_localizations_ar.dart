@@ -329,7 +329,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get separationModelRequired =>
-      'حمّل نموذج الفصل على الجهاز أولاً — من الإعدادات → نموذج الفصل على الجهاز → تنزيل.';
+      'نموذج الفصل غير محمّل بعد.\nافتح الإعدادات → نموذج الفصل على الجهاز → تنزيل، ثم حاول مجدداً.';
 
   @override
   String get separationLocalHint =>
@@ -388,6 +388,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get separationModelDownloadAction => 'تنزيل';
+
+  @override
+  String get separationModelCancelAction => 'إلغاء';
 
   @override
   String get separationModelDeleteAction => 'حذف';

@@ -127,12 +127,25 @@ class _TrailingAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state.status == OnDeviceModelStatus.checking ||
-        state.status == OnDeviceModelStatus.downloading) {
+    if (state.status == OnDeviceModelStatus.checking) {
       return const SizedBox(
         width: 20,
         height: 20,
         child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (state.status == OnDeviceModelStatus.downloading) {
+      final l10n = AppLocalizations.of(context);
+      return TextButton(
+        onPressed: () => context.read<OnDeviceModelCubit>().cancelDownload(),
+        child: Text(
+          l10n.separationModelCancelAction,
+          style: font14W600(
+            settingsCubit: settingsCubit,
+            color: context.error,
+          ),
+        ),
       );
     }
 

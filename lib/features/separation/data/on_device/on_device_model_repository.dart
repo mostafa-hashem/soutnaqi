@@ -12,10 +12,20 @@ import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec
 /// once, from a static file host (not a compute server), into persistent
 /// app-support storage — every separation run after that is fully offline.
 class OnDeviceModelRepository {
-  OnDeviceModelRepository({http.Client? client})
-      : _client = client ?? http.Client();
+  OnDeviceModelRepository();
 
-  final http.Client _client;
+  /// Dedicated client for the in-flight download so [cancelDownload] can
+  /// abort the HTTP stream without affecting other callers.
+  http.Client? _downloadClient;
+  bool _cancelRequested = false;
+
+  /// Aborts an in-progress [ensureModelDownloaded]. Safe to call when idle.
+  void cancelDownload() {
+    _cancelRequested = true;
+    final client = _downloadClient;
+    _downloadClient = null;
+    client?.close();
+  }
 
   Future<Directory> _modelDirectory() async {
     final supportDir = await getApplicationSupportDirectory();
@@ -56,6 +66,8 @@ class OnDeviceModelRepository {
 
   /// Downloads the model if it isn't already cached, verifying its
   /// checksum. Safe to call before every separation — a no-op once cached.
+  /// Throws [AppException] with `onDeviceModelDownloadCancelled` when the
+  /// user aborts via [cancelDownload].
   Future<void> ensureModelDownloaded({
     void Function(double progress)? onProgress,
   }) async {
@@ -65,10 +77,18 @@ class OnDeviceModelRepository {
     final targetFile = await _modelFile();
     IOSink? sink;
     var completed = false;
+    _cancelRequested = false;
+    final downloadClient = http.Client();
+    _downloadClient = downloadClient;
     try {
-      final response = await _client.send(
+      final response = await downloadClient.send(
         http.Request('GET', Uri.parse(OnDeviceModelSpec.downloadUrl)),
       );
+      if (_cancelRequested) {
+        throw const AppException(
+          messageKey: 'onDeviceModelDownloadCancelled',
+        );
+      }
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw AppException(
           messageKey: 'onDeviceModelDownloadFailed',
@@ -87,6 +107,11 @@ class OnDeviceModelRepository {
       sink = partFile.openWrite();
 
       await for (final chunk in response.stream) {
+        if (_cancelRequested) {
+          throw const AppException(
+            messageKey: 'onDeviceModelDownloadCancelled',
+          );
+        }
         sink.add(chunk);
         digestInput.add(chunk);
         received += chunk.length;
@@ -111,6 +136,11 @@ class OnDeviceModelRepository {
     } on AppException {
       rethrow;
     } on SocketException catch (error) {
+      if (_cancelRequested) {
+        throw const AppException(
+          messageKey: 'onDeviceModelDownloadCancelled',
+        );
+      }
       appLog.e('❌ On-device model download failed', error: error);
       throw AppException(
         messageKey: 'onDeviceModelDownloadFailed',
@@ -125,6 +155,11 @@ class OnDeviceModelRepository {
         cause: error,
       );
     } catch (error) {
+      if (_cancelRequested) {
+        throw const AppException(
+          messageKey: 'onDeviceModelDownloadCancelled',
+        );
+      }
       appLog.e('❌ On-device model download failed', error: error);
       throw AppException(
         messageKey: 'onDeviceModelDownloadFailed',
@@ -132,6 +167,10 @@ class OnDeviceModelRepository {
         cause: error,
       );
     } finally {
+      if (identical(_downloadClient, downloadClient)) {
+        _downloadClient = null;
+      }
+      downloadClient.close();
       if (sink != null) {
         await sink.close();
       }

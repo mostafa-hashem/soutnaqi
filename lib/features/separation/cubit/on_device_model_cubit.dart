@@ -58,6 +58,14 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
       await refresh();
       unawaited(warmUpSeparationIfReady());
     } on AppException catch (error) {
+      if (isClosed) return;
+      if (error.messageKey == 'onDeviceModelDownloadCancelled') {
+        appLog.d('🔍 On-device model download cancelled by user');
+        emit(
+          const OnDeviceModelState(status: OnDeviceModelStatus.notDownloaded),
+        );
+        return;
+      }
       emit(
         state.copyWith(
           status: OnDeviceModelStatus.error,
@@ -65,6 +73,7 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
         ),
       );
     } catch (error) {
+      if (isClosed) return;
       appLog.e('❌ On-device model download failed', error: error);
       emit(
         state.copyWith(
@@ -73,6 +82,12 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
         ),
       );
     }
+  }
+
+  /// Stops an in-progress download and returns to [OnDeviceModelStatus.notDownloaded].
+  void cancelDownload() {
+    if (state.status != OnDeviceModelStatus.downloading) return;
+    _repository.cancelDownload();
   }
 
   Future<void> delete() async {

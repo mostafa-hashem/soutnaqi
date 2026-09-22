@@ -113,7 +113,7 @@
   "processIsolateMusicSuccess": "Music extracted successfully.",
   "separationAiHint": "AI separation (Demucs) — may take several minutes.",
   "separationNotConfigured": "Vocal separation is not available on web. Run the app on Android, iOS, or desktop.",
-  "separationModelRequired": "Download the on-device separation model first — open Settings → On-device model → Download.",
+  "separationModelRequired": "The separation model isn't downloaded yet.\nOpen Settings → On-device model → Download, then try again.",
   "separationLocalHint": "Local Demucs (free) — run the server on your PC. May take several minutes.",
   "separationCloudHint": "Demucs via Replicate (paid) — may take several minutes.",
   "separationServerUnreachable": "Could not reach the local Demucs server. Ensure it is running and the phone is on the same Wi‑Fi.",
@@ -143,6 +143,7 @@
     }
   },
   "separationModelDownloadAction": "Download",
+  "separationModelCancelAction": "Cancel",
   "separationModelDeleteAction": "Delete",
   "separationProgressPreparingAudio": "Preparing audio…",
   "separationProgressExtractingAudio": "Extracting audio from video…",

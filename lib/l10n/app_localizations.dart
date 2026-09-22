@@ -719,7 +719,7 @@ abstract class AppLocalizations {
   /// No description provided for @separationModelRequired.
   ///
   /// In en, this message translates to:
-  /// **'Download the on-device separation model first — open Settings → On-device model → Download.'**
+  /// **'The separation model isn\'t downloaded yet.\nOpen Settings → On-device model → Download, then try again.'**
   String get separationModelRequired;
 
   /// No description provided for @separationLocalHint.
@@ -811,6 +811,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download'**
   String get separationModelDownloadAction;
+
+  /// No description provided for @separationModelCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get separationModelCancelAction;
 
   /// No description provided for @separationModelDeleteAction.
   ///
