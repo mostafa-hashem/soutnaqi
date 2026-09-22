@@ -47,6 +47,9 @@ class WorkspaceScreen extends StatelessWidget {
               WorkspaceProcessingOverlay(
                 settingsCubit: settingsCubit,
                 state: state,
+                onCancel: state.canCancelSeparation
+                    ? () => context.read<WorkspaceCubit>().cancelSeparation()
+                    : null,
               ),
             ],
           );

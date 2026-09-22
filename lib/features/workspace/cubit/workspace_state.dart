@@ -81,6 +81,10 @@ class WorkspaceState extends Equatable {
       status == WorkspaceStatus.processing &&
       processingPhase != WorkspaceProcessingPhase.none;
 
+  bool get canCancelSeparation =>
+      hasProcessingOverlay &&
+      processingPhase != WorkspaceProcessingPhase.generic;
+
   bool get showSeparationKeepOpenHint =>
       processingPhase == WorkspaceProcessingPhase.warmingUpEngine ||
       processingPhase == WorkspaceProcessingPhase.separating ||

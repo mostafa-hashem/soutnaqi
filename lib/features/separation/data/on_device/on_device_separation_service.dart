@@ -11,6 +11,7 @@ import 'package:soutnaqi/features/separation/data/on_device/on_device_model_repo
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_separation_engine.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
@@ -42,6 +43,7 @@ class OnDeviceSeparationService implements SeparationService {
     required String inputAudioPath,
     required SeparationTarget target,
     SeparationProgressCallback? onProgress,
+    SeparationCancelToken? cancelToken,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -50,10 +52,12 @@ class OnDeviceSeparationService implements SeparationService {
     appLog.d('⚡ Starting on-device Demucs separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.preparingAudio),
       );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
+      cancelToken?.throwIfCancelled();
 
       if (!await _modelRepository.isModelCached()) {
         throw const AppException(messageKey: 'separationModelRequired');
@@ -64,12 +68,15 @@ class OnDeviceSeparationService implements SeparationService {
       );
       final mix = await AudioTensorCodec.decodeWav(preparedPath);
       await Future<void>.delayed(Duration.zero);
+      cancelToken?.throwIfCancelled();
 
       final runner = await _engine.ensureRunner(onProgress: onProgress);
+      cancelToken?.throwIfCancelled();
 
       final stems = await DemucsChunker.process(
         mix: mix,
         runChunk: runner.runChunk,
+        cancelToken: cancelToken,
         onProgress: (chunkIndex, totalChunks) {
           onProgress?.call(
             SeparationProgress(
@@ -81,6 +88,8 @@ class OnDeviceSeparationService implements SeparationService {
           );
         },
       );
+
+      cancelToken?.throwIfCancelled();
 
       final vocals = stems[OnDeviceModelSpec.vocalsStemIndex];
       final targetSamples = target == SeparationTarget.vocals
@@ -96,6 +105,7 @@ class OnDeviceSeparationService implements SeparationService {
         outputPath: wavOutput,
         samples: targetSamples,
       );
+      cancelToken?.throwIfCancelled();
 
       final outputPath = await SeparationAudioIo.encodeWavToM4a(wavOutput);
       appLog.d('✅ On-device separation complete: $outputPath');

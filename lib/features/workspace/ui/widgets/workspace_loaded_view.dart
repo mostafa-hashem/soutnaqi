@@ -278,6 +278,7 @@ class WorkspaceLoadedView extends StatelessWidget {
       );
     } on AppException catch (error) {
       if (!context.mounted) return;
+      if (error.messageKey == 'separationCancelled') return;
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,

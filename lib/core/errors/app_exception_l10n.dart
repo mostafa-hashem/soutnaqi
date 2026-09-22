@@ -22,6 +22,7 @@ String appExceptionMessage(AppException exception, AppLocalizations l10n) {
     'separationFailed' => l10n.separationFailed,
     'separationInsufficientCredit' => l10n.separationInsufficientCredit,
     'separationTimeout' => l10n.separationTimeout,
+    'separationCancelled' => l10n.separationCancelled,
     'onDeviceModelDownloadFailed' => l10n.onDeviceModelDownloadFailed,
     'onDeviceModelCorrupted' => l10n.onDeviceModelCorrupted,
     'onDeviceInsufficientStorage' => l10n.onDeviceInsufficientStorage,

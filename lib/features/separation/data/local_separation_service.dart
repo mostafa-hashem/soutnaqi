@@ -6,6 +6,7 @@ import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
@@ -14,13 +15,10 @@ import 'package:uuid/uuid.dart';
 SeparationService createLocalSeparationService() => LocalSeparationService();
 
 class LocalSeparationService implements SeparationService {
-  LocalSeparationService({http.Client? client})
-      : _client = client ?? http.Client();
+  LocalSeparationService();
 
   static const _uuid = Uuid();
   static const _requestTimeout = Duration(minutes: 15);
-
-  final http.Client _client;
 
   @override
   bool get isSupported => AppEnv.isLocalSeparationConfigured;
@@ -30,6 +28,7 @@ class LocalSeparationService implements SeparationService {
     required String inputAudioPath,
     required SeparationTarget target,
     SeparationProgressCallback? onProgress,
+    SeparationCancelToken? cancelToken,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -38,17 +37,21 @@ class LocalSeparationService implements SeparationService {
     appLog.d('⚡ Starting local Demucs separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.preparingAudio),
       );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.separating),
       );
       final wavBytes = await _requestSeparation(
         wavPath: preparedPath,
         target: target,
+        cancelToken: cancelToken,
       );
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.encodingOutput),
       );
@@ -61,6 +64,9 @@ class LocalSeparationService implements SeparationService {
     } on AppException {
       rethrow;
     } on SocketException catch (error) {
+      if (cancelToken?.isCancelled ?? false) {
+        throw const AppException(messageKey: 'separationCancelled');
+      }
       appLog.e('❌ Local separation server unreachable', error: error);
       throw AppException(
         messageKey: 'separationServerUnreachable',
@@ -68,6 +74,9 @@ class LocalSeparationService implements SeparationService {
         cause: error,
       );
     } catch (error) {
+      if (cancelToken?.isCancelled ?? false) {
+        throw const AppException(messageKey: 'separationCancelled');
+      }
       appLog.e('❌ Local separation failed', error: error);
       throw AppException(messageKey: 'separationFailed', cause: error);
     } finally {
@@ -82,6 +91,7 @@ class LocalSeparationService implements SeparationService {
   Future<List<int>> _requestSeparation({
     required String wavPath,
     required SeparationTarget target,
+    SeparationCancelToken? cancelToken,
   }) async {
     final baseUrl = AppEnv.separationServerUrl.replaceAll(RegExp(r'/+$'), '');
     final uri = Uri.parse('$baseUrl/separate');
@@ -97,27 +107,39 @@ class LocalSeparationService implements SeparationService {
         ),
       );
 
-    final streamedResponse =
-        await _client.send(request).timeout(_requestTimeout);
-    final body = await streamedResponse.stream.toBytes();
+    cancelToken?.throwIfCancelled();
 
-    if (streamedResponse.statusCode < 200 ||
-        streamedResponse.statusCode >= 300) {
-      throw AppException(
-        messageKey: 'separationFailed',
-        cause:
-            'Local server failed (${streamedResponse.statusCode}): ${String.fromCharCodes(body.take(240))}',
-      );
+    final requestClient = http.Client();
+    void abortOnCancel() => requestClient.close();
+    cancelToken?.addCancelListener(abortOnCancel);
+    try {
+      final streamedResponse =
+          await requestClient.send(request).timeout(_requestTimeout);
+      cancelToken?.throwIfCancelled();
+      final body = await streamedResponse.stream.toBytes();
+      cancelToken?.throwIfCancelled();
+
+      if (streamedResponse.statusCode < 200 ||
+          streamedResponse.statusCode >= 300) {
+        throw AppException(
+          messageKey: 'separationFailed',
+          cause:
+              'Local server failed (${streamedResponse.statusCode}): ${String.fromCharCodes(body.take(240))}',
+        );
+      }
+
+      if (body.isEmpty) {
+        throw const AppException(
+          messageKey: 'separationFailed',
+          cause: 'Local server returned an empty response',
+        );
+      }
+
+      return body;
+    } finally {
+      cancelToken?.removeCancelListener(abortOnCancel);
+      requestClient.close();
     }
-
-    if (body.isEmpty) {
-      throw const AppException(
-        messageKey: 'separationFailed',
-        cause: 'Local server returned an empty response',
-      );
-    }
-
-    return body;
   }
 
   String _targetField(SeparationTarget target) {

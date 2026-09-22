@@ -878,6 +878,24 @@ abstract class AppLocalizations {
   /// **'Keep the app open — this may take a few minutes.'**
   String get separationProgressKeepOpen;
 
+  /// No description provided for @separationCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get separationCancelAction;
+
+  /// No description provided for @separationCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling…'**
+  String get separationCancelling;
+
+  /// No description provided for @separationCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Separation cancelled.'**
+  String get separationCancelled;
+
   /// No description provided for @historyShareLoading.
   ///
   /// In en, this message translates to:

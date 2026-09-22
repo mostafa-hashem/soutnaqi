@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
+import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 
 /// Splits a full-length stereo mix into fixed-length, overlapping chunks
 /// sized to the model's segment length, runs each chunk through inference,
@@ -42,6 +43,7 @@ class DemucsChunker {
     required Future<List<List<Float32List>>> Function(StereoSamples chunk)
         runChunk,
     void Function(int chunkIndex, int totalChunks)? onProgress,
+    SeparationCancelToken? cancelToken,
   }) async {
     final totalLength = mix.length;
     const segment = OnDeviceModelSpec.chunkSamples;
@@ -62,6 +64,8 @@ class DemucsChunker {
     final weight = Float32List(totalLength);
 
     for (var i = 0; i < chunkCount; i++) {
+      cancelToken?.throwIfCancelled();
+
       final start = i * stride;
       final end = (start + segment > totalLength)
           ? totalLength
@@ -76,6 +80,8 @@ class DemucsChunker {
       final stems = await runChunk(
         StereoSamples(left: chunkLeft, right: chunkRight),
       );
+
+      cancelToken?.throwIfCancelled();
 
       for (var s = 0; s < sourceCount; s++) {
         final stemLeft = stems[s][0];
@@ -93,6 +99,8 @@ class DemucsChunker {
       onProgress?.call(i + 1, chunkCount);
       await Future<void>.delayed(Duration.zero);
     }
+
+    cancelToken?.throwIfCancelled();
 
     return List.generate(sourceCount, (s) {
       final left = Float32List(totalLength);

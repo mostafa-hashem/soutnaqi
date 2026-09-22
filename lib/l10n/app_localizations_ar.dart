@@ -430,6 +430,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'اترك التطبيق مفتوحاً — قد يستغرق الأمر عدة دقائق.';
 
   @override
+  String get separationCancelAction => 'إلغاء';
+
+  @override
+  String get separationCancelling => 'جاري الإلغاء…';
+
+  @override
+  String get separationCancelled => 'تم إلغاء الفصل.';
+
+  @override
   String get historyShareLoading => 'جاري تجهيز المشاركة…';
 
   @override

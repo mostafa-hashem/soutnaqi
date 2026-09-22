@@ -11,6 +11,7 @@ import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/separation_audio_io.dart';
+import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
@@ -41,6 +42,7 @@ class ReplicateSeparationService implements SeparationService {
     required String inputAudioPath,
     required SeparationTarget target,
     SeparationProgressCallback? onProgress,
+    SeparationCancelToken? cancelToken,
   }) async {
     if (!isSupported) {
       throw const AppException(messageKey: 'separationNotConfigured');
@@ -49,16 +51,23 @@ class ReplicateSeparationService implements SeparationService {
     appLog.d('⚡ Starting AI stem separation: $target');
     var preparedPath = inputAudioPath;
     try {
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.preparingAudio),
       );
       preparedPath = await SeparationAudioIo.prepareWavInput(inputAudioPath);
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.separating),
       );
       final uploadedUrl = await _uploadAudio(preparedPath);
-      final output = await _createAndAwaitPrediction(uploadedUrl);
+      cancelToken?.throwIfCancelled();
+      final output = await _createAndAwaitPrediction(
+        uploadedUrl,
+        cancelToken: cancelToken,
+      );
       appLog.d('🔍 Demucs output keys: ${output.keys.join(', ')}');
+      cancelToken?.throwIfCancelled();
       onProgress?.call(
         const SeparationProgress(stage: SeparationStage.encodingOutput),
       );
@@ -69,6 +78,7 @@ class ReplicateSeparationService implements SeparationService {
           ),
         SeparationTarget.instrumental => _resolveInstrumentalWav(output),
       };
+      cancelToken?.throwIfCancelled();
       final outputPath = await SeparationAudioIo.encodeWavToM4a(wavPath);
       appLog.d('✅ AI separation complete: $outputPath');
       return outputPath;
@@ -141,8 +151,12 @@ class ReplicateSeparationService implements SeparationService {
     );
   }
 
-  Future<Map<String, dynamic>> _createAndAwaitPrediction(String audioUrl) async {
+  Future<Map<String, dynamic>> _createAndAwaitPrediction(
+    String audioUrl, {
+    SeparationCancelToken? cancelToken,
+  }) async {
     appLog.d('🔍 Creating Demucs prediction…');
+    cancelToken?.throwIfCancelled();
     final response = await _client.post(
       Uri.parse('https://api.replicate.com/v1/predictions'),
       headers: {
@@ -192,7 +206,7 @@ class ReplicateSeparationService implements SeparationService {
       );
     }
 
-    return _waitForOutput(id);
+    return _waitForOutput(id, cancelToken: cancelToken);
   }
 
   String _truncate(String value, {int maxLength = 240}) {
@@ -202,11 +216,16 @@ class ReplicateSeparationService implements SeparationService {
     return '${value.substring(0, maxLength)}…';
   }
 
-  Future<Map<String, dynamic>> _waitForOutput(String predictionId) async {
+  Future<Map<String, dynamic>> _waitForOutput(
+    String predictionId, {
+    SeparationCancelToken? cancelToken,
+  }) async {
     appLog.d('🔍 Waiting for Demucs result…');
     for (var attempt = 0; attempt < _maxPollAttempts; attempt++) {
+      cancelToken?.throwIfCancelled();
       if (attempt > 0) {
         await Future<void>.delayed(_pollInterval);
+        cancelToken?.throwIfCancelled();
       }
 
       http.Response response;

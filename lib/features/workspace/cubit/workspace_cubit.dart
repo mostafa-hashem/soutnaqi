@@ -15,6 +15,7 @@ import 'package:soutnaqi/features/history/data/models/project_record.dart';
 import 'package:soutnaqi/features/history/data/project_history_repository.dart';
 import 'package:soutnaqi/features/media/data/media_picker_repository.dart';
 import 'package:soutnaqi/features/media/data/models/media_file.dart';
+import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 import 'package:soutnaqi/features/separation/data/separation_progress.dart';
 import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
@@ -53,6 +54,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<Duration?>? _durationSubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
+  SeparationCancelToken? _separationCancelToken;
 
   Future<void> initialize() async {
     _positionSubscription = _player.positionStream.listen((position) {
@@ -252,6 +254,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     final media = state.media!;
     _ensureSeparationSupported();
 
+    final cancelToken = SeparationCancelToken();
+    _separationCancelToken = cancelToken;
+
     emit(
       state.copyWith(
         status: WorkspaceStatus.processing,
@@ -267,12 +272,14 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         inputAudioPath: media.path!,
         target: _separationTargetFromAudioOperation(operation),
         onProgress: _reportSeparationProgress,
+        cancelToken: cancelToken,
       );
+      cancelToken.throwIfCancelled();
       await _applySeparatedAudio(
         outputPath: outputPath,
         operationKey: _operationKey(operation),
       );
-    } on AppException {
+    } on AppException catch (error) {
       emit(
         state.copyWith(
           status: WorkspaceStatus.ready,
@@ -280,6 +287,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           clearProcessingOverlay: true,
         ),
       );
+      if (error.messageKey == 'separationCancelled') {
+        appLog.d('🔍 Audio separation cancelled by user');
+      }
       rethrow;
     } catch (error) {
       emit(
@@ -290,12 +300,19 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         ),
       );
       throw AppException(messageKey: 'separationFailed', cause: error);
+    } finally {
+      if (identical(_separationCancelToken, cancelToken)) {
+        _separationCancelToken = null;
+      }
     }
   }
 
   Future<void> _processVideoSeparation(VideoOperation operation) async {
     final media = state.media!;
     _ensureSeparationSupported();
+
+    final cancelToken = SeparationCancelToken();
+    _separationCancelToken = cancelToken;
 
     emit(
       state.copyWith(
@@ -308,15 +325,19 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     );
 
     try {
+      cancelToken.throwIfCancelled();
       final audioPath = await _videoProcessingService.process(
         inputPath: media.path!,
         operation: VideoOperation.extractAudio,
       );
+      cancelToken.throwIfCancelled();
       final separatedAudioPath = await _separationService.separate(
         inputAudioPath: audioPath,
         target: _separationTargetFromVideoOperation(operation),
         onProgress: _reportSeparationProgress,
+        cancelToken: cancelToken,
       );
+      cancelToken.throwIfCancelled();
       emit(
         state.copyWith(
           processingPhase: WorkspaceProcessingPhase.finalizingVideo,
@@ -328,6 +349,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         videoPath: media.path!,
         audioPath: separatedAudioPath,
       );
+      cancelToken.throwIfCancelled();
       await _player.stop();
       emit(
         state.copyWith(
@@ -339,7 +361,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           lastOperation: _videoOperationKey(operation),
         ),
       );
-    } on AppException {
+    } on AppException catch (error) {
       emit(
         state.copyWith(
           status: WorkspaceStatus.ready,
@@ -347,6 +369,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           clearProcessingOverlay: true,
         ),
       );
+      if (error.messageKey == 'separationCancelled') {
+        appLog.d('🔍 Video separation cancelled by user');
+      }
       rethrow;
     } catch (error) {
       emit(
@@ -357,11 +382,22 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         ),
       );
       throw AppException(messageKey: 'separationFailed', cause: error);
+    } finally {
+      if (identical(_separationCancelToken, cancelToken)) {
+        _separationCancelToken = null;
+      }
     }
   }
 
+  /// Requests cancellation of the in-flight separation. Takes effect after the
+  /// current chunk / network step finishes.
+  void cancelSeparation() {
+    if (!state.canCancelSeparation) return;
+    _separationCancelToken?.cancel();
+  }
+
   void _reportSeparationProgress(SeparationProgress progress) {
-    if (isClosed) return;
+    if (isClosed || (_separationCancelToken?.isCancelled ?? false)) return;
 
     final phase = switch (progress.stage) {
       SeparationStage.preparingAudio => WorkspaceProcessingPhase.preparingAudio,

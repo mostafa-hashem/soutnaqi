@@ -437,6 +437,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep the app open — this may take a few minutes.';
 
   @override
+  String get separationCancelAction => 'Cancel';
+
+  @override
+  String get separationCancelling => 'Cancelling…';
+
+  @override
+  String get separationCancelled => 'Separation cancelled.';
+
+  @override
   String get historyShareLoading => 'Preparing share…';
 
   @override
