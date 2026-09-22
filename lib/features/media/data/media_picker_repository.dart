@@ -1,12 +1,17 @@
-import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/media/data/models/media_file.dart';
 
 class MediaPickerRepository {
+  MediaPickerRepository({ImagePicker? imagePicker})
+      : _imagePicker = imagePicker ?? ImagePicker();
+
+  final ImagePicker _imagePicker;
+
   static const _audioExtensions = [
     'mp3',
     'wav',
@@ -34,12 +39,57 @@ class MediaPickerRepository {
         expectedKind: MediaKind.audio,
       );
 
-  /// Opens the system file picker filtered to common video formats.
-  Future<MediaFile?> pickVideo() => _pick(
-        type: FileType.custom,
-        allowedExtensions: _videoExtensions,
-        expectedKind: MediaKind.video,
+  /// Opens the system gallery/photos picker to select a video.
+  Future<MediaFile?> pickVideo() async {
+    appLog.d('🔍 Opening video gallery picker…');
+    try {
+      final file = await _imagePicker.pickVideo(
+        source: ImageSource.gallery,
       );
+
+      if (file == null) {
+        appLog.d('⚡ Video picker cancelled');
+        return null;
+      }
+
+      if (file.name.isEmpty) {
+        throw const AppException(messageKey: 'mediaPickFailed');
+      }
+
+      final bytes = kIsWeb ? await file.readAsBytes() : null;
+      final path = kIsWeb ? null : file.path;
+
+      if (!kIsWeb && (path == null || path.isEmpty)) {
+        throw const AppException(messageKey: 'mediaPickFailed');
+      }
+
+      if (kIsWeb && (bytes == null || bytes.isEmpty)) {
+        throw const AppException(messageKey: 'mediaPickFailed');
+      }
+
+      final sizeBytes = bytes?.length ?? await file.length();
+      final mimeType = lookupMimeType(file.name) ??
+          (path != null ? lookupMimeType(path) : null) ??
+          _fallbackMime(MediaKind.video);
+
+      final media = MediaFile(
+        name: file.name,
+        kind: MediaKind.video,
+        mimeType: mimeType,
+        sizeBytes: sizeBytes,
+        path: path,
+        bytes: bytes,
+      );
+
+      appLog.d('✅ Video picked from gallery: ${media.name}');
+      return media;
+    } on AppException {
+      rethrow;
+    } catch (error) {
+      appLog.e('❌ Video pick failed', error: error);
+      throw AppException(messageKey: 'mediaPickFailed', cause: error);
+    }
+  }
 
   Future<MediaFile> parseDroppedFile(XFile file) async {
     appLog.d('🔍 Parsing dropped file…');

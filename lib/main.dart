@@ -8,9 +8,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarContrastEnforced: false,
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarContrastEnforced: false),
   );
 
   appLog.d('🔍 Bootstrapping SoutNaqi…');
