@@ -1,164 +1,138 @@
-# SoutNaqi (صوت نقي)
+<p align="center">
+  <img src="assets/brand/app-icon.png" alt="SoutNaqi Logo" width="120" style="border-radius: 24px;" />
+</p>
 
-A bilingual (Arabic / English) Flutter app for everyday audio and video work on your phone or desktop — trim clips, convert formats, preview waveforms, split vocals from instrumentals, and keep a local project history.
+<h1 align="center">SoutNaqi (صوت نقي)</h1>
 
-Processing runs on-device where possible (FFmpeg on Android, iOS, and desktop). **Vocal separation runs fully on the phone** via an ONNX Demucs model — no PC server required by default.
+<p align="center">
+  <strong>An open-source on-device audio & video processor with AI vocal separation for Android.</strong>
+  <br />
+  <em>Trim, convert formats, extract audio, and separate vocals/music completely offline on your phone.</em>
+</p>
 
-## What it does
+<p align="center">
+  <a href="https://github.com/mostafa-hashem/soutnaqi/releases/latest">
+    <img src="https://img.shields.io/github/v/release/mostafa-hashem/soutnaqi?color=2563EB&label=Download%20APK&logo=android" alt="Download Release" />
+  </a>
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android" alt="Android" />
+  <img src="https://img.shields.io/badge/AI_Engine-ONNX%20Demucs-FF6F00" alt="ONNX Demucs" />
+  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
+</p>
 
-| Area | Details |
-|------|---------|
-| **Workspace** | Pick audio or video, trim on a timeline, play back, export |
-| **Audio** | Transcode between common formats (MP3, AAC, WAV, FLAC, OGG, …) |
-| **Video** | Extract audio, mute audio, compress |
-| **Separation** | Pull out vocals or instrumental stems on-device (after a one-time model download) |
-| **Waveform** | Visual preview of the loaded audio |
-| **History** | Reopen recent projects stored on the device |
-| **Settings** | Light / dark theme, language toggle, on-device model download |
+---
 
-Web builds are supported for browsing the UI, but heavy processing and separation are disabled there — use a mobile or desktop target for real edits.
+<p align="center">
+  <a href="#-download-apk"><b>📥 Download</b></a> •
+  <a href="#-key-features"><b>✨ Features</b></a> •
+  <a href="#-how-to-use"><b>🚀 How to Use</b></a> •
+  <a href="#-screenshots"><b>📸 Screenshots</b></a> •
+  <a href="#-developer-guide"><b>💻 Developer Guide</b></a>
+</p>
 
-## Screenshots
+---
 
-_Add screenshots here before publishing._
+## 📥 Download APK
 
-## Requirements
+You can download the latest installable Android APK directly from GitHub Releases:
 
-- Flutter SDK **3.8+** ([install guide](https://docs.flutter.dev/get-started/install))
-- A device or emulator (Android, iOS, Windows, macOS, or Linux)
-- **FFmpeg** is bundled via `ffmpeg_kit_flutter` on IO targets — no separate install for basic editing
-- For **on-device vocal separation**: ~160 MB free storage for the one-time model download (Wi‑Fi recommended)
+[![Download APK](https://img.shields.io/badge/Download_APK-Direct_Download-2563EB?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mostafa-hashem/soutnaqi/releases/latest)
 
-## Quick start — run the app
+> 💡 **Quick Note:** After installing and launching the app, head over to **Settings → On-device model** and download the Demucs AI model (~160 MB) once. After this one-time download, vocal separation runs completely offline without any internet connection!
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| 🎙️ **AI Vocal Separation** | Extract vocals or instrumental stems (Acappella / Karaoke) using Demucs AI running directly on your mobile device. |
+| ✂️ **Audio & Video Trimmer** | High-precision timeline trimming with real-time waveform visual scrubbing. |
+| 🔄 **Format Conversion** | Rapidly convert audio tracks between popular formats: **MP3, AAC, WAV, FLAC, OGG, M4A**. |
+| 🎬 **Video Tools** | One-tap audio extraction from video clips, mute audio, and compress media. |
+| 📊 **Interactive Waveform** | Smooth visual audio representation for intuitive seeking and playback. |
+| 📁 **Local Project History** | Automatically save and quickly resume your recent edits and projects on-device. |
+| 🌐 **Bilingual & Modern UI** | Seamless Arabic & English support with polished Dark and Light themes. |
+
+---
+
+## 🚀 How to Use
+
+1. **Import Media:** Tap the import button to choose any audio or video file from your phone.
+2. **Choose Operation:**
+   - **Vocal Separation:** Select **Vocals only** or **Music only**.
+   - **Trim & Edit:** Adjust the start and end handles on the timeline.
+   - **Convert Format:** Choose your desired output format and audio bitrate.
+3. **Process & Export:** Preview the processed result instantly and save it to your storage or share it with friends.
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <i>Screenshots coming soon</i>
+</p>
+
+---
+
+## 💻 Developer Guide
+
+Want to build or contribute to SoutNaqi locally from source?
+
+### Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (version 3.8 or later).
+- Android Studio or VS Code with an Android device or emulator.
+
+### Getting Started
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/mostafa-hashem/soutnaqi.git
+
+# 2. Navigate to the project directory
 cd soutnaqi
+
+# 3. Install dependencies
 flutter pub get
+
+# 4. Run the app
 flutter run
 ```
 
-No extra config is needed for the default on-device separation path.
+### Build Release APK
 
-### Optional: dart defines
+To create optimized and lightweight release APKs (reduces size from ~170MB to ~60MB):
 
-Advanced backends are opt-in via `dart_defines.json` (gitignored). Copy the example if you need them:
+```bash
+flutter build apk --split-per-abi
+```
+
+The output APK for modern devices (64-bit) will be at:
+`build/app/outputs/flutter-apk/app-arm64-v8a-release.apk` (~60 MB).
+
+### Optional: Remote Demucs Server
+By default, the app runs Demucs on-device using ONNX Runtime. If you prefer running Demucs on an external PC server or via Replicate, configure `dart_defines.json`:
 
 ```bash
 cp dart_defines.example.json dart_defines.json
 ```
 
-Leave both keys empty for on-device separation only:
+---
 
-```json
-{
-  "SEPARATION_SERVER_URL": "",
-  "REPLICATE_API_TOKEN": ""
-}
-```
+## 🛠️ Tech Stack
 
-If you use VS Code / Cursor, `.vscode/launch.json` passes `--dart-define-from-file=dart_defines.json` when that file exists.
+- **Framework:** [Flutter](https://flutter.dev) (Dart 3)
+- **State Management:** `flutter_bloc` (Cubit Pattern)
+- **Audio & Video Processing:** `ffmpeg_kit_flutter_new_min`, `just_audio`, `video_player`
+- **AI Neural Engine:** `onnxruntime_v2` (HT-Demucs Model)
+- **Typography & Icons:** Cairo & Inter Fonts, HugeIcons
 
-Run from the terminal:
+---
 
-```bash
-flutter run --dart-define-from-file=dart_defines.json
-```
+## 📄 License
 
-## Vocal separation — on-device (default)
+This project is open-source and licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-Separation uses an ONNX export of HT-Demucs FT directly on the phone. After the model is cached, every run is fully offline.
+## 👤 Author
 
-### Before your first separation
-
-1. Open the app on **Android or iOS** (or desktop).
-2. Go to **Settings → On-device model**.
-3. Tap **Download** and wait for the ~160 MB model to finish.
-4. Return to **Workspace**, import media, then use **Vocals only** or **Music only**.
-
-The first separation after each app launch may spend ~30 seconds preparing the AI engine (NNAPI on Android). Keep the app open — a progress overlay shows each stage.
-
-### Optional: local Demucs server on your PC
-
-If you prefer running Demucs on a computer instead, set `SEPARATION_SERVER_URL` in `dart_defines.json`. The app prefers the local server when that key is set.
-
-See [`tools/local_demucs_server/README.md`](tools/local_demucs_server/README.md) for setup.
-
-### Optional: Replicate
-
-Set `REPLICATE_API_TOKEN` in `dart_defines.json` for cloud separation. Local server URL takes priority when both are set.
-
-## Project layout
-
-Feature-first structure under `lib/`. Each feature owns its UI, state, and data; shared pieces live in `core/`.
-
-```
-lib/
-├── main.dart                 # entry point
-├── app.dart                  # MaterialApp, theme, localization
-├── core/
-│   ├── config/               # compile-time env (dart-define)
-│   ├── constants/
-│   ├── errors/
-│   ├── layout/
-│   ├── logging/
-│   ├── platform/
-│   ├── storage/
-│   ├── theme/
-│   ├── toast/
-│   └── widgets/              # reused across features only
-├── features/
-│   ├── shell/                # navigation shell (sidebar / bottom nav)
-│   ├── splash/
-│   ├── workspace/            # main editor (cubit + ui)
-│   ├── history/
-│   ├── settings/
-│   ├── audio_processing/     # FFmpeg audio ops (data layer)
-│   ├── video_processing/
-│   ├── waveform/
-│   ├── separation/           # on-device ONNX + optional server/cloud
-│   ├── export/
-│   └── media/                # file picking, video player factories
-└── l10n/                     # ARB files + generated localizations
-```
-
-**Conventions**
-
-- State: `flutter_bloc` cubits with `Equatable` states
-- Imports: always `package:soutnaqi/...` (no relative paths between features)
-- Platform split: `*_platform.dart` exports IO or stub implementations via conditional imports
-- UI strings: `AppLocalizations` from ARB files — no hard-coded user-facing text
-
-Processing services (`audio_processing`, `video_processing`, etc.) are data-only modules injected into `WorkspaceCubit` at bootstrap time.
-
-## Stack
-
-- Flutter / Dart 3.8
-- `flutter_bloc` + `equatable`
-- `ffmpeg_kit_flutter_new_min` for on-device transcoding
-- `onnxruntime_v2` for on-device Demucs separation
-- `just_audio`, `video_player`
-- `hugeicons`, Cairo + Inter fonts
-- Optional local server: FastAPI + Demucs + uvicorn
-
-## Localization
-
-Strings live in `lib/l10n/app_en.arb` and `app_ar.arb`. After editing ARBs:
-
-```bash
-flutter gen-l10n
-```
-
-## Tests
-
-```bash
-flutter test
-```
-
-## License
-
-_Not specified yet — add a LICENSE file before making the repo public if you want others to reuse the code._
-
-## Author
-
-[mostafa-hashem](https://github.com/mostafa-hashem)
+Developed with ❤️ by **[Mostafa Hashem](https://github.com/mostafa-hashem)**.
