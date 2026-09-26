@@ -300,17 +300,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dropLoading => 'جاري استيراد الملف…';
 
   @override
-  String get processIsolateVocals => 'صوت فقط';
+  String get processIsolateVocals => 'حذف الموسيقى';
 
   @override
   String get processIsolateMusic => 'موسيقى فقط';
 
   @override
   String get processIsolateVocalsLoading =>
-      'جاري استخراج الصوت بالذكاء الاصطناعي… قد يستغرق دقائق.';
+      'جاري حذف الموسيقى بالذكاء الاصطناعي… قد يستغرق دقائق.';
 
   @override
-  String get processIsolateVocalsSuccess => 'تم استخراج الصوت بنجاح.';
+  String get processIsolateVocalsSuccess => 'تم حذف الموسيقى بنجاح.';
 
   @override
   String get processIsolateMusicLoading =>
@@ -485,8 +485,92 @@ class AppLocalizationsAr extends AppLocalizations {
   String get operationCompressVideo => 'ضغط الفيدio';
 
   @override
-  String get operationIsolateVocals => 'صوت فقط';
+  String get operationIsolateVocals => 'حذف الموسيقى';
 
   @override
   String get operationIsolateMusic => 'موسيقى فقط';
+
+  @override
+  String get aboutSoutNaqiTitle => 'عن صوت نقي';
+
+  @override
+  String get aboutAppDescription =>
+      'التطبيق المتخصص في إزالة الموسيقى وتصفية الصوت البشري بأحدث تقنيات الذكاء الاصطناعي.';
+
+  @override
+  String get aboutVisionTitle => 'الرؤية والهدف';
+
+  @override
+  String get aboutVisionBody =>
+      'صُمم «صوت نقي» ليكون تطبيقاً مخصصاً واحترافياً لحذف الموسيقى والمؤثرات الصوتية من مقاطع الصوت والفيديو، ليمنحك صوتاً بشرياً صافياً ومناسباً للبودكاست والمحتوى الهادف ودروس العلم، مع الحفاظ على أعلى جودة ممكنة للصوت الأصلي.';
+
+  @override
+  String get aboutDisclaimerTitle => 'تنويه هام حول دقة عزل الموسيقى';
+
+  @override
+  String get aboutDisclaimerP1 =>
+      'يعتمد التطبيق على خوارزميات ذكاء اصطناعي متطورة لفصل الترددات الصوتية. ورغم الكفاءة العالية، فإن طبيعة التسجيلات الصوتية تختلف اختلافاً كبيراً، خصوصاً مع وجود تداخل معقد بين الآلات الموسيقية ونبرات الصوت أو مؤثرات الصدى العميق؛ ولذلك قد لا تتم إزالة الموسيقى بنسبة 100% في بعض المقاطع المعقدة، وقد تلاحظ أحياناً أثراً خفيفاً جداً متبقياً في الخلفية.';
+
+  @override
+  String get aboutDisclaimerP2 =>
+      'نحن نعمل باستمرار وبشكل متواصل على تطوير وتحسين نماذج الذكاء الاصطناعي وخوارزميات المعالجة لتقديم أعلى درجات النقاء الصوتي مع كل تحديث جديد.';
+
+  @override
+  String get aboutFeaturesTitle => 'مميزات التطبيق';
+
+  @override
+  String get aboutFeatureDedicatedTitle => 'تخصص كامل في حذف الموسيقى';
+
+  @override
+  String get aboutFeatureDedicatedDesc =>
+      'تم تخصيص التطبيق بالكامل للتركيز على مهمة واحدة باحترافية: التخلص من الموسيقى واستخراج الصوت النقي فقط.';
+
+  @override
+  String get aboutFeaturePrivacyTitle => 'خصوصية تامة ومعالجة على الجهاز';
+
+  @override
+  String get aboutFeaturePrivacyDesc =>
+      'دعم فصل الصوت محلياً على هاتفك دون الحاجة لرفع ملفاتك إلى أي خوادم أو التضحية بخصوصيتك.';
+
+  @override
+  String get aboutFeatureMediaTitle => 'دعم ملفات الصوت والفيديو';
+
+  @override
+  String get aboutFeatureMediaDesc =>
+      'معالجة المقاطع الصوتية ومقاطع الفيديو مباشرة مع الحفاظ على تزامن الصوت وجودة العرض.';
+
+  @override
+  String get aboutFeatureToolsTitle => 'أدوات متكاملة لتحسين الصوت';
+
+  @override
+  String get aboutFeatureToolsDesc =>
+      'تنقية التشويش والضوضاء الخلفية وتوحيد مستوى الصوت لضمان تجربة استماع مريحة ونقية.';
+
+  @override
+  String get aboutTipsTitle => 'نصائح للحصول على أفضل النتائج';
+
+  @override
+  String get aboutTip1 =>
+      'اختر مقاطع يكون فيها صوت المتحدث واضحاً ومسموعاً بوضوح مقارنة بصوت الموسيقى.';
+
+  @override
+  String get aboutTip2 =>
+      'الملفات ذات الجودة العالية (High Bitrate) تعطي دقة فصل أعلى ونقاءً أفضل بكثير.';
+
+  @override
+  String get aboutTip3 =>
+      'في حال وجود هواء أو وشيش في التسجيل، استخدم أداة «تقليل الضوضاء» لتحسين صفاء الصوت الناتج.';
+
+  @override
+  String get aboutContinuousDevelopmentTitle => 'تطوير مستمر ومستدام';
+
+  @override
+  String get aboutContinuousDevelopmentDesc =>
+      'ملاحظاتكم واقتراحاتكم محل اهتمامنا الدائم وتساعدنا في تدريب النماذج القادمة.';
+
+  @override
+  String get aboutFooter => 'صوت نقي — صُنع بشغف لخدمة المحتوى الهادف';
+
+  @override
+  String get aboutViewDetails => 'تفاصيل التطبيق ودقة العزل';
 }

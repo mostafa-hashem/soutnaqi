@@ -307,17 +307,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropLoading => 'Importing dropped file…';
 
   @override
-  String get processIsolateVocals => 'Vocals only';
+  String get processIsolateVocals => 'Remove music';
 
   @override
   String get processIsolateMusic => 'Music only';
 
   @override
   String get processIsolateVocalsLoading =>
-      'Extracting vocals with AI… this may take a few minutes.';
+      'Removing music with AI… this may take a few minutes.';
 
   @override
-  String get processIsolateVocalsSuccess => 'Vocals extracted successfully.';
+  String get processIsolateVocalsSuccess => 'Music removed successfully.';
 
   @override
   String get processIsolateMusicLoading =>
@@ -490,8 +490,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operationCompressVideo => 'Compress video';
 
   @override
-  String get operationIsolateVocals => 'Vocals only';
+  String get operationIsolateVocals => 'Remove music';
 
   @override
   String get operationIsolateMusic => 'Music only';
+
+  @override
+  String get aboutSoutNaqiTitle => 'About Sout Naqi';
+
+  @override
+  String get aboutAppDescription =>
+      'Professional application dedicated to removing music and isolating pure human speech using AI.';
+
+  @override
+  String get aboutVisionTitle => 'Vision & Purpose';
+
+  @override
+  String get aboutVisionBody =>
+      'Sout Naqi is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.';
+
+  @override
+  String get aboutDisclaimerTitle => 'Important Notice on Separation Accuracy';
+
+  @override
+  String get aboutDisclaimerP1 =>
+      'Sout Naqi leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.';
+
+  @override
+  String get aboutDisclaimerP2 =>
+      'Our team is continuously developing and fine-tuning our AI models and audio processing algorithms to deliver cleaner separation and even higher vocal purity with every update.';
+
+  @override
+  String get aboutFeaturesTitle => 'Key Capabilities';
+
+  @override
+  String get aboutFeatureDedicatedTitle => 'Dedicated to Music Removal';
+
+  @override
+  String get aboutFeatureDedicatedDesc =>
+      'Tailored exclusively for one mission: eliminating musical accompaniment to leave only pure speech.';
+
+  @override
+  String get aboutFeaturePrivacyTitle => 'On-Device Privacy';
+
+  @override
+  String get aboutFeaturePrivacyDesc =>
+      'Support for local processing directly on your device without sending sensitive media to external servers.';
+
+  @override
+  String get aboutFeatureMediaTitle => 'Audio & Video Support';
+
+  @override
+  String get aboutFeatureMediaDesc =>
+      'Process audio tracks and video files seamlessly with synchronized output and high fidelity.';
+
+  @override
+  String get aboutFeatureToolsTitle => 'Audio Enhancement Suite';
+
+  @override
+  String get aboutFeatureToolsDesc =>
+      'Built-in background noise reduction and loudness normalization for a polished listening experience.';
+
+  @override
+  String get aboutTipsTitle => 'Tips for Best Results';
+
+  @override
+  String get aboutTip1 =>
+      'Choose recordings where speech is clear and distinct from the musical accompaniment.';
+
+  @override
+  String get aboutTip2 =>
+      'High-bitrate, uncompressed source files produce substantially cleaner vocal separation.';
+
+  @override
+  String get aboutTip3 =>
+      'If ambient hiss or air noise is present, apply Noise Reduction for enhanced clarity.';
+
+  @override
+  String get aboutContinuousDevelopmentTitle => 'Continuous Development';
+
+  @override
+  String get aboutContinuousDevelopmentDesc =>
+      'Your feedback helps us refine future models and optimize separation algorithms.';
+
+  @override
+  String get aboutFooter =>
+      'Sout Naqi — Crafted for clean and purposeful listening';
+
+  @override
+  String get aboutViewDetails => 'App details & isolation accuracy';
 }

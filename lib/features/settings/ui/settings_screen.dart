@@ -8,6 +8,7 @@ import 'package:soutnaqi/core/theme/app_radii.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/widgets/soutnaqi_logo.dart';
+import 'package:soutnaqi/features/about/ui/about_screen.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_language_selector.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_on_device_model_row.dart';
@@ -212,44 +213,66 @@ class _AboutRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      child: Row(
-        children: [
-          const SoutNaqiLogo(size: 44),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.appName,
-                  style: font16W600(
-                    settingsCubit: settingsCubit,
-                    color: context.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.appTagline,
-                  style: font12W400(
-                    settingsCubit: settingsCubit,
-                    color: context.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.appVersion(kAppVersion),
-                  style: font12W400(
-                    settingsCubit: settingsCubit,
-                    color: context.textMuted,
-                  ),
-                ),
-              ],
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(AppRadii.lg),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const AboutScreen(),
             ),
+          );
+        },
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const SoutNaqiLogo(size: 44),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.appName,
+                      style: font16W600(
+                        settingsCubit: settingsCubit,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.aboutViewDetails,
+                      style: font12W500(
+                        settingsCubit: settingsCubit,
+                        color: context.accentPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.appVersion(kAppVersion),
+                      style: font12W400(
+                        settingsCubit: settingsCubit,
+                        color: context.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              HugeIcon(
+                icon: isRtl
+                    ? HugeIconsStrokeRounded.arrowLeft01
+                    : HugeIconsStrokeRounded.arrowRight01,
+                color: context.textSecondary,
+                size: 20,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:hugeicons/styles/stroke_rounded.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/widgets/soutnaqi_logo.dart';
+import 'package:soutnaqi/features/about/ui/about_screen.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/shell/cubit/shell_tab.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
@@ -72,6 +73,20 @@ class ShellSidebar extends StatelessWidget {
                   icon: HugeIconsStrokeRounded.settings01,
                   selected: selectedTab == ShellTab.settings,
                   onTap: () => onTabSelected(ShellTab.settings),
+                ),
+                const Spacer(),
+                _SidebarItem(
+                  settingsCubit: settingsCubit,
+                  label: l10n.aboutSoutNaqiTitle,
+                  icon: HugeIconsStrokeRounded.informationCircle,
+                  selected: false,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AboutScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

@@ -18,7 +18,6 @@ class WorkspaceProcessingTools extends StatelessWidget {
     required this.onNormalize,
     required this.onNoiseReduction,
     required this.onIsolateVocals,
-    required this.onIsolateMusic,
   });
 
   final SettingsCubit settingsCubit;
@@ -26,7 +25,6 @@ class WorkspaceProcessingTools extends StatelessWidget {
   final VoidCallback onNormalize;
   final VoidCallback onNoiseReduction;
   final VoidCallback onIsolateVocals;
-  final VoidCallback onIsolateMusic;
 
   @override
   Widget build(BuildContext context) {
@@ -79,14 +77,6 @@ class WorkspaceProcessingTools extends StatelessWidget {
                   isLoading: state.status == WorkspaceStatus.processing &&
                       state.activeOperation == AudioOperation.isolateVocals,
                   onPressed: isBusy ? null : onIsolateVocals,
-                ),
-                _ToolButton(
-                  settingsCubit: settingsCubit,
-                  label: l10n.processIsolateMusic,
-                  icon: HugeIconsStrokeRounded.musicNote01,
-                  isLoading: state.status == WorkspaceStatus.processing &&
-                      state.activeOperation == AudioOperation.isolateMusic,
-                  onPressed: isBusy ? null : onIsolateMusic,
                 ),
               ],
             ),

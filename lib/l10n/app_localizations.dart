@@ -671,7 +671,7 @@ abstract class AppLocalizations {
   /// No description provided for @processIsolateVocals.
   ///
   /// In en, this message translates to:
-  /// **'Vocals only'**
+  /// **'Remove music'**
   String get processIsolateVocals;
 
   /// No description provided for @processIsolateMusic.
@@ -683,13 +683,13 @@ abstract class AppLocalizations {
   /// No description provided for @processIsolateVocalsLoading.
   ///
   /// In en, this message translates to:
-  /// **'Extracting vocals with AI… this may take a few minutes.'**
+  /// **'Removing music with AI… this may take a few minutes.'**
   String get processIsolateVocalsLoading;
 
   /// No description provided for @processIsolateVocalsSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Vocals extracted successfully.'**
+  /// **'Music removed successfully.'**
   String get processIsolateVocalsSuccess;
 
   /// No description provided for @processIsolateMusicLoading.
@@ -965,7 +965,7 @@ abstract class AppLocalizations {
   /// No description provided for @operationIsolateVocals.
   ///
   /// In en, this message translates to:
-  /// **'Vocals only'**
+  /// **'Remove music'**
   String get operationIsolateVocals;
 
   /// No description provided for @operationIsolateMusic.
@@ -973,6 +973,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Music only'**
   String get operationIsolateMusic;
+
+  /// No description provided for @aboutSoutNaqiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About Sout Naqi'**
+  String get aboutSoutNaqiTitle;
+
+  /// No description provided for @aboutAppDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional application dedicated to removing music and isolating pure human speech using AI.'**
+  String get aboutAppDescription;
+
+  /// No description provided for @aboutVisionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision & Purpose'**
+  String get aboutVisionTitle;
+
+  /// No description provided for @aboutVisionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sout Naqi is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.'**
+  String get aboutVisionBody;
+
+  /// No description provided for @aboutDisclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notice on Separation Accuracy'**
+  String get aboutDisclaimerTitle;
+
+  /// No description provided for @aboutDisclaimerP1.
+  ///
+  /// In en, this message translates to:
+  /// **'Sout Naqi leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.'**
+  String get aboutDisclaimerP1;
+
+  /// No description provided for @aboutDisclaimerP2.
+  ///
+  /// In en, this message translates to:
+  /// **'Our team is continuously developing and fine-tuning our AI models and audio processing algorithms to deliver cleaner separation and even higher vocal purity with every update.'**
+  String get aboutDisclaimerP2;
+
+  /// No description provided for @aboutFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Capabilities'**
+  String get aboutFeaturesTitle;
+
+  /// No description provided for @aboutFeatureDedicatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated to Music Removal'**
+  String get aboutFeatureDedicatedTitle;
+
+  /// No description provided for @aboutFeatureDedicatedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tailored exclusively for one mission: eliminating musical accompaniment to leave only pure speech.'**
+  String get aboutFeatureDedicatedDesc;
+
+  /// No description provided for @aboutFeaturePrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Device Privacy'**
+  String get aboutFeaturePrivacyTitle;
+
+  /// No description provided for @aboutFeaturePrivacyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Support for local processing directly on your device without sending sensitive media to external servers.'**
+  String get aboutFeaturePrivacyDesc;
+
+  /// No description provided for @aboutFeatureMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio & Video Support'**
+  String get aboutFeatureMediaTitle;
+
+  /// No description provided for @aboutFeatureMediaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Process audio tracks and video files seamlessly with synchronized output and high fidelity.'**
+  String get aboutFeatureMediaDesc;
+
+  /// No description provided for @aboutFeatureToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Enhancement Suite'**
+  String get aboutFeatureToolsTitle;
+
+  /// No description provided for @aboutFeatureToolsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in background noise reduction and loudness normalization for a polished listening experience.'**
+  String get aboutFeatureToolsDesc;
+
+  /// No description provided for @aboutTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for Best Results'**
+  String get aboutTipsTitle;
+
+  /// No description provided for @aboutTip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose recordings where speech is clear and distinct from the musical accompaniment.'**
+  String get aboutTip1;
+
+  /// No description provided for @aboutTip2.
+  ///
+  /// In en, this message translates to:
+  /// **'High-bitrate, uncompressed source files produce substantially cleaner vocal separation.'**
+  String get aboutTip2;
+
+  /// No description provided for @aboutTip3.
+  ///
+  /// In en, this message translates to:
+  /// **'If ambient hiss or air noise is present, apply Noise Reduction for enhanced clarity.'**
+  String get aboutTip3;
+
+  /// No description provided for @aboutContinuousDevelopmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous Development'**
+  String get aboutContinuousDevelopmentTitle;
+
+  /// No description provided for @aboutContinuousDevelopmentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your feedback helps us refine future models and optimize separation algorithms.'**
+  String get aboutContinuousDevelopmentDesc;
+
+  /// No description provided for @aboutFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Sout Naqi — Crafted for clean and purposeful listening'**
+  String get aboutFooter;
+
+  /// No description provided for @aboutViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'App details & isolation accuracy'**
+  String get aboutViewDetails;
 }
 
 class _AppLocalizationsDelegate

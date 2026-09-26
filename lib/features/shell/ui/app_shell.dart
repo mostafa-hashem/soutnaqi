@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:hugeicons/styles/stroke_rounded.dart';
 import 'package:soutnaqi/core/constants/layout_constants.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
+import 'package:soutnaqi/features/about/ui/about_screen.dart';
 import 'package:soutnaqi/features/history/cubit/history_cubit.dart';
 import 'package:soutnaqi/features/history/ui/history_screen.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
@@ -73,6 +76,23 @@ class AppShell extends StatelessWidget {
                       color: context.textPrimary,
                     ),
                   ),
+                  actions: [
+                    IconButton(
+                      tooltip: l10n.aboutSoutNaqiTitle,
+                      icon: HugeIcon(
+                        icon: HugeIconsStrokeRounded.informationCircle,
+                        color: context.textSecondary,
+                        size: 22,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AboutScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 body: body,
                 bottomNavigationBar: ShellBottomNav(

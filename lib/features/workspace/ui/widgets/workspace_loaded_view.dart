@@ -129,12 +129,6 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processAudio(AudioOperation.isolateVocals),
                       ),
-                      onIsolateMusic: () => _runSeparation(
-                        context,
-                        success: l10n.processIsolateMusicSuccess,
-                        action: () =>
-                            cubit.processAudio(AudioOperation.isolateMusic),
-                      ),
                     ),
                   ] else
                     WorkspaceVideoTools(
@@ -159,12 +153,6 @@ class WorkspaceLoadedView extends StatelessWidget {
                         success: l10n.processIsolateVocalsSuccess,
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateVocals),
-                      ),
-                      onIsolateMusic: () => _runSeparation(
-                        context,
-                        success: l10n.processIsolateMusicSuccess,
-                        action: () =>
-                            cubit.processVideo(VideoOperation.isolateMusic),
                       ),
                     ),
                   const SizedBox(height: 16),
