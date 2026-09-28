@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sout Naqi | صوت نقي</title>
-    <meta name="description" content="تطبيق صوت نقي - قريباً على متجر جوجل بلاي وآبل ستور. التجربة الصوتية الأفضل.">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="description" content="تطبيق صوت نقي - إزالة الموسيقى من الصوت والفيديو بضغطة زر.">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,49 +19,53 @@
                 <span class="logo-icon">🎧</span>
                 <span class="logo-text">صوت نقي</span>
             </div>
-            <a href="#features" class="nav-link">المميزات</a>
+            <div class="nav-actions">
+                <a href="#features" class="nav-link" data-i18n="nav_features">المميزات</a>
+                <button id="langToggle" class="lang-btn">English</button>
+            </div>
         </div>
     </nav>
 
     <header class="hero">
         <div class="container hero-content">
             <div class="hero-text-area hidden">
-                <h1 class="title">
-                    استمتع بتجربة <span class="gradient-text">صوتية استثنائية</span>
+                <h1 class="title" data-i18n="hero_title">
+                    إزالة <span class="gradient-text">الموسيقى</span> بضغطة زر
                 </h1>
-                <p class="subtitle">
-                    تطبيق "صوت نقي" يقدم لك أفضل جودة للصوتيات مع واجهة مستخدم عصرية وسهلة. انضم إلينا قريباً لتجربة لا مثيل لها.
+                <p class="subtitle" data-i18n="hero_subtitle">
+                    تطبيق "صوت نقي" يقوم بعزل وإزالة الموسيقى من ملفات الصوت والفيديو بكل سهولة وسرعة، مع الحفاظ على جودة الصوت البشري النقية.
                 </p>
                 
                 <div class="store-buttons">
                     <!-- Google Play Button -->
                     <div class="store-btn-wrapper">
-                        <a href="#" class="store-btn google-play coming-soon-btn">
+                        <!-- Added dir="ltr" to fix alignment issues in RTL layout -->
+                        <a href="#" class="store-btn google-play coming-soon-btn" dir="ltr">
                             <div class="btn-content">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Play_Arrow_logo.svg" alt="Google Play" class="store-icon">
                                 <div class="btn-text">
-                                    <span class="small-text">Get it on</span>
+                                    <span class="small-text">GET IT ON</span>
                                     <span class="large-text">Google Play</span>
                                 </div>
                             </div>
                             <div class="coming-soon-overlay">
-                                <span>قريباً - Coming Soon</span>
+                                <span data-i18n="btn_soon">قريباً - Coming Soon</span>
                             </div>
                         </a>
                     </div>
 
                     <!-- App Store Button -->
                     <div class="store-btn-wrapper">
-                        <a href="#" class="store-btn app-store coming-soon-btn">
+                        <a href="#" class="store-btn app-store coming-soon-btn" dir="ltr">
                             <div class="btn-content">
-                                <svg class="store-icon" viewBox="0 0 384 512" width="24" height="24" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                                <svg class="store-icon" viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
                                 <div class="btn-text">
                                     <span class="small-text">Download on the</span>
                                     <span class="large-text">App Store</span>
                                 </div>
                             </div>
                             <div class="coming-soon-overlay">
-                                <span>قريباً - Coming Soon</span>
+                                <span data-i18n="btn_soon">قريباً - Coming Soon</span>
                             </div>
                         </a>
                     </div>
@@ -86,14 +90,14 @@
                                 <div class="bar" style="height: 90%"></div>
                                 <div class="bar" style="height: 50%"></div>
                             </div>
-                            <h3 class="mockup-title">جاري التشغيل...</h3>
-                            <p class="mockup-subtitle">مقطع صوتي عالي الدقة</p>
+                            <h3 class="mockup-title" data-i18n="mockup_title">جاري العزل...</h3>
+                            <p class="mockup-subtitle" data-i18n="mockup_subtitle">يتم الآن إزالة الموسيقى</p>
                         </div>
                     </div>
                     <!-- Floating elements -->
                     <div class="float-el el-1">🎵</div>
                     <div class="float-el el-2">✨</div>
-                    <div class="float-el el-3">🔊</div>
+                    <div class="float-el el-3">✂️</div>
                 </div>
             </div>
         </div>
@@ -101,22 +105,22 @@
 
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title hidden">مميزات <span class="gradient-text">البرنامج</span></h2>
+            <h2 class="section-title hidden" data-i18n="features_title">مميزات <span class="gradient-text">البرنامج</span></h2>
             <div class="features-grid">
                 <div class="feature-card glass-panel hidden" style="--delay: 1">
-                    <div class="feature-icon">🚀</div>
-                    <h3>أداء سريع ومستقر</h3>
-                    <p>تم بناء التطبيق بأحدث التقنيات لضمان تجربة سلسة بدون أي تقطيع.</p>
+                    <div class="feature-icon">✂️</div>
+                    <h3 data-i18n="f1_title">عزل الموسيقى</h3>
+                    <p data-i18n="f1_desc">إزالة الموسيقى من الصوت والفيديو بدقة عالية بضغطة زر.</p>
                 </div>
                 <div class="feature-card glass-panel hidden" style="--delay: 2">
-                    <div class="feature-icon">🎨</div>
-                    <h3>واجهة عصرية</h3>
-                    <p>تصميم مريح للعين مع دعم كامل للوضع الداكن لتجربة استخدام ممتعة.</p>
+                    <div class="feature-icon">🚀</div>
+                    <h3 data-i18n="f2_title">أداء سريع ومستقر</h3>
+                    <p data-i18n="f2_desc">سرعة فائقة في المعالجة للحصول على النتيجة في ثوانٍ.</p>
                 </div>
                 <div class="feature-card glass-panel hidden" style="--delay: 3">
-                    <div class="feature-icon">🎧</div>
-                    <h3>جودة صوت نقية</h3>
-                    <p>استمتع بأنقى درجات الصوت بفضل خوارزميات المعالجة المتقدمة لدينا.</p>
+                    <div class="feature-icon">🎨</div>
+                    <h3 data-i18n="f3_title">واجهة سهلة</h3>
+                    <p data-i18n="f3_desc">تصميم بسيط ومريح للعين لتجربة استخدام سلسة.</p>
                 </div>
             </div>
         </div>
@@ -125,24 +129,24 @@
     <!-- How it Works Section -->
     <section id="how-it-works" class="steps-section">
         <div class="container">
-            <h2 class="section-title hidden">كيف <span class="gradient-text">نعمل؟</span></h2>
+            <h2 class="section-title hidden" data-i18n="steps_title">كيف <span class="gradient-text">نعمل؟</span></h2>
             <div class="steps-container">
                 <div class="step-card hidden" style="--delay: 1">
                     <div class="step-number">1</div>
-                    <h3>حمل التطبيق</h3>
-                    <p>احصل على التطبيق قريباً من متجرك المفضل بخطوة واحدة.</p>
+                    <h3 data-i18n="s1_title">اختر الملف</h3>
+                    <p data-i18n="s1_desc">قم باختيار ملف الصوت أو الفيديو من هاتفك.</p>
                 </div>
                 <div class="step-line hidden"></div>
                 <div class="step-card hidden" style="--delay: 2">
                     <div class="step-number">2</div>
-                    <h3>سجل حسابك</h3>
-                    <p>أنشئ حسابك بسهولة لتبدأ تجربتك الصوتية.</p>
+                    <h3 data-i18n="s2_title">اعزل الموسيقى</h3>
+                    <p data-i18n="s2_desc">بضغطة زر واحدة، سيقوم التطبيق بعزل الموسيقى.</p>
                 </div>
                 <div class="step-line hidden"></div>
                 <div class="step-card hidden" style="--delay: 3">
                     <div class="step-number">3</div>
-                    <h3>استمتع بالاستماع</h3>
-                    <p>عش تجربة صوتية نقية لا مثيل لها في أي وقت ومكان.</p>
+                    <h3 data-i18n="s3_title">احفظ النتيجة</h3>
+                    <p data-i18n="s3_desc">احفظ المقطع الصوتي النقي وشاركه مع من تحب.</p>
                 </div>
             </div>
         </div>
@@ -151,19 +155,19 @@
     <!-- FAQ Section -->
     <section id="faq" class="faq-section">
         <div class="container">
-            <h2 class="section-title hidden">الأسئلة <span class="gradient-text">الشائعة</span></h2>
+            <h2 class="section-title hidden" data-i18n="faq_title">الأسئلة <span class="gradient-text">الشائعة</span></h2>
             <div class="faq-container">
                 <div class="faq-item hidden" style="--delay: 1">
-                    <button class="faq-question">متى سيتم إطلاق التطبيق؟ <span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>نحن نعمل بجد لوضع اللمسات الأخيرة، وسيتوفر التطبيق قريباً جداً على متجري جوجل بلاي وآبل ستور.</p></div>
+                    <button class="faq-question"><span data-i18n="faq1_q">هل يدعم التطبيق عزل الموسيقى من الفيديو؟</span> <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p data-i18n="faq1_a">نعم، يمكنك اختيار مقطع فيديو وسيقوم التطبيق بفصل الموسيقى عنه واستخراج الصوت النقي.</p></div>
                 </div>
                 <div class="faq-item hidden" style="--delay: 2">
-                    <button class="faq-question">هل التطبيق مجاني؟ <span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>نعم، سيوفر التطبيق باقة مجانية مميزة تتيح لك الاستمتاع بأهم الوظائف الأساسية.</p></div>
+                    <button class="faq-question"><span data-i18n="faq2_q">متى سيتم إطلاق التطبيق؟</span> <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p data-i18n="faq2_a">نحن في المراحل النهائية من المراجعة، وسيتوفر التطبيق قريباً جداً على متجري جوجل بلاي وآبل ستور.</p></div>
                 </div>
                 <div class="faq-item hidden" style="--delay: 3">
-                    <button class="faq-question">كيف يمكنني التواصل معكم؟ <span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>يمكنك مراسلتنا دائماً عبر وسائل التواصل الخاصة بنا أو من خلال الدعم الفني داخل التطبيق عند إطلاقه.</p></div>
+                    <button class="faq-question"><span data-i18n="faq3_q">هل يمكنني حفظ الملف بعد العزل؟</span> <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p data-i18n="faq3_a">بالتأكيد! يمكنك حفظ الملف الصوتي النقي على جهازك أو مشاركته مباشرة.</p></div>
                 </div>
             </div>
         </div>
@@ -172,11 +176,11 @@
     <!-- Newsletter CTA -->
     <section id="newsletter" class="cta-section">
         <div class="container cta-container glass-panel hidden">
-            <h2 class="cta-title">كن أول من يصله جديدنا!</h2>
-            <p class="cta-desc">انضم لقائمتنا البريدية لنخبرك فور إطلاق التطبيق رسمياً.</p>
+            <h2 class="cta-title" data-i18n="cta_title">كن أول من يصله جديدنا!</h2>
+            <p class="cta-desc" data-i18n="cta_desc">انضم لقائمتنا البريدية لنخبرك فور إطلاق التطبيق رسمياً.</p>
             <form class="newsletter-form" id="notify-form">
-                <input type="email" placeholder="أدخل بريدك الإلكتروني..." required>
-                <button type="submit" class="submit-btn">أخبرني عند الإطلاق</button>
+                <input type="email" id="emailInput" placeholder="أدخل بريدك الإلكتروني..." required>
+                <button type="submit" class="submit-btn" id="submitBtn" data-i18n="cta_btn">أخبرني عند الإطلاق</button>
             </form>
             <div class="form-message" id="form-msg"></div>
         </div>
@@ -186,11 +190,11 @@
         <div class="container footer-content">
             <div class="logo">
                 <span class="logo-icon">🎧</span>
-                <span class="logo-text">صوت نقي</span>
+                <span class="logo-text" data-i18n="logo_text">صوت نقي</span>
             </div>
             <div class="footer-links">
-                <a href="https://soutnaqi.pages.dev/privacy-policy" target="_blank">سياسة الخصوصية</a>
-                <span>&copy; 2026 جميع الحقوق محفوظة.</span>
+                <a href="https://soutnaqi.pages.dev/privacy-policy" target="_blank" data-i18n="footer_privacy">سياسة الخصوصية</a>
+                <span data-i18n="footer_rights">&copy; 2026 جميع الحقوق محفوظة.</span>
             </div>
         </div>
     </footer>
