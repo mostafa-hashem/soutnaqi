@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// Application name
   ///
   /// In en, this message translates to:
-  /// **'SoutNaqi'**
+  /// **'Voice Purify'**
   String get appName;
 
   /// No description provided for @appTagline.
@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeWelcome.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to SoutNaqi'**
+  /// **'Welcome to Voice Purify'**
   String get homeWelcome;
 
   /// No description provided for @homeSubtitle.
@@ -977,7 +977,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutSoutNaqiTitle.
   ///
   /// In en, this message translates to:
-  /// **'About Sout Naqi'**
+  /// **'About Voice Purify'**
   String get aboutSoutNaqiTitle;
 
   /// No description provided for @aboutAppDescription.
@@ -995,7 +995,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutVisionBody.
   ///
   /// In en, this message translates to:
-  /// **'Sout Naqi is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.'**
+  /// **'Voice Purify is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.'**
   String get aboutVisionBody;
 
   /// No description provided for @aboutDisclaimerTitle.
@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDisclaimerP1.
   ///
   /// In en, this message translates to:
-  /// **'Sout Naqi leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.'**
+  /// **'Voice Purify leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.'**
   String get aboutDisclaimerP1;
 
   /// No description provided for @aboutDisclaimerP2.
@@ -1109,7 +1109,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFooter.
   ///
   /// In en, this message translates to:
-  /// **'Sout Naqi — Crafted for clean and purposeful listening'**
+  /// **'Voice Purify — Crafted for clean and purposeful listening'**
   String get aboutFooter;
 
   /// No description provided for @aboutViewDetails.

@@ -27,9 +27,14 @@ class SoutNaqiLogo extends StatelessWidget {
     final mark = SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        size: Size.square(size),
-        painter: const _SoutNaqiMarkPainter(),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.22),
+        child: Image.asset(
+          SoutNaqiBrand.markAsset,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
       ),
     );
 

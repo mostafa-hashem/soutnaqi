@@ -7,5 +7,5 @@ abstract final class SoutNaqiBrand {
   static const Color blueSoft = Color(0xFF60A5FA);
   static const Color canvas = Color(0xFFF4F6FA);
 
-  static const String markAsset = 'assets/brand/app-icon.png';
+  static const String markAsset = 'assets/brand/app-icon-new.jpg';
 }
