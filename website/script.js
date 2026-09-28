@@ -23,16 +23,13 @@ const translations = {
         faq_title: 'الأسئلة <span class="gradient-text">الشائعة</span>',
         faq1_q: "هل يدعم التطبيق عزل الموسيقى من الفيديو؟",
         faq1_a: "نعم، يمكنك اختيار مقطع فيديو وسيقوم التطبيق بفصل الموسيقى عنه واستخراج الصوت النقي.",
-        faq2_q: "متى سيتم إطلاق التطبيق؟",
-        faq2_a: "نحن في المراحل النهائية من المراجعة، وسيتوفر التطبيق قريباً جداً على متجري جوجل بلاي وآبل ستور.",
+        faq2_q: "هل التطبيق مجاني؟",
+        faq2_a: "نعم! التطبيق مجاني بالكامل 100%، ومفتوح المصدر (Open Source) ومتاح على GitHub للجميع.",
         faq3_q: "هل يمكنني حفظ الملف بعد العزل؟",
         faq3_a: "بالتأكيد! يمكنك حفظ الملف الصوتي النقي على جهازك أو مشاركته مباشرة.",
-        cta_title: "كن أول من يصله جديدنا!",
-        cta_desc: "انضم لقائمتنا البريدية لنخبرك فور إطلاق التطبيق رسمياً.",
-        cta_placeholder: "أدخل بريدك الإلكتروني...",
-        cta_btn: "أخبرني عند الإطلاق",
-        cta_loading: "جاري التسجيل...",
-        cta_success: "تم تسجيل بريدك بنجاح! سنبقيك على اطلاع.",
+        contact_title: "تواصل معنا",
+        contact_desc: "هل لديك استفسار أو اقتراح؟ يسعدنا تواصلك معنا.",
+        contact_btn: "راسلنا عبر البريد",
         logo_text: "صوت نقي",
         footer_privacy: "سياسة الخصوصية",
         footer_rights: "&copy; 2026 جميع الحقوق محفوظة."
@@ -61,17 +58,14 @@ const translations = {
         faq_title: 'Frequently Asked <span class="gradient-text">Questions</span>',
         faq1_q: "Does the app support videos?",
         faq1_a: "Yes, you can select a video file and the app will remove the music and extract the pure voice.",
-        faq2_q: "When will the app be released?",
-        faq2_a: "We are in the final review stages. It will be available very soon on Google Play and App Store.",
+        faq2_q: "Is the app free?",
+        faq2_a: "Yes! The app is 100% free and open-source on GitHub for everyone.",
         faq3_q: "Can I save the file after isolation?",
         faq3_a: "Absolutely! You can save the pure audio file to your device or share it directly.",
-        cta_title: "Be the First to Know!",
-        cta_desc: "Join our newsletter to get notified as soon as we launch.",
-        cta_placeholder: "Enter your email...",
-        cta_btn: "Notify Me",
-        cta_loading: "Registering...",
-        cta_success: "Email registered successfully! We'll keep you updated.",
-        logo_text: "Sout Naqi",
+        contact_title: "Contact Us",
+        contact_desc: "Have a question or suggestion? We'd love to hear from you.",
+        contact_btn: "Email Us",
+        logo_text: "Voice Purify",
         footer_privacy: "Privacy Policy",
         footer_rights: "&copy; 2026 All rights reserved."
     }
@@ -159,29 +153,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // 5. Newsletter Form Logic (Simulated)
-    const form = document.getElementById('notify-form');
-    const formMsg = document.getElementById('form-msg');
-    
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            
-            btn.textContent = translations[currentLang].cta_loading;
-            btn.style.opacity = '0.7';
-            
-            setTimeout(() => {
-                emailInput.value = '';
-                btn.textContent = translations[currentLang].cta_btn;
-                btn.style.opacity = '1';
-                formMsg.textContent = translations[currentLang].cta_success;
-                
-                setTimeout(() => {
-                    formMsg.textContent = '';
-                }, 5000);
-            }, 1500);
-        });
-    }
 });

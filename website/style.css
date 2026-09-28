@@ -88,9 +88,12 @@ body[dir="ltr"] .step-number { font-family: 'Outfit', sans-serif; }
     font-size: 24px;
     font-weight: 800;
 }
-.logo-icon {
-    font-size: 32px;
-    animation: pulse 2s infinite;
+.logo-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .nav-actions {
     display: flex;
