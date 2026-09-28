@@ -31,11 +31,14 @@ class AboutFooter extends StatelessWidget {
                 size: 14,
               ),
               const SizedBox(width: 6),
-              Text(
-                l10n.aboutFooter,
-                style: font12W400(
-                  settingsCubit: settingsCubit,
-                  color: context.textMuted,
+              Flexible(
+                child: Text(
+                  l10n.aboutFooter,
+                  textAlign: TextAlign.center,
+                  style: font12W400(
+                    settingsCubit: settingsCubit,
+                    color: context.textMuted,
+                  ),
                 ),
               ),
             ],

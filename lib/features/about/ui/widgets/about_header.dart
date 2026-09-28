@@ -63,15 +63,16 @@ class AboutHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _BadgeChip(
               settingsCubit: settingsCubit,
               icon: HugeIconsStrokeRounded.checkmarkBadge01,
               label: l10n.appVersion(kAppVersion),
             ),
-            const SizedBox(width: 8),
             _BadgeChip(
               settingsCubit: settingsCubit,
               icon: HugeIconsStrokeRounded.aiVoice,
@@ -125,11 +126,13 @@ class _BadgeChip extends StatelessWidget {
             size: 14,
           ),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: font12W500(
-              settingsCubit: settingsCubit,
-              color: fgColor,
+          Flexible(
+            child: Text(
+              label,
+              style: font12W500(
+                settingsCubit: settingsCubit,
+                color: fgColor,
+              ),
             ),
           ),
         ],
