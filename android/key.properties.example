@@ -1,0 +1,13 @@
+# Example key.properties file for Android release signing
+# Copy this file to `android/key.properties` and fill in your actual keystore details.
+# DO NOT commit `key.properties` or `*.jks` / `*.keystore` files to git (they are already in .gitignore).
+#
+# To generate a new keystore on Windows (PowerShell / Command Prompt):
+# keytool -genkey -v -keystore soutnaqi-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias soutnaqi
+#
+# Then move `soutnaqi-release.jks` to the `android/app` folder, or specify its relative path below:
+
+keyAlias=soutnaqi
+keyPassword=your_key_password
+storeFile=soutnaqi-release.jks
+storePassword=your_store_password

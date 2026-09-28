@@ -1,4 +1,4 @@
-package com.example.soutnaqi
+package com.soutnaqi.app
 
 import android.os.Bundle
 import androidx.core.view.WindowCompat

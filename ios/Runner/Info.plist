@@ -47,5 +47,26 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<!-- Localization Support -->
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>ar</string>
+			<string>en</string>
+		</array>
+		<!-- Privacy Usage Descriptions for App Store Review -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>يحتاج صوت نقي إلى الوصول لمكتبة الصور والفيديو لتمكينك من استيراد مقاطع الفيديو والصوت لمعالجتها وفصل المقاطع الصوتية.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>يحتاج صوت نقي إلى الكاميرا في حال رغبتك في تسجيل مقطع فيديو لمعالجته وفصل الصوت منه داخل التطبيق.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>يحتاج صوت نقي إلى الميكروفون لتسجيل الصوت ومعالجته وعزله بدقة داخل التطبيق.</string>
+		<!-- Export Compliance -->
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
+		<!-- Document Sharing / Files App Access for Exported Media -->
+		<key>UIFileSharingEnabled</key>
+		<true/>
+		<key>LSSupportsOpeningDocumentsInPlace</key>
+		<true/>
 	</dict>
 </plist>
