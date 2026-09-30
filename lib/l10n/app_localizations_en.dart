@@ -579,4 +579,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutViewDetails => 'App details & isolation accuracy';
+
+  @override
+  String get playbackSpeed => 'Playback speed';
+
+  @override
+  String get changeSpeed => 'Change speed';
+
+  @override
+  String get speedNormal => 'Normal';
+
+  @override
+  String get speedPickerTitle => 'Select Speed';
+
+  @override
+  String get speedProcessLoading => 'Changing speed…';
+
+  @override
+  String get speedProcessSuccess => 'Speed changed successfully.';
+
+  @override
+  String get operationChangeSpeed => 'Change speed';
+
+  @override
+  String get storageSection => 'Storage & Cache';
+
+  @override
+  String get clearTempFiles => 'Clear temporary files';
+
+  @override
+  String get clearTempFilesSubtitle =>
+      'Reclaim storage by removing temporary processing files';
+
+  @override
+  String get clearTempFilesConfirm =>
+      'Are you sure you want to clear temporary processing files? Saved history projects will not be deleted.';
+
+  @override
+  String get clearTempFilesSuccess => 'Temporary files cleared successfully.';
+
+  @override
+  String get clearTempFilesLoading => 'Clearing temporary files…';
+
+  @override
+  String tempStorageUsage(String size) {
+    return 'Temporary storage: $size';
+  }
+
+  @override
+  String get confirmAction => 'Clear';
+
+  @override
+  String get cancelAction => 'Cancel';
 }

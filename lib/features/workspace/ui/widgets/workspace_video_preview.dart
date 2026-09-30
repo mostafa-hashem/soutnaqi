@@ -9,6 +9,7 @@ import 'package:soutnaqi/features/media/data/video_source_platform.dart';
 import 'package:soutnaqi/features/media/data/video_source_resolver.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/speed_picker_sheet.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 import 'package:video_player/video_player.dart';
 
@@ -234,6 +235,48 @@ class _VideoControls extends StatelessWidget {
                   style: font12W400(
                     settingsCubit: settingsCubit,
                     color: context.textMuted,
+                  ),
+                ),
+                const Spacer(),
+                Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    onTap: () async {
+                      final selected = await showSpeedPickerSheet(
+                        context,
+                        settingsCubit: settingsCubit,
+                        currentSpeed: value.playbackSpeed,
+                      );
+                      if (selected != null) {
+                        await controller.setPlaybackSpeed(selected);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIconsStrokeRounded.dashboardSquare01,
+                            color: context.accentPrimary,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${value.playbackSpeed}x',
+                            style: font12W600(
+                              settingsCubit: settingsCubit,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

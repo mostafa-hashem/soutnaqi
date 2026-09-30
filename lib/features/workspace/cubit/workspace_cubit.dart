@@ -204,7 +204,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     }
   }
 
-  Future<void> processAudio(AudioOperation operation) async {
+  Future<void> processAudio(AudioOperation operation, {double speed = 1.0}) async {
     final media = state.media;
     if (media == null || !media.isAudio) {
       throw const AppException(messageKey: 'processingAudioOnly');
@@ -235,6 +235,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         operation: operation,
         trimStart: operation == AudioOperation.trim ? state.trimStart : null,
         trimEnd: operation == AudioOperation.trim ? state.effectiveTrimEnd : null,
+        speed: speed,
       );
 
       if (_activeOperationId != operationId) return;
@@ -589,7 +590,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     await processAudio(AudioOperation.trim);
   }
 
-  Future<void> processVideo(VideoOperation operation) async {
+  Future<void> processVideo(VideoOperation operation, {double speed = 1.0}) async {
     final media = state.media;
     if (media == null || !media.isVideo) {
       throw const AppException(messageKey: 'processingVideoOnly');
@@ -618,6 +619,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       final outputPath = await _videoProcessingService.process(
         inputPath: media.path!,
         operation: operation,
+        speed: speed,
       );
 
       if (_activeOperationId != operationId) return;
@@ -848,6 +850,15 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     await seekTo(target);
   }
 
+  Future<void> setPlaybackSpeed(double speed) async {
+    emit(state.copyWith(playbackSpeed: speed));
+    try {
+      await _player.setSpeed(speed);
+    } catch (error) {
+      appLog.w('⚠️ Failed to set playback speed: $error');
+    }
+  }
+
   Future<void> clearWorkspace() async {
     appLog.d('🔍 Clearing workspace…');
     await _player.stop();
@@ -886,6 +897,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       AudioOperation.trim => 'trim',
       AudioOperation.isolateVocals => 'isolate_vocals',
       AudioOperation.isolateMusic => 'isolate_music',
+      AudioOperation.changeSpeed => 'change_speed',
     };
   }
 
@@ -895,12 +907,14 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       VideoOperation.compress => 'compress',
       VideoOperation.isolateVocals => 'isolate_vocals',
       VideoOperation.isolateMusic => 'isolate_music',
+      VideoOperation.changeSpeed => 'change_speed',
     };
   }
 
   Future<void> _loadProcessedOutput(String path) async {
     try {
       await _player.setFilePath(path);
+      await _player.setSpeed(state.playbackSpeed);
       emit(state.copyWith(isPlayerReady: true));
     } catch (error) {
       appLog.e('❌ Player failed to load processed output', error: error);
@@ -919,6 +933,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
     if (media.hasLocalPath) {
       await _player.setFilePath(media.path!);
+      await _player.setSpeed(state.playbackSpeed);
       emit(state.copyWith(isPlayerReady: true));
       return;
     }

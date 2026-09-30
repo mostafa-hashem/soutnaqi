@@ -482,7 +482,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get operationExtractAudio => 'استخراج الصوت';
 
   @override
-  String get operationCompressVideo => 'ضغط الفيدio';
+  String get operationCompressVideo => 'ضغط الفيديو';
 
   @override
   String get operationIsolateVocals => 'حذف الموسيقى';
@@ -573,4 +573,56 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aboutViewDetails => 'تفاصيل التطبيق ودقة العزل';
+
+  @override
+  String get playbackSpeed => 'سرعة التشغيل';
+
+  @override
+  String get changeSpeed => 'تغيير السرعة';
+
+  @override
+  String get speedNormal => 'طبيعية';
+
+  @override
+  String get speedPickerTitle => 'اختر السرعة';
+
+  @override
+  String get speedProcessLoading => 'جاري تغيير سرعة الملف…';
+
+  @override
+  String get speedProcessSuccess => 'تم تغيير السرعة بنجاح.';
+
+  @override
+  String get operationChangeSpeed => 'تغيير السرعة';
+
+  @override
+  String get storageSection => 'التخزين والذاكرة المؤقتة';
+
+  @override
+  String get clearTempFiles => 'تفريغ الملفات المؤقتة';
+
+  @override
+  String get clearTempFilesSubtitle =>
+      'تفريغ مساحة التخزين بحذف ملفات المعالجة السابقة';
+
+  @override
+  String get clearTempFilesConfirm =>
+      'هل أنت متأكد من تفريغ ملفات المعالجة المؤقتة؟ لن يتم حذف المشاريع المحفوظة في السجل.';
+
+  @override
+  String get clearTempFilesSuccess => 'تم تفريغ الملفات المؤقتة بنجاح.';
+
+  @override
+  String get clearTempFilesLoading => 'جاري تفريغ الملفات المؤقتة…';
+
+  @override
+  String tempStorageUsage(String size) {
+    return 'المساحة المؤقتة المستهلكة: $size';
+  }
+
+  @override
+  String get confirmAction => 'تفريغ';
+
+  @override
+  String get cancelAction => 'إلغاء';
 }

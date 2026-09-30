@@ -10,6 +10,7 @@ import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/video_processing/data/video_operation.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/speed_picker_sheet.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_canvas.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_export_bar.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_media_card.dart';
@@ -91,6 +92,7 @@ class WorkspaceLoadedView extends StatelessWidget {
                       onTogglePlayback: cubit.togglePlayback,
                       onSeek: cubit.seekTo,
                       onSourceChanged: cubit.switchPlaybackSource,
+                      onSpeedChanged: cubit.setPlaybackSpeed,
                     ),
                     const SizedBox(height: 16),
                     WorkspaceTrimPanel(
@@ -129,6 +131,7 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processAudio(AudioOperation.isolateVocals),
                       ),
+                      onChangeSpeed: () => _changeAudioSpeed(context),
                     ),
                   ] else
                     WorkspaceVideoTools(
@@ -154,6 +157,7 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateVocals),
                       ),
+                      onChangeSpeed: () => _changeVideoSpeed(context),
                     ),
                   const SizedBox(height: 16),
                   WorkspaceExportBar(
@@ -305,6 +309,54 @@ class WorkspaceLoadedView extends StatelessWidget {
         message: appExceptionMessage(error, l10n),
       );
     }
+  }
+
+  Future<void> _changeAudioSpeed(BuildContext context) async {
+    final settingsCubit = context.read<SettingsCubit>();
+    final l10n = AppLocalizations.of(context);
+    final cubit = context.read<WorkspaceCubit>();
+
+    final selected = await showSpeedPickerSheet(
+      context,
+      settingsCubit: settingsCubit,
+      currentSpeed: 1.0,
+      title: l10n.changeSpeed,
+    );
+    if (selected == null || !context.mounted) return;
+
+    await _runToast(
+      context,
+      loading: l10n.speedProcessLoading,
+      success: l10n.speedProcessSuccess,
+      action: () => cubit.processAudio(
+        AudioOperation.changeSpeed,
+        speed: selected,
+      ),
+    );
+  }
+
+  Future<void> _changeVideoSpeed(BuildContext context) async {
+    final settingsCubit = context.read<SettingsCubit>();
+    final l10n = AppLocalizations.of(context);
+    final cubit = context.read<WorkspaceCubit>();
+
+    final selected = await showSpeedPickerSheet(
+      context,
+      settingsCubit: settingsCubit,
+      currentSpeed: 1.0,
+      title: l10n.changeSpeed,
+    );
+    if (selected == null || !context.mounted) return;
+
+    await _runToast(
+      context,
+      loading: l10n.speedProcessLoading,
+      success: l10n.speedProcessSuccess,
+      action: () => cubit.processVideo(
+        VideoOperation.changeSpeed,
+        speed: selected,
+      ),
+    );
   }
 
   String _formatBytes(int bytes) {

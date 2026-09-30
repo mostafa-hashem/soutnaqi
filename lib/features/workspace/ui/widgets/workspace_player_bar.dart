@@ -5,6 +5,7 @@ import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/speed_picker_sheet.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
 class WorkspacePlayerBar extends StatelessWidget {
@@ -15,6 +16,7 @@ class WorkspacePlayerBar extends StatelessWidget {
     required this.onTogglePlayback,
     required this.onSeek,
     required this.onSourceChanged,
+    required this.onSpeedChanged,
   });
 
   final SettingsCubit settingsCubit;
@@ -22,6 +24,7 @@ class WorkspacePlayerBar extends StatelessWidget {
   final VoidCallback onTogglePlayback;
   final ValueChanged<Duration> onSeek;
   final ValueChanged<PlaybackSource> onSourceChanged;
+  final ValueChanged<double> onSpeedChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +86,49 @@ class WorkspacePlayerBar extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    onTap: state.isPlayerReady
+                        ? () async {
+                            final selected = await showSpeedPickerSheet(
+                              context,
+                              settingsCubit: settingsCubit,
+                              currentSpeed: state.playbackSpeed,
+                            );
+                            if (selected != null) {
+                              onSpeedChanged(selected);
+                            }
+                          }
+                        : null,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIconsStrokeRounded.dashboardSquare01,
+                            color: context.accentPrimary,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${state.playbackSpeed}x',
+                            style: font12W600(
+                              settingsCubit: settingsCubit,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

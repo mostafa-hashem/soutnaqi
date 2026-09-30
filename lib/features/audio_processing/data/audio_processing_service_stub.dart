@@ -15,6 +15,7 @@ class StubAudioProcessingService implements AudioProcessingService {
     required AudioOperation operation,
     Duration? trimStart,
     Duration? trimEnd,
+    double speed = 1.0,
   }) {
     return Future.error(
       const AppException(

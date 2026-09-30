@@ -4,4 +4,5 @@ enum AudioOperation {
   trim,
   isolateVocals,
   isolateMusic,
+  changeSpeed,
 }

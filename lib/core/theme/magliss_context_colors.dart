@@ -20,6 +20,7 @@ extension MaglissContextColors on BuildContext {
   Color get onAccent => _tokens.onAccent;
   Color get success => _tokens.success;
   Color get error => _tokens.error;
+  Color get danger => _tokens.error;
   Color get inputFill => _tokens.inputFill;
   Color get inputBorder => _tokens.inputBorder;
   Color get inputBorderFocused => _tokens.inputBorderFocused;

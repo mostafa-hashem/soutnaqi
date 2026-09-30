@@ -1117,6 +1117,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App details & isolation accuracy'**
   String get aboutViewDetails;
+
+  /// No description provided for @playbackSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get playbackSpeed;
+
+  /// No description provided for @changeSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Change speed'**
+  String get changeSpeed;
+
+  /// No description provided for @speedNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get speedNormal;
+
+  /// No description provided for @speedPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Speed'**
+  String get speedPickerTitle;
+
+  /// No description provided for @speedProcessLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing speed…'**
+  String get speedProcessLoading;
+
+  /// No description provided for @speedProcessSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed changed successfully.'**
+  String get speedProcessSuccess;
+
+  /// No description provided for @operationChangeSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Change speed'**
+  String get operationChangeSpeed;
+
+  /// No description provided for @storageSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage & Cache'**
+  String get storageSection;
+
+  /// No description provided for @clearTempFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear temporary files'**
+  String get clearTempFiles;
+
+  /// No description provided for @clearTempFilesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reclaim storage by removing temporary processing files'**
+  String get clearTempFilesSubtitle;
+
+  /// No description provided for @clearTempFilesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear temporary processing files? Saved history projects will not be deleted.'**
+  String get clearTempFilesConfirm;
+
+  /// No description provided for @clearTempFilesSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary files cleared successfully.'**
+  String get clearTempFilesSuccess;
+
+  /// No description provided for @clearTempFilesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Clearing temporary files…'**
+  String get clearTempFilesLoading;
+
+  /// No description provided for @tempStorageUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary storage: {size}'**
+  String tempStorageUsage(String size);
+
+  /// No description provided for @confirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get confirmAction;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
 }
 
 class _AppLocalizationsDelegate

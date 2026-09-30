@@ -6,6 +6,7 @@ abstract class AudioProcessingService {
     required AudioOperation operation,
     Duration? trimStart,
     Duration? trimEnd,
+    double speed = 1.0,
   });
 
   bool get isProcessingSupported;

@@ -35,6 +35,7 @@ class WorkspaceState extends Equatable {
     this.activeVideoOperation,
     this.playbackSource = PlaybackSource.original,
     this.isPlaying = false,
+    this.playbackSpeed = 1.0,
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.isPlayerReady = false,
@@ -61,6 +62,7 @@ class WorkspaceState extends Equatable {
   final VideoOperation? activeVideoOperation;
   final PlaybackSource playbackSource;
   final bool isPlaying;
+  final double playbackSpeed;
   final Duration position;
   final Duration duration;
   final bool isPlayerReady;
@@ -126,6 +128,7 @@ class WorkspaceState extends Equatable {
     VideoOperation? activeVideoOperation,
     PlaybackSource? playbackSource,
     bool? isPlaying,
+    double? playbackSpeed,
     Duration? position,
     Duration? duration,
     bool? isPlayerReady,
@@ -167,6 +170,7 @@ class WorkspaceState extends Equatable {
           : (activeVideoOperation ?? this.activeVideoOperation),
       playbackSource: playbackSource ?? this.playbackSource,
       isPlaying: isPlaying ?? this.isPlaying,
+      playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       position: position ?? this.position,
       duration: duration ?? this.duration,
       isPlayerReady: isPlayerReady ?? this.isPlayerReady,
@@ -209,6 +213,7 @@ class WorkspaceState extends Equatable {
         activeVideoOperation,
         playbackSource,
         isPlaying,
+        playbackSpeed,
         position,
         duration,
         isPlayerReady,

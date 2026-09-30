@@ -23,15 +23,24 @@ class IoVideoProcessingService implements VideoProcessingService {
   Future<String> process({
     required String inputPath,
     required VideoOperation operation,
+    double speed = 1.0,
   }) async {
-    appLog.d('⚡ Starting video processing: $operation');
+    appLog.d('⚡ Starting video processing: $operation (speed: $speed)');
     final outputPath = await _createOutputPath(inputPath, operation);
     if (operation == VideoOperation.extractAudio) {
       return _extractAudio(inputPath: inputPath, outputPath: outputPath);
     }
+    if (operation == VideoOperation.changeSpeed) {
+      return _changeSpeed(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        speed: speed,
+      );
+    }
 
     final command = switch (operation) {
       VideoOperation.extractAudio => throw StateError('handled above'),
+      VideoOperation.changeSpeed => throw StateError('handled above'),
       VideoOperation.compress =>
         '-y -i "$inputPath" -vcodec libx264 -crf 28 -acodec aac -b:a 128k "$outputPath"',
       VideoOperation.isolateVocals => throw StateError(
@@ -55,6 +64,28 @@ class IoVideoProcessingService implements VideoProcessingService {
     final command =
         '-y -i "$videoPath" -i "$audioPath" -c:v copy -c:a aac -b:a 192k -map 0:v:0 -map 1:a:0 -shortest "$outputPath"';
     return _runFfmpeg(command, outputPath);
+  }
+
+  Future<String> _changeSpeed({
+    required String inputPath,
+    required String outputPath,
+    required double speed,
+  }) async {
+    final pts = (1.0 / speed).toStringAsFixed(4);
+    final atempo = speed.toStringAsFixed(2);
+    final commandWithAudio =
+        '-y -i "$inputPath" -filter_complex "[0:v]setpts=$pts*PTS[v];[0:a]atempo=$atempo[a]" -map "[v]" -map "[a]" -c:v libx264 -crf 23 -c:a aac -b:a 192k "$outputPath"';
+
+    final session = await FFmpegKit.execute(commandWithAudio);
+    if (ReturnCode.isSuccess(await session.getReturnCode())) {
+      appLog.d('✅ Video speed changed: $outputPath');
+      return outputPath;
+    }
+
+    appLog.d('⚡ Combined speed filter failed — attempting video-only speed adjustment…');
+    final commandVideoOnly =
+        '-y -i "$inputPath" -vf "setpts=$pts*PTS" -c:v libx264 -crf 23 -an "$outputPath"';
+    return _runFfmpeg(commandVideoOnly, outputPath);
   }
 
   Future<String> _extractAudio({
@@ -95,6 +126,7 @@ class IoVideoProcessingService implements VideoProcessingService {
     final extension = switch (operation) {
       VideoOperation.extractAudio => FfmpegAudioCodec.outputExtension,
       VideoOperation.compress => 'mp4',
+      VideoOperation.changeSpeed => 'mp4',
       VideoOperation.isolateVocals => throw StateError(
           'Separation operations use SeparationService',
         ),

@@ -3,4 +3,5 @@ enum VideoOperation {
   compress,
   isolateVocals,
   isolateMusic,
+  changeSpeed,
 }

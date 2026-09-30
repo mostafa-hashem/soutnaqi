@@ -25,8 +25,9 @@ class IoAudioProcessingService implements AudioProcessingService {
     required AudioOperation operation,
     Duration? trimStart,
     Duration? trimEnd,
+    double speed = 1.0,
   }) async {
-    appLog.d('⚡ Starting audio processing: $operation');
+    appLog.d('⚡ Starting audio processing: $operation (speed: $speed)');
     final outputPath = await _createOutputPath();
     final command = _commandFor(
       inputPath: inputPath,
@@ -34,6 +35,7 @@ class IoAudioProcessingService implements AudioProcessingService {
       operation: operation,
       trimStart: trimStart,
       trimEnd: trimEnd,
+      speed: speed,
     );
 
     final session = await FFmpegKit.execute(command);
@@ -58,6 +60,7 @@ class IoAudioProcessingService implements AudioProcessingService {
     required AudioOperation operation,
     Duration? trimStart,
     Duration? trimEnd,
+    double speed = 1.0,
   }) {
     final trimArgs = _trimArgs(trimStart, trimEnd);
     final encode = FfmpegAudioCodec.encodeTo(outputPath);
@@ -68,6 +71,8 @@ class IoAudioProcessingService implements AudioProcessingService {
       AudioOperation.noiseReduction =>
         '$trimArgs -y -i "$inputPath" -af "afftdn=nf=-25" $encode',
       AudioOperation.trim => '$trimArgs -y -i "$inputPath" $encode',
+      AudioOperation.changeSpeed =>
+        '$trimArgs -y -i "$inputPath" -af "atempo=${speed.toStringAsFixed(2)}" $encode',
       AudioOperation.isolateVocals => throw StateError(
           'Separation operations use SeparationService',
         ),

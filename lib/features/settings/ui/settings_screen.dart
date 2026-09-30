@@ -10,6 +10,7 @@ import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/widgets/soutnaqi_logo.dart';
 import 'package:soutnaqi/features/about/ui/about_screen.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
+import 'package:soutnaqi/features/settings/ui/widgets/settings_cache_row.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_language_selector.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_on_device_model_row.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_theme_selector.dart';
@@ -81,6 +82,16 @@ class SettingsScreen extends StatelessWidget {
                     _SettingsCard(
                       children: [
                         SettingsOnDeviceModelRow(settingsCubit: settingsCubit),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _SectionLabel(
+                      settingsCubit: settingsCubit,
+                      label: l10n.storageSection,
+                    ),
+                    _SettingsCard(
+                      children: [
+                        SettingsCacheRow(settingsCubit: settingsCubit),
                       ],
                     ),
                     const SizedBox(height: 24),

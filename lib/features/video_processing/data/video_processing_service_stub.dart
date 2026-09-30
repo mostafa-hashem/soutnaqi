@@ -13,6 +13,7 @@ class StubVideoProcessingService implements VideoProcessingService {
   Future<String> process({
     required String inputPath,
     required VideoOperation operation,
+    double speed = 1.0,
   }) {
     return _unsupported();
   }

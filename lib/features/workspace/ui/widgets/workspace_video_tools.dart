@@ -18,6 +18,7 @@ class WorkspaceVideoTools extends StatelessWidget {
     required this.onExtractAudio,
     required this.onCompress,
     required this.onIsolateVocals,
+    required this.onChangeSpeed,
   });
 
   final SettingsCubit settingsCubit;
@@ -25,6 +26,7 @@ class WorkspaceVideoTools extends StatelessWidget {
   final VoidCallback onExtractAudio;
   final VoidCallback onCompress;
   final VoidCallback onIsolateVocals;
+  final VoidCallback onChangeSpeed;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +80,14 @@ class WorkspaceVideoTools extends StatelessWidget {
                   isLoading: state.status == WorkspaceStatus.processing &&
                       state.activeVideoOperation == VideoOperation.compress,
                   onPressed: isBusy ? null : onCompress,
+                ),
+                _ToolButton(
+                  settingsCubit: settingsCubit,
+                  label: l10n.changeSpeed,
+                  icon: HugeIconsStrokeRounded.dashboardSquare01,
+                  isLoading: state.status == WorkspaceStatus.processing &&
+                      state.activeVideoOperation == VideoOperation.changeSpeed,
+                  onPressed: isBusy ? null : onChangeSpeed,
                 ),
                 _ToolButton(
                   settingsCubit: settingsCubit,

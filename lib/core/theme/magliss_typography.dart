@@ -59,6 +59,17 @@ TextStyle font12W500({
       color: color,
     );
 
+TextStyle font12W600({
+  required SettingsCubit settingsCubit,
+  Color? color,
+}) =>
+    _baseStyle(
+      settingsCubit: settingsCubit,
+      size: 12,
+      weight: FontWeight.w600,
+      color: color,
+    );
+
 TextStyle font14W400({
   required SettingsCubit settingsCubit,
   Color? color,
