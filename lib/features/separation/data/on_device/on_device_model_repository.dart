@@ -34,6 +34,25 @@ class OnDeviceModelRepository {
   bool get isDownloading => _activeDownloadFuture != null;
   double get currentDownloadProgress => _lastReportedProgress;
 
+  void addProgressListener(void Function(double progress) listener) {
+    _progressListeners.add(listener);
+    if (_lastReportedProgress > 0) {
+      listener(_lastReportedProgress);
+    }
+  }
+
+  void removeProgressListener(void Function(double progress) listener) {
+    _progressListeners.remove(listener);
+  }
+
+  void _notifyProgress(double progress) {
+    for (final listener in List.of(_progressListeners)) {
+      try {
+        listener(progress);
+      } catch (_) {}
+    }
+  }
+
   /// Aborts an in-progress [ensureModelDownloaded] immediately. Safe to call when idle.
   void cancelDownload() {
     _cancelRequested = true;
@@ -125,7 +144,7 @@ class OnDeviceModelRepository {
     await BackgroundTaskService.instance.acquireWakeLock();
 
     try {
-      const maxRetries = 5;
+      const maxRetries = 10;
       for (var attempt = 0; attempt < maxRetries; attempt++) {
         if (_cancelRequested) {
           throw const AppException(
@@ -147,6 +166,14 @@ class OnDeviceModelRepository {
             return;
           }
           existingLength = 0;
+        }
+
+        final initialProgress =
+            (existingLength / OnDeviceModelSpec.expectedSizeBytes)
+                .clamp(0.0, 1.0);
+        if (initialProgress > _lastReportedProgress) {
+          _lastReportedProgress = initialProgress;
+          _notifyProgress(_lastReportedProgress);
         }
 
         http.Client? client;
@@ -191,6 +218,11 @@ class OnDeviceModelRepository {
             );
           }
 
+          if (!isPartial) {
+            _lastReportedProgress = 0.0;
+            _notifyProgress(0.0);
+          }
+
           var received = isPartial ? existingLength : 0;
           sink = partFile.openWrite(
             mode: isPartial ? FileMode.append : FileMode.write,
@@ -217,11 +249,7 @@ class OnDeviceModelRepository {
                   .clamp(0.0, 1.0);
               if (rawProgress >= _lastReportedProgress) {
                 _lastReportedProgress = rawProgress;
-                for (final listener in List.of(_progressListeners)) {
-                  try {
-                    listener(_lastReportedProgress);
-                  } catch (_) {}
-                }
+                _notifyProgress(_lastReportedProgress);
               }
             },
             onError: (Object error, [StackTrace? stackTrace]) {
@@ -274,7 +302,7 @@ class OnDeviceModelRepository {
             );
           }
           await Future<void>.delayed(
-            Duration(milliseconds: 1500 * (attempt + 1)),
+            Duration(seconds: (attempt + 1).clamp(1, 4)),
           );
         } finally {
           _downloadSub?.cancel();

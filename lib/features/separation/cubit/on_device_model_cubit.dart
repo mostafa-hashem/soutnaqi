@@ -14,14 +14,39 @@ import 'package:soutnaqi/features/separation/data/separation_platform.dart';
 class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
   OnDeviceModelCubit({OnDeviceModelRepository? repository})
       : _repository = repository ?? OnDeviceModelRepository(),
-        super(const OnDeviceModelState());
+        super(const OnDeviceModelState()) {
+    if (_repository.isDownloading) {
+      emit(
+        state.copyWith(
+          status: OnDeviceModelStatus.downloading,
+          downloadProgress: _repository.currentDownloadProgress,
+        ),
+      );
+    }
+    _repository.addProgressListener(_onRepositoryProgress);
+  }
 
   final OnDeviceModelRepository _repository;
 
+  bool get isDownloading =>
+      _repository.isDownloading ||
+      state.status == OnDeviceModelStatus.downloading;
+
+  void _onRepositoryProgress(double progress) {
+    if (isClosed) return;
+    if (state.status == OnDeviceModelStatus.downloading) {
+      emit(state.copyWith(downloadProgress: progress));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _repository.removeProgressListener(_onRepositoryProgress);
+    return super.close();
+  }
+
   Future<void> refresh() async {
-    // If a download is active, do not overwrite state with checking/notDownloaded
-    if (state.status == OnDeviceModelStatus.downloading ||
-        _repository.isDownloading) {
+    if (_repository.isDownloading) {
       emit(
         state.copyWith(
           status: OnDeviceModelStatus.downloading,
@@ -54,8 +79,7 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
   }
 
   Future<void> download() async {
-    // Re-entrancy guard: if already downloading, no-op
-    if (state.status == OnDeviceModelStatus.downloading) {
+    if (_repository.isDownloading) {
       return;
     }
 
@@ -103,7 +127,10 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
 
   /// Stops an in-progress download and returns to [OnDeviceModelStatus.notDownloaded] immediately.
   void cancelDownload() {
-    if (state.status != OnDeviceModelStatus.downloading) return;
+    if (!_repository.isDownloading &&
+        state.status != OnDeviceModelStatus.downloading) {
+      return;
+    }
     _repository.cancelDownload();
     emit(const OnDeviceModelState(status: OnDeviceModelStatus.notDownloaded));
   }

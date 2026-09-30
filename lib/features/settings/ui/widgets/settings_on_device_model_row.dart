@@ -32,7 +32,7 @@ class _SettingsOnDeviceModelRowState extends State<SettingsOnDeviceModelRow> {
   void initState() {
     super.initState();
     final cubit = context.read<OnDeviceModelCubit>();
-    if (cubit.state.status != OnDeviceModelStatus.downloading) {
+    if (!cubit.isDownloading) {
       unawaited(cubit.refresh());
     }
   }
