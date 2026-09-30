@@ -631,4 +631,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelAction => 'Cancel';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Sout Naqi';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Personalize your experience before getting started';
+
+  @override
+  String get onboardingLanguageSelect => 'Choose Language';
+
+  @override
+  String get onboardingThemeSelect => 'Choose Theme';
+
+  @override
+  String get onboardingFeature1Title => 'Pure Vocal & Music Isolation';
+
+  @override
+  String get onboardingFeature1Subtitle => 'Advanced on-device AI';
+
+  @override
+  String get onboardingFeature1Desc =>
+      'Extract crystal-clear speech or isolate musical backing tracks with maximum privacy and studio-grade clarity.';
+
+  @override
+  String get onboardingFeature2Title => 'On-Device AI Engine';
+
+  @override
+  String get onboardingFeature2Subtitle => '100% Offline & Private';
+
+  @override
+  String get onboardingFeature2Desc =>
+      'Sout Naqi runs high-precision neural models directly on your device. Your media never leaves your hands and never uploads to any server.';
+
+  @override
+  String get onboardingFeature3Title => 'Ready for Clean Audio?';
+
+  @override
+  String get onboardingFeature3Subtitle => 'One quick step';
+
+  @override
+  String get onboardingFeature3Desc =>
+      'You will be guided to download the AI model in Settings. It takes about 40 MB once, and you can separate audio anywhere offline.';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingGetStarted => 'Get Started';
+
+  @override
+  String get guideSettingsStepTitle => 'First Step: AI Model Setup';
+
+  @override
+  String get guideSettingsStepDesc =>
+      'Tap Settings to prepare the AI model so music separation works offline.';
+
+  @override
+  String get guideGoToSettings => 'Go to Settings';
+
+  @override
+  String get guideModelStepTitle => 'On-Device AI Model';
+
+  @override
+  String get guideModelStepDesc =>
+      'Download the AI model (~40 MB) once to enable full offline separation. Would you like to download it now?';
+
+  @override
+  String get guideDownloadNow => 'Download Now';
+
+  @override
+  String get guideMaybeLater => 'Maybe Later';
+
+  @override
+  String get guideSkip => 'Skip Guide';
 }

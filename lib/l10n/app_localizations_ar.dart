@@ -625,4 +625,84 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelAction => 'إلغاء';
+
+  @override
+  String get onboardingWelcomeTitle => 'مرحباً بك في صوت نقي';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'خصص تجربتك المفضلة قبل البدء';
+
+  @override
+  String get onboardingLanguageSelect => 'اختر اللغة المفضلة';
+
+  @override
+  String get onboardingThemeSelect => 'اختر مظهر التطبيق';
+
+  @override
+  String get onboardingFeature1Title => 'عزل احترافي للصوت والموسيقى';
+
+  @override
+  String get onboardingFeature1Subtitle => 'ذكاء اصطناعي متطور';
+
+  @override
+  String get onboardingFeature1Desc =>
+      'استخرج الصوت البشري النقي أو اعزل الموسيقى باحترافية وسرعة فائقة مع الحفاظ الكامل على جودة الملف الأصلي.';
+
+  @override
+  String get onboardingFeature2Title => 'محرك ذكاء اصطناعي على جهازك';
+
+  @override
+  String get onboardingFeature2Subtitle => 'خصوصية تامة وبدون إنترنت';
+
+  @override
+  String get onboardingFeature2Desc =>
+      'يعمل تطبيق صوت نقي محلياً على هاتفك؛ لا يتم رفع ملفاتك أو تسجيلاتك لأي خوادم خارجية إطلاقاً لحماية خصوصيتك.';
+
+  @override
+  String get onboardingFeature3Title => 'جاهز لتجربة استماع نقية؟';
+
+  @override
+  String get onboardingFeature3Subtitle => 'خطوة أخيرة وسريعة';
+
+  @override
+  String get onboardingFeature3Desc =>
+      'سنرشدك في البداية لتحميل موديل الذكاء الاصطناعي من الإعدادات (حجمه حوالي 40 ميغابايت لمرة واحدة)، ليعمل معك في أي وقت دون إنترنت.';
+
+  @override
+  String get onboardingContinue => 'متابعة';
+
+  @override
+  String get onboardingSkip => 'تخطي';
+
+  @override
+  String get onboardingNext => 'التالي';
+
+  @override
+  String get onboardingGetStarted => 'ابدأ الآن';
+
+  @override
+  String get guideSettingsStepTitle => 'خطوة أولى مهمة: تجهيز الموديل';
+
+  @override
+  String get guideSettingsStepDesc =>
+      'اضغط على الإعدادات لتحميل موديل الذكاء الاصطناعي ليعمل عزل الصوت بدون إنترنت.';
+
+  @override
+  String get guideGoToSettings => 'الانتقال للإعدادات';
+
+  @override
+  String get guideModelStepTitle => 'موديل الذكاء الاصطناعي';
+
+  @override
+  String get guideModelStepDesc =>
+      'قم بتحميل الموديل (حوالي 40 ميغابايت) لمرة واحدة ليعمل التطبيق بدون إنترنت. هل تود التحميل الآن؟';
+
+  @override
+  String get guideDownloadNow => 'تحميل الموديل الآن';
+
+  @override
+  String get guideMaybeLater => 'سأقوم به لاحقاً';
+
+  @override
+  String get guideSkip => 'تخطي الدليل';
 }

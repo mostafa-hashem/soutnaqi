@@ -9,6 +9,7 @@ import 'package:soutnaqi/core/services/incoming_media_service.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/toast/app_toast.dart';
+import 'package:soutnaqi/features/guide/ui/widgets/model_setup_guide_banner.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
@@ -68,18 +69,29 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   @override
   Widget build(BuildContext context) {
     final settingsCubit = context.read<SettingsCubit>();
+    final showModelGuide = context.select<SettingsCubit, bool>(
+      (cubit) => !cubit.state.hasCompletedModelGuide,
+    );
 
     return ColoredBox(
       color: context.webBackground,
       child: BlocBuilder<WorkspaceCubit, WorkspaceState>(
         builder: (context, state) {
           final content = !state.hasMedia
-              ? WorkspaceEmptyState(
-                  settingsCubit: settingsCubit,
-                  isBusy: state.isBusy,
-                  showDropHint: kIsWeb,
-                  onPickAudio: () => _pickAudio(context),
-                  onPickVideo: () => _pickVideo(context),
+              ? Column(
+                  children: [
+                    if (showModelGuide)
+                      WorkspaceModelGuideBanner(settingsCubit: settingsCubit),
+                    Expanded(
+                      child: WorkspaceEmptyState(
+                        settingsCubit: settingsCubit,
+                        isBusy: state.isBusy,
+                        showDropHint: kIsWeb,
+                        onPickAudio: () => _pickAudio(context),
+                        onPickVideo: () => _pickVideo(context),
+                      ),
+                    ),
+                  ],
                 )
               : WorkspaceLoadedView(
                   settingsCubit: settingsCubit,

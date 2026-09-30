@@ -9,6 +9,7 @@ import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/widgets/soutnaqi_logo.dart';
 import 'package:soutnaqi/features/about/ui/about_screen.dart';
+import 'package:soutnaqi/features/guide/ui/widgets/model_setup_guide_banner.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_cache_row.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_language_selector.dart';
@@ -23,6 +24,9 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingsCubit = context.read<SettingsCubit>();
     final l10n = AppLocalizations.of(context);
+    final showModelGuide = context.select<SettingsCubit, bool>(
+      (cubit) => !cubit.state.hasCompletedModelGuide,
+    );
 
     return ColoredBox(
       color: context.webBackground,
@@ -79,6 +83,8 @@ class SettingsScreen extends StatelessWidget {
                       settingsCubit: settingsCubit,
                       label: l10n.separationSection,
                     ),
+                    if (showModelGuide)
+                      SettingsModelGuideCard(settingsCubit: settingsCubit),
                     _SettingsCard(
                       children: [
                         SettingsOnDeviceModelRow(settingsCubit: settingsCubit),

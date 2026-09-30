@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:soutnaqi/core/logging/app_log.dart';
@@ -9,6 +10,12 @@ class PreferencesStore {
 
   SharedPreferences? _preferences;
   Future<void>? _initializing;
+
+  @visibleForTesting
+  void resetForTesting() {
+    _preferences = null;
+    _initializing = null;
+  }
 
   Future<void> ensureInitialized() {
     return _initializing ??= _openWithRetry();

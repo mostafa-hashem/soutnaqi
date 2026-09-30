@@ -27,6 +27,8 @@ class SettingsCubit extends Cubit<SettingsState> {
         state.copyWith(
           themeMode: _repository.loadThemeMode(),
           locale: _repository.loadLocale(),
+          hasCompletedOnboarding: _repository.hasCompletedOnboarding(),
+          hasCompletedModelGuide: _repository.hasCompletedModelGuide(),
           isLoaded: true,
         ),
       );
@@ -50,5 +52,15 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> setLocale(Locale locale) async {
     emit(state.copyWith(locale: locale));
     await _repository.saveLocale(locale);
+  }
+
+  Future<void> completeOnboarding() async {
+    emit(state.copyWith(hasCompletedOnboarding: true));
+    await _repository.saveOnboardingCompleted(true);
+  }
+
+  Future<void> completeModelGuide() async {
+    emit(state.copyWith(hasCompletedModelGuide: true));
+    await _repository.saveModelGuideCompleted(true);
   }
 }

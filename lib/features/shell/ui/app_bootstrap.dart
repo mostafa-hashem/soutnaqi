@@ -9,6 +9,7 @@ import 'package:soutnaqi/features/export/data/local_export_platform.dart';
 import 'package:soutnaqi/features/history/cubit/history_cubit.dart';
 import 'package:soutnaqi/features/history/data/project_history_repository.dart';
 import 'package:soutnaqi/features/media/data/media_picker_repository.dart';
+import 'package:soutnaqi/features/onboarding/ui/onboarding_screen.dart';
 import 'package:soutnaqi/features/separation/cubit/on_device_model_cubit.dart';
 import 'package:soutnaqi/features/separation/data/separation_platform.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
@@ -54,6 +55,14 @@ class _AppBootstrapState extends State<AppBootstrap> {
 
     if (!settingsLoaded || !_splashHoldComplete) {
       return const SplashScreen();
+    }
+
+    final hasCompletedOnboarding = context.select<SettingsCubit, bool>(
+      (cubit) => cubit.state.hasCompletedOnboarding,
+    );
+
+    if (!hasCompletedOnboarding) {
+      return const OnboardingScreen();
     }
 
     return MultiBlocProvider(

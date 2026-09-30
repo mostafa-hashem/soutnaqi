@@ -1213,6 +1213,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancelAction;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Sout Naqi'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalize your experience before getting started'**
+  String get onboardingWelcomeSubtitle;
+
+  /// No description provided for @onboardingLanguageSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language'**
+  String get onboardingLanguageSelect;
+
+  /// No description provided for @onboardingThemeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Theme'**
+  String get onboardingThemeSelect;
+
+  /// No description provided for @onboardingFeature1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure Vocal & Music Isolation'**
+  String get onboardingFeature1Title;
+
+  /// No description provided for @onboardingFeature1Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced on-device AI'**
+  String get onboardingFeature1Subtitle;
+
+  /// No description provided for @onboardingFeature1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract crystal-clear speech or isolate musical backing tracks with maximum privacy and studio-grade clarity.'**
+  String get onboardingFeature1Desc;
+
+  /// No description provided for @onboardingFeature2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Device AI Engine'**
+  String get onboardingFeature2Title;
+
+  /// No description provided for @onboardingFeature2Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'100% Offline & Private'**
+  String get onboardingFeature2Subtitle;
+
+  /// No description provided for @onboardingFeature2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sout Naqi runs high-precision neural models directly on your device. Your media never leaves your hands and never uploads to any server.'**
+  String get onboardingFeature2Desc;
+
+  /// No description provided for @onboardingFeature3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for Clean Audio?'**
+  String get onboardingFeature3Title;
+
+  /// No description provided for @onboardingFeature3Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One quick step'**
+  String get onboardingFeature3Subtitle;
+
+  /// No description provided for @onboardingFeature3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be guided to download the AI model in Settings. It takes about 40 MB once, and you can separate audio anywhere offline.'**
+  String get onboardingFeature3Desc;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @guideSettingsStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Step: AI Model Setup'**
+  String get guideSettingsStepTitle;
+
+  /// No description provided for @guideSettingsStepDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Settings to prepare the AI model so music separation works offline.'**
+  String get guideSettingsStepDesc;
+
+  /// No description provided for @guideGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings'**
+  String get guideGoToSettings;
+
+  /// No description provided for @guideModelStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Device AI Model'**
+  String get guideModelStepTitle;
+
+  /// No description provided for @guideModelStepDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the AI model (~40 MB) once to enable full offline separation. Would you like to download it now?'**
+  String get guideModelStepDesc;
+
+  /// No description provided for @guideDownloadNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Now'**
+  String get guideDownloadNow;
+
+  /// No description provided for @guideMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get guideMaybeLater;
+
+  /// No description provided for @guideSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Guide'**
+  String get guideSkip;
 }
 
 class _AppLocalizationsDelegate

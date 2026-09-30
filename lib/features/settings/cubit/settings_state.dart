@@ -8,11 +8,15 @@ class SettingsState extends Equatable {
     required this.themeMode,
     required this.locale,
     required this.isLoaded,
+    this.hasCompletedOnboarding = false,
+    this.hasCompletedModelGuide = false,
   });
 
   final AppThemeMode themeMode;
   final Locale locale;
   final bool isLoaded;
+  final bool hasCompletedOnboarding;
+  final bool hasCompletedModelGuide;
 
   ThemeMode get materialThemeMode => switch (themeMode) {
         AppThemeMode.light => ThemeMode.light,
@@ -24,14 +28,26 @@ class SettingsState extends Equatable {
     AppThemeMode? themeMode,
     Locale? locale,
     bool? isLoaded,
+    bool? hasCompletedOnboarding,
+    bool? hasCompletedModelGuide,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       locale: locale ?? this.locale,
       isLoaded: isLoaded ?? this.isLoaded,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+      hasCompletedModelGuide:
+          hasCompletedModelGuide ?? this.hasCompletedModelGuide,
     );
   }
 
   @override
-  List<Object?> get props => [themeMode, locale, isLoaded];
+  List<Object?> get props => [
+        themeMode,
+        locale,
+        isLoaded,
+        hasCompletedOnboarding,
+        hasCompletedModelGuide,
+      ];
 }

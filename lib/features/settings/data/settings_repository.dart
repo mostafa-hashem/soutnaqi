@@ -14,9 +14,31 @@ class SettingsRepository {
 
   static const _themeModeKey = 'settings_theme_mode';
   static const _localeKey = 'settings_locale';
+  static const _onboardingCompletedKey = 'settings_onboarding_completed';
+  static const _modelGuideCompletedKey = 'settings_model_guide_completed';
 
   Future<void> init() async {
     _preferences ??= await _store.preferences;
+  }
+
+  bool hasCompletedOnboarding() {
+    return _preferences?.getBool(_onboardingCompletedKey) ?? false;
+  }
+
+  Future<void> saveOnboardingCompleted(bool completed) async {
+    final preferences = await _store.preferences;
+    await preferences.setBool(_onboardingCompletedKey, completed);
+    appLog.d('✅ Onboarding completed saved: $completed');
+  }
+
+  bool hasCompletedModelGuide() {
+    return _preferences?.getBool(_modelGuideCompletedKey) ?? false;
+  }
+
+  Future<void> saveModelGuideCompleted(bool completed) async {
+    final preferences = await _store.preferences;
+    await preferences.setBool(_modelGuideCompletedKey, completed);
+    appLog.d('✅ Model guide completed saved: $completed');
   }
 
   AppThemeMode loadThemeMode() {

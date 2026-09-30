@@ -72,6 +72,8 @@ class ShellSidebar extends StatelessWidget {
                   label: l10n.navSettings,
                   icon: HugeIconsStrokeRounded.settings01,
                   selected: selectedTab == ShellTab.settings,
+                  isGuideHighlighted: selectedTab != ShellTab.settings &&
+                      !settingsCubit.state.hasCompletedModelGuide,
                   onTap: () => onTabSelected(ShellTab.settings),
                 ),
                 const Spacer(),
@@ -104,6 +106,7 @@ class _SidebarItem extends StatelessWidget {
     required this.icon,
     required this.selected,
     required this.onTap,
+    this.isGuideHighlighted = false,
   });
 
   final SettingsCubit settingsCubit;
@@ -111,10 +114,12 @@ class _SidebarItem extends StatelessWidget {
   final List<List<dynamic>> icon;
   final bool selected;
   final VoidCallback onTap;
+  final bool isGuideHighlighted;
 
   @override
   Widget build(BuildContext context) {
     final color = selected ? context.accentPrimary : context.textSecondary;
+    final iconWidget = HugeIcon(icon: icon, color: color, size: 20);
 
     return Material(
       color: selected
@@ -128,7 +133,14 @@ class _SidebarItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              HugeIcon(icon: icon, color: color, size: 20),
+              if (isGuideHighlighted)
+                Badge(
+                  backgroundColor: context.accentPrimary,
+                  smallSize: 8,
+                  child: iconWidget,
+                )
+              else
+                iconWidget,
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
