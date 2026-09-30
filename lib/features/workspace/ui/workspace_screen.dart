@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/errors/app_exception_l10n.dart';
+import 'package:soutnaqi/core/services/incoming_media_service.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/core/toast/app_toast.dart';
@@ -16,8 +17,53 @@ import 'package:soutnaqi/features/workspace/ui/widgets/workspace_loaded_view.dar
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_processing_overlay.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
-class WorkspaceScreen extends StatelessWidget {
+class WorkspaceScreen extends StatefulWidget {
   const WorkspaceScreen({super.key});
+
+  @override
+  State<WorkspaceScreen> createState() => _WorkspaceScreenState();
+}
+
+class _WorkspaceScreenState extends State<WorkspaceScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      IncomingMediaService.instance.initialize(
+        onMediaReceived: (filePath) {
+          if (!mounted) return;
+          _handleExternalMedia(filePath);
+        },
+      );
+    });
+  }
+
+  Future<void> _handleExternalMedia(String filePath) async {
+    final settingsCubit = context.read<SettingsCubit>();
+    final l10n = AppLocalizations.of(context);
+    AppToast.showLoading(
+      context,
+      settingsCubit: settingsCubit,
+      message: l10n.pickAudioLoading,
+    );
+    try {
+      await context.read<WorkspaceCubit>().importMediaFromPath(filePath);
+      if (!mounted) return;
+      AppToast.showSuccess(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.pickMediaSuccess,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.mediaPickFailed,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +93,11 @@ class WorkspaceScreen extends StatelessWidget {
               WorkspaceProcessingOverlay(
                 settingsCubit: settingsCubit,
                 state: state,
-                onCancel: state.canCancelSeparation
-                    ? () => context.read<WorkspaceCubit>().cancelSeparation()
+                onCancel: state.canCancelProcessing
+                    ? () {
+                        context.read<WorkspaceCubit>().cancelProcessing();
+                        AppToast.dismiss();
+                      }
                     : null,
               ),
             ],
@@ -172,15 +221,14 @@ class _WebDropZoneState extends State<_WebDropZone> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return DropTarget(
       onDragEntered: (_) => setState(() => _isDragging = true),
       onDragExited: (_) => setState(() => _isDragging = false),
-      onDragDone: (details) async {
+      onDragDone: (details) {
         setState(() => _isDragging = false);
-        if (details.files.isEmpty) return;
-        await _handleDrop(context, details.files.first);
+        if (details.files.isNotEmpty) {
+          _handleDrop(context, details.files.first);
+        }
       },
       child: Stack(
         fit: StackFit.expand,
@@ -189,7 +237,7 @@ class _WebDropZoneState extends State<_WebDropZone> {
           if (_isDragging)
             DecoratedBox(
               decoration: BoxDecoration(
-                color: context.accentPrimary.withValues(alpha: 0.08),
+                color: context.accentPrimary.withValues(alpha: 0.12),
                 border: Border.all(
                   color: context.accentPrimary,
                   width: 2,
@@ -197,8 +245,7 @@ class _WebDropZoneState extends State<_WebDropZone> {
               ),
               child: Center(
                 child: Text(
-                  l10n.dropHint,
-                  textAlign: TextAlign.center,
+                  AppLocalizations.of(context).dropHint,
                   style: font16W600(
                     settingsCubit: widget.settingsCubit,
                     color: context.accentPrimary,

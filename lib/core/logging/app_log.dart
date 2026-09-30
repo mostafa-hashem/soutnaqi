@@ -11,6 +11,13 @@ class AppLog {
 
   void d(String message) => _logger.d(message);
 
+  void w(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+  }) =>
+      _logger.w(message, error: error, stackTrace: stackTrace);
+
   void e(
     String message, {
     Object? error,

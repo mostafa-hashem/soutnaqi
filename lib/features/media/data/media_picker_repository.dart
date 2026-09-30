@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/media/data/models/media_file.dart';
@@ -34,8 +37,7 @@ class MediaPickerRepository {
   ];
 
   Future<MediaFile?> pickAudio() => _pick(
-        type: FileType.custom,
-        allowedExtensions: _audioExtensions,
+        type: FileType.audio,
         expectedKind: MediaKind.audio,
       );
 
@@ -94,7 +96,10 @@ class MediaPickerRepository {
   Future<MediaFile> parseDroppedFile(XFile file) async {
     appLog.d('🔍 Parsing dropped file…');
     try {
-      final kind = _kindFromName(file.name);
+      var kind = _kindFromName(file.name);
+      if (kind == MediaKind.unknown && file.path.isNotEmpty) {
+        kind = _kindFromName(file.path);
+      }
       if (kind == MediaKind.unknown) {
         throw const AppException(messageKey: 'mediaPickFailed');
       }
@@ -122,12 +127,38 @@ class MediaPickerRepository {
     }
   }
 
+  Future<MediaFile> parseLocalFilePath(String filePath) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw const AppException(messageKey: 'mediaPickFailed');
+    }
+    final name = p.basename(filePath);
+    var kind = _kindFromName(name);
+    if (kind == MediaKind.unknown) {
+      final mime = lookupMimeType(filePath);
+      if (mime != null && mime.startsWith('video/')) {
+        kind = MediaKind.video;
+      } else {
+        kind = MediaKind.audio;
+      }
+    }
+    final sizeBytes = await file.length();
+    final mimeType = lookupMimeType(filePath) ?? _fallbackMime(kind);
+    return MediaFile(
+      name: name,
+      kind: kind,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      path: filePath,
+    );
+  }
+
   Future<MediaFile?> _pick({
     required FileType type,
     required MediaKind expectedKind,
     List<String>? allowedExtensions,
   }) async {
-    appLog.d('🔍 Opening media picker…');
+    appLog.d('🔍 Opening media picker: type=$type…');
     try {
       final result = await FilePicker.platform.pickFiles(
         type: type,
@@ -153,12 +184,24 @@ class MediaPickerRepository {
         throw const AppException(messageKey: 'mediaPickFailed');
       }
 
-      final kind = _kindFromName(file.name);
+      var kind = _kindFromName(file.name);
+      if (kind == MediaKind.unknown && file.extension != null) {
+        kind = _kindFromName('.${file.extension!}');
+      }
+      if (kind == MediaKind.unknown && file.path != null) {
+        kind = _kindFromName(file.path!);
+      }
+      if (kind == MediaKind.unknown) {
+        kind = expectedKind;
+      }
+
       if (kind != expectedKind) {
         throw const AppException(messageKey: 'mediaPickFailed');
       }
 
-      final mimeType = lookupMimeType(file.name) ?? _fallbackMime(expectedKind);
+      final mimeType = lookupMimeType(file.name) ??
+          (file.path != null ? lookupMimeType(file.path!) : null) ??
+          _fallbackMime(expectedKind);
       final media = MediaFile(
         name: file.name,
         kind: expectedKind,

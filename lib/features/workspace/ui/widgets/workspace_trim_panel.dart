@@ -30,6 +30,9 @@ class WorkspaceTrimPanel extends StatelessWidget {
 
     final startValue = state.trimStart.inMilliseconds / durationMs;
     final endValue = state.effectiveTrimEnd.inMilliseconds / durationMs;
+    final canApply = !state.isBusy && state.isTrimModified;
+    final isTrimming = state.status == WorkspaceStatus.processing &&
+        state.activeOperation == AudioOperation.trim;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -93,17 +96,18 @@ class WorkspaceTrimPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Material(
-              color: context.accentSecondary,
+              color: canApply || isTrimming
+                  ? context.accentSecondary
+                  : context.accentSecondary.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(10),
               child: InkWell(
-                onTap: state.isBusy ? null : onApplyTrim,
+                onTap: canApply ? onApplyTrim : null,
                 borderRadius: BorderRadius.circular(10),
                 child: SizedBox(
                   height: 42,
                   width: double.infinity,
                   child: Center(
-                    child: state.status == WorkspaceStatus.processing &&
-                            state.activeOperation == AudioOperation.trim
+                    child: isTrimming
                         ? SizedBox(
                             width: 20,
                             height: 20,
@@ -116,7 +120,9 @@ class WorkspaceTrimPanel extends StatelessWidget {
                             l10n.applyTrim,
                             style: font14W600(
                               settingsCubit: settingsCubit,
-                              color: Colors.white,
+                              color: canApply
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.45),
                             ),
                           ),
                   ),

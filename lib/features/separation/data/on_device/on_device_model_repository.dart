@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -6,22 +7,27 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
+import 'package:soutnaqi/core/services/background_task_service.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 
 /// Downloads and caches the on-device separation model. The model is fetched
 /// once, from a static file host (not a compute server), into persistent
 /// app-support storage — every separation run after that is fully offline.
+///
+/// Supports resumable HTTP downloads via Range headers, automatic retry with
+/// backoff, background execution via WakeLock, and instant cancellation.
 class OnDeviceModelRepository {
   OnDeviceModelRepository();
 
-  /// Dedicated client for the in-flight download so [cancelDownload] can
-  /// abort the HTTP stream without affecting other callers.
   http.Client? _downloadClient;
+  StreamSubscription<List<int>>? _downloadSub;
   bool _cancelRequested = false;
 
-  /// Aborts an in-progress [ensureModelDownloaded]. Safe to call when idle.
+  /// Aborts an in-progress [ensureModelDownloaded] immediately. Safe to call when idle.
   void cancelDownload() {
     _cancelRequested = true;
+    _downloadSub?.cancel();
+    _downloadSub = null;
     final client = _downloadClient;
     _downloadClient = null;
     client?.close();
@@ -46,9 +52,7 @@ class OnDeviceModelRepository {
     return File(p.join(dir.path, '${OnDeviceModelSpec.modelFileName}.part'));
   }
 
-  /// Whether a verified copy of the model is already cached on disk. Only
-  /// checks file size, not a full re-hash, to stay fast on every app
-  /// launch — the checksum is verified once, right after download.
+  /// Whether a verified copy of the model is already cached on disk.
   Future<bool> isModelCached() async {
     await _deleteLegacyModel();
     final file = await _modelFile();
@@ -65,10 +69,7 @@ class OnDeviceModelRepository {
 
   Future<String> modelPath() async => (await _modelFile()).path;
 
-  /// Downloads the model if it isn't already cached, verifying its
-  /// checksum. Safe to call before every separation — a no-op once cached.
-  /// Throws [AppException] with `onDeviceModelDownloadCancelled` when the
-  /// user aborts via [cancelDownload].
+  /// Downloads the model with Range resume and retry support, keeping WakeLock active.
   Future<void> ensureModelDownloaded({
     void Function(double progress)? onProgress,
   }) async {
@@ -76,111 +77,200 @@ class OnDeviceModelRepository {
 
     final partFile = await _partFile();
     final targetFile = await _modelFile();
-    IOSink? sink;
     var completed = false;
     _cancelRequested = false;
-    final downloadClient = http.Client();
-    _downloadClient = downloadClient;
+
+    await BackgroundTaskService.instance.acquireWakeLock();
+
     try {
-      final response = await downloadClient.send(
-        http.Request('GET', Uri.parse(OnDeviceModelSpec.downloadUrl)),
-      );
-      if (_cancelRequested) {
-        throw const AppException(
-          messageKey: 'onDeviceModelDownloadCancelled',
-        );
-      }
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw AppException(
-          messageKey: 'onDeviceModelDownloadFailed',
-          type: AppExceptionType.network,
-          cause: 'Download failed (${response.statusCode})',
-        );
-      }
-
-      final total =
-          response.contentLength ?? OnDeviceModelSpec.expectedSizeBytes;
-      var received = 0;
-      Digest? digest;
-      final digestInput = sha256.startChunkedConversion(
-        _CapturingSink((d) => digest = d),
-      );
-      sink = partFile.openWrite();
-
-      await for (final chunk in response.stream) {
+      const maxRetries = 5;
+      for (var attempt = 0; attempt < maxRetries; attempt++) {
         if (_cancelRequested) {
           throw const AppException(
             messageKey: 'onDeviceModelDownloadCancelled',
           );
         }
-        sink.add(chunk);
-        digestInput.add(chunk);
-        received += chunk.length;
-        if (total > 0) onProgress?.call(received / total);
-      }
-      await sink.flush();
-      await sink.close();
-      sink = null;
-      digestInput.close();
-      final actualSha256 = digest.toString();
 
-      if (received != OnDeviceModelSpec.expectedSizeBytes ||
-          actualSha256 != OnDeviceModelSpec.expectedSha256) {
-        throw const AppException(
-          messageKey: 'onDeviceModelCorrupted',
-          type: AppExceptionType.validation,
-        );
-      }
+        var existingLength =
+            await partFile.exists() ? await partFile.length() : 0;
+        if (existingLength > OnDeviceModelSpec.expectedSizeBytes) {
+          try {
+            await partFile.delete();
+          } catch (_) {}
+          existingLength = 0;
+        } else if (existingLength == OnDeviceModelSpec.expectedSizeBytes) {
+          final isVerified = await _verifyAndFinalize(partFile, targetFile);
+          if (isVerified) {
+            completed = true;
+            return;
+          }
+          existingLength = 0;
+        }
 
-      await partFile.rename(targetFile.path);
-      completed = true;
-    } on AppException {
-      rethrow;
-    } on SocketException catch (error) {
-      if (_cancelRequested) {
-        throw const AppException(
-          messageKey: 'onDeviceModelDownloadCancelled',
-        );
-      }
-      appLog.e('❌ On-device model download failed', error: error);
-      throw AppException(
-        messageKey: 'onDeviceModelDownloadFailed',
-        type: AppExceptionType.network,
-        cause: error,
-      );
-    } on FileSystemException catch (error) {
-      appLog.e('❌ On-device model storage error', error: error);
-      throw AppException(
-        messageKey: 'onDeviceInsufficientStorage',
-        type: AppExceptionType.validation,
-        cause: error,
-      );
-    } catch (error) {
-      if (_cancelRequested) {
-        throw const AppException(
-          messageKey: 'onDeviceModelDownloadCancelled',
-        );
-      }
-      appLog.e('❌ On-device model download failed', error: error);
-      throw AppException(
-        messageKey: 'onDeviceModelDownloadFailed',
-        type: AppExceptionType.network,
-        cause: error,
-      );
-    } finally {
-      if (identical(_downloadClient, downloadClient)) {
-        _downloadClient = null;
-      }
-      downloadClient.close();
-      if (sink != null) {
-        await sink.close();
-      }
-      if (!completed && await partFile.exists()) {
+        http.Client? client;
+        IOSink? sink;
+
         try {
-          await partFile.delete();
-        } catch (_) {}
+          client = http.Client();
+          _downloadClient = client;
+
+          final request =
+              http.Request('GET', Uri.parse(OnDeviceModelSpec.downloadUrl));
+          if (existingLength > 0) {
+            request.headers['Range'] = 'bytes=$existingLength-';
+            appLog.d(
+              '⚡ Resuming model download from $existingLength bytes (attempt ${attempt + 1})',
+            );
+          } else {
+            appLog.d('⚡ Starting model download (attempt ${attempt + 1})');
+          }
+
+          final response = await client.send(request);
+          if (_cancelRequested) {
+            throw const AppException(
+              messageKey: 'onDeviceModelDownloadCancelled',
+            );
+          }
+
+          final isPartial = response.statusCode == 206;
+          final isSuccess = response.statusCode == 200 || isPartial;
+
+          if (!isSuccess) {
+            if (response.statusCode == 416) {
+              try {
+                await partFile.delete();
+              } catch (_) {}
+              continue;
+            }
+            throw AppException(
+              messageKey: 'onDeviceModelDownloadFailed',
+              type: AppExceptionType.network,
+              cause: 'Download failed (${response.statusCode})',
+            );
+          }
+
+          var received = isPartial ? existingLength : 0;
+          sink = partFile.openWrite(
+            mode: isPartial ? FileMode.append : FileMode.write,
+          );
+
+          final completer = Completer<void>();
+          final sub = response.stream.listen(
+            (chunk) {
+              if (_cancelRequested) {
+                _downloadSub?.cancel();
+                _downloadSub = null;
+                if (!completer.isCompleted) {
+                  completer.completeError(
+                    const AppException(
+                      messageKey: 'onDeviceModelDownloadCancelled',
+                    ),
+                  );
+                }
+                return;
+              }
+              sink?.add(chunk);
+              received += chunk.length;
+              onProgress?.call(
+                (received / OnDeviceModelSpec.expectedSizeBytes)
+                    .clamp(0.0, 1.0),
+              );
+            },
+            onError: (Object error, [StackTrace? stackTrace]) {
+              if (!completer.isCompleted) {
+                completer.completeError(error, stackTrace);
+              }
+            },
+            onDone: () {
+              if (!completer.isCompleted) completer.complete();
+            },
+            cancelOnError: true,
+          );
+          _downloadSub = sub;
+
+          await completer.future;
+          await sink.flush();
+          await sink.close();
+          sink = null;
+
+          final isVerified = await _verifyAndFinalize(partFile, targetFile);
+          if (isVerified) {
+            completed = true;
+            return;
+          } else {
+            throw const AppException(
+              messageKey: 'onDeviceModelCorrupted',
+              type: AppExceptionType.validation,
+            );
+          }
+        } on AppException {
+          rethrow;
+        } catch (error) {
+          if (_cancelRequested) {
+            throw const AppException(
+              messageKey: 'onDeviceModelDownloadCancelled',
+            );
+          }
+          appLog.w(
+            '⚠️ Model download attempt ${attempt + 1} interrupted: $error',
+          );
+          if (attempt == maxRetries - 1) {
+            appLog.e(
+              '❌ On-device model download retries exhausted',
+              error: error,
+            );
+            throw AppException(
+              messageKey: 'onDeviceModelDownloadFailed',
+              type: AppExceptionType.network,
+              cause: error,
+            );
+          }
+          await Future<void>.delayed(
+            Duration(milliseconds: 1500 * (attempt + 1)),
+          );
+        } finally {
+          _downloadSub?.cancel();
+          _downloadSub = null;
+          if (identical(_downloadClient, client)) {
+            _downloadClient = null;
+          }
+          client?.close();
+          if (sink != null) {
+            try {
+              await sink.close();
+            } catch (_) {}
+          }
+        }
+      }
+    } finally {
+      await BackgroundTaskService.instance.releaseWakeLock();
+      if (!completed && _cancelRequested) {
+        if (await partFile.exists()) {
+          try {
+            await partFile.delete();
+          } catch (_) {}
+        }
       }
     }
+  }
+
+  Future<bool> _verifyAndFinalize(File partFile, File targetFile) async {
+    if (!await partFile.exists()) return false;
+    final length = await partFile.length();
+    if (length != OnDeviceModelSpec.expectedSizeBytes) return false;
+
+    final digest = await sha256.bind(partFile.openRead()).first;
+    if (digest.toString() != OnDeviceModelSpec.expectedSha256) {
+      appLog.e('❌ Model checksum mismatch');
+      try {
+        await partFile.delete();
+      } catch (_) {}
+      return false;
+    }
+
+    await partFile.rename(targetFile.path);
+    appLog.d('✅ Model downloaded and verified: ${targetFile.path}');
+    return true;
   }
 
   Future<void> deleteCachedModel() async {
@@ -188,29 +278,20 @@ class OnDeviceModelRepository {
     if (await file.exists()) {
       await file.delete();
     }
+    final part = await _partFile();
+    if (await part.exists()) {
+      await part.delete();
+    }
   }
 
   /// The previous HTDemucs file is ~166 MB and is no longer used.
   Future<void> _deleteLegacyModel() async {
     final dir = await _modelDirectory();
-    final legacy = File(p.join(dir.path, OnDeviceModelSpec.legacyModelFileName));
+    final legacy =
+        File(p.join(dir.path, OnDeviceModelSpec.legacyModelFileName));
     if (await legacy.exists()) {
       appLog.d('🔍 Removing previous on-device model');
       await legacy.delete();
     }
   }
-}
-
-/// Captures the single [Digest] a chunked hash conversion emits, without
-/// pulling in `package:convert` just for `AccumulatorSink`.
-class _CapturingSink implements Sink<Digest> {
-  _CapturingSink(this._onDigest);
-
-  final void Function(Digest) _onDigest;
-
-  @override
-  void add(Digest data) => _onDigest(data);
-
-  @override
-  void close() {}
 }

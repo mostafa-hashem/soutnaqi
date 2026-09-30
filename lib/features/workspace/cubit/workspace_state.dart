@@ -85,9 +85,16 @@ class WorkspaceState extends Equatable {
       status == WorkspaceStatus.processing &&
       processingPhase != WorkspaceProcessingPhase.none;
 
-  bool get canCancelSeparation =>
-      hasProcessingOverlay &&
-      processingPhase != WorkspaceProcessingPhase.generic;
+  bool get canCancelProcessing => hasProcessingOverlay;
+  bool get canCancelSeparation => canCancelProcessing;
+
+  bool get isTrimModified {
+    if (duration <= Duration.zero) return false;
+    final end = effectiveTrimEnd;
+    return trimStart > const Duration(milliseconds: 250) ||
+        (end > Duration.zero &&
+            end < duration - const Duration(milliseconds: 250));
+  }
 
   bool get showSeparationKeepOpenHint =>
       processingPhase == WorkspaceProcessingPhase.warmingUpEngine ||

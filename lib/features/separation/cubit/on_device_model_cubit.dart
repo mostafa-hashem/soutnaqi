@@ -84,10 +84,11 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
     }
   }
 
-  /// Stops an in-progress download and returns to [OnDeviceModelStatus.notDownloaded].
+  /// Stops an in-progress download and returns to [OnDeviceModelStatus.notDownloaded] immediately.
   void cancelDownload() {
     if (state.status != OnDeviceModelStatus.downloading) return;
     _repository.cancelDownload();
+    emit(const OnDeviceModelState(status: OnDeviceModelStatus.notDownloaded));
   }
 
   Future<void> delete() async {
