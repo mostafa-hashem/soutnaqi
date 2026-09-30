@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Voice Purify';
+  String get appName => 'Sout Naqi';
 
   @override
   String get appTagline => 'Pure audio & video processing';
@@ -49,7 +49,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageArabic => 'Arabic';
 
   @override
-  String get homeWelcome => 'Welcome to Voice Purify';
+  String get homeWelcome => 'Welcome to Sout Naqi';
 
   @override
   String get homeSubtitle => 'Your workspace foundation is ready.';
@@ -496,7 +496,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operationIsolateMusic => 'Music only';
 
   @override
-  String get aboutSoutNaqiTitle => 'About Voice Purify';
+  String get aboutSoutNaqiTitle => 'About Sout Naqi';
 
   @override
   String get aboutAppDescription =>
@@ -507,14 +507,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutVisionBody =>
-      'Voice Purify is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.';
+      'Sout Naqi is crafted to be a dedicated, professional tool for removing music and background soundtracks from audio and video recordings. It delivers crystal-clear vocals ideal for podcasts, educational content, and purposeful listening while preserving natural voice dynamics.';
 
   @override
   String get aboutDisclaimerTitle => 'Important Notice on Separation Accuracy';
 
   @override
   String get aboutDisclaimerP1 =>
-      'Voice Purify leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.';
+      'Sout Naqi leverages cutting-edge artificial intelligence to separate audio frequencies. However, due to the intricate nature of sound recording, heavy instrumentals, and acoustic resonance, music removal may not always reach 100% in certain complex tracks, occasionally leaving subtle background remnants.';
 
   @override
   String get aboutDisclaimerP2 =>
@@ -575,7 +575,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutFooter =>
-      'Voice Purify — Crafted for clean and purposeful listening';
+      'Sout Naqi — Crafted for clean and purposeful listening';
 
   @override
   String get aboutViewDetails => 'App details & isolation accuracy';

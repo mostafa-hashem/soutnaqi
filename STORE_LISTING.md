@@ -25,13 +25,13 @@
 
 ---
 
-## English - App Name: Voice Purify
+## English - App Name: Sout Naqi
 
 ### Short Description
 A free app to accurately isolate and remove music from audio and video files.
 
 ### Full Description
-Voice Purify is the ultimate tool for anyone looking to isolate human voices and remove background music from audio and video files with ease and professionalism. Whether you are a content creator, a sound engineer, or a user who prefers listening to tracks without distracting music, this app provides the perfect one-click solution.
+Sout Naqi is the ultimate tool for anyone looking to isolate human voices and remove background music from audio and video files with ease and professionalism. Whether you are a content creator, a sound engineer, or a user who prefers listening to tracks without distracting music, this app provides the perfect one-click solution.
 
 Key Features:
 - Accurate Music Isolation: The app utilizes advanced processing to separate music from vocals with high precision.
@@ -46,4 +46,4 @@ How it works:
 2. Tap the isolate button to begin removing the music.
 3. Listen to the purified result and save it directly to your phone for later use or sharing.
 
-Voice Purify offers a professional and distraction-free listening experience. Download it today and enjoy crystal clear voice quality.
+Sout Naqi offers a professional and distraction-free listening experience. Download it today and enjoy crystal clear voice quality.

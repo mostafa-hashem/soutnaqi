@@ -65,7 +65,7 @@ const translations = {
         contact_title: "Contact Us",
         contact_desc: "Have a question or suggestion? We'd love to hear from you.",
         contact_btn: "Email Us",
-        logo_text: "Voice Purify",
+        logo_text: "Sout Naqi",
         footer_privacy: "Privacy Policy",
         footer_rights: "&copy; 2026 All rights reserved."
     }
