@@ -17,11 +17,22 @@ import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec
 /// Supports resumable HTTP downloads via Range headers, automatic retry with
 /// backoff, background execution via WakeLock, and instant cancellation.
 class OnDeviceModelRepository {
-  OnDeviceModelRepository();
+  factory OnDeviceModelRepository() => instance;
+
+  OnDeviceModelRepository._();
+
+  static final OnDeviceModelRepository instance = OnDeviceModelRepository._();
 
   http.Client? _downloadClient;
   StreamSubscription<List<int>>? _downloadSub;
   bool _cancelRequested = false;
+
+  Future<void>? _activeDownloadFuture;
+  final Set<void Function(double progress)> _progressListeners = {};
+  double _lastReportedProgress = 0.0;
+
+  bool get isDownloading => _activeDownloadFuture != null;
+  double get currentDownloadProgress => _lastReportedProgress;
 
   /// Aborts an in-progress [ensureModelDownloaded] immediately. Safe to call when idle.
   void cancelDownload() {
@@ -31,6 +42,9 @@ class OnDeviceModelRepository {
     final client = _downloadClient;
     _downloadClient = null;
     client?.close();
+    _activeDownloadFuture = null;
+    _progressListeners.clear();
+    _lastReportedProgress = 0.0;
   }
 
   Future<Directory> _modelDirectory() async {
@@ -70,11 +84,39 @@ class OnDeviceModelRepository {
   Future<String> modelPath() async => (await _modelFile()).path;
 
   /// Downloads the model with Range resume and retry support, keeping WakeLock active.
+  /// If a download is already in flight, joins the active download without duplicating requests.
   Future<void> ensureModelDownloaded({
     void Function(double progress)? onProgress,
   }) async {
     if (await isModelCached()) return;
 
+    if (onProgress != null) {
+      _progressListeners.add(onProgress);
+      if (_lastReportedProgress > 0) {
+        onProgress(_lastReportedProgress);
+      }
+    }
+
+    if (_activeDownloadFuture != null) {
+      await _activeDownloadFuture!;
+      return;
+    }
+
+    final future = _executeDownload();
+    _activeDownloadFuture = future;
+
+    try {
+      await future;
+    } finally {
+      if (identical(_activeDownloadFuture, future)) {
+        _activeDownloadFuture = null;
+        _progressListeners.clear();
+        _lastReportedProgress = 0.0;
+      }
+    }
+  }
+
+  Future<void> _executeDownload() async {
     final partFile = await _partFile();
     final targetFile = await _modelFile();
     var completed = false;
@@ -171,10 +213,16 @@ class OnDeviceModelRepository {
               }
               sink?.add(chunk);
               received += chunk.length;
-              onProgress?.call(
-                (received / OnDeviceModelSpec.expectedSizeBytes)
-                    .clamp(0.0, 1.0),
-              );
+              final rawProgress = (received / OnDeviceModelSpec.expectedSizeBytes)
+                  .clamp(0.0, 1.0);
+              if (rawProgress >= _lastReportedProgress) {
+                _lastReportedProgress = rawProgress;
+                for (final listener in List.of(_progressListeners)) {
+                  try {
+                    listener(_lastReportedProgress);
+                  } catch (_) {}
+                }
+              }
             },
             onError: (Object error, [StackTrace? stackTrace]) {
               if (!completer.isCompleted) {

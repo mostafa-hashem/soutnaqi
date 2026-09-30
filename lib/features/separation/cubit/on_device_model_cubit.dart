@@ -19,6 +19,18 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
   final OnDeviceModelRepository _repository;
 
   Future<void> refresh() async {
+    // If a download is active, do not overwrite state with checking/notDownloaded
+    if (state.status == OnDeviceModelStatus.downloading ||
+        _repository.isDownloading) {
+      emit(
+        state.copyWith(
+          status: OnDeviceModelStatus.downloading,
+          downloadProgress: _repository.currentDownloadProgress,
+        ),
+      );
+      return;
+    }
+
     emit(state.copyWith(status: OnDeviceModelStatus.checking));
     try {
       if (await _repository.isModelCached()) {
@@ -42,10 +54,15 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
   }
 
   Future<void> download() async {
+    // Re-entrancy guard: if already downloading, no-op
+    if (state.status == OnDeviceModelStatus.downloading) {
+      return;
+    }
+
     emit(
       state.copyWith(
         status: OnDeviceModelStatus.downloading,
-        downloadProgress: 0,
+        downloadProgress: _repository.currentDownloadProgress,
       ),
     );
     try {
