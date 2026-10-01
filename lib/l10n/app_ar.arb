@@ -276,5 +276,9 @@
   "guideModelStepDesc": "قم بتحميل الموديل (حوالي 40 ميغابايت) لمرة واحدة ليعمل التطبيق بدون إنترنت. هل تود التحميل الآن؟",
   "guideDownloadNow": "تحميل الموديل الآن",
   "guideMaybeLater": "سأقوم به لاحقاً",
-  "guideSkip": "تخطي الدليل"
+  "guideSkip": "تخطي الدليل",
+  "communitySection": "المجتمع والدعم",
+  "telegramCommunityTitle": "مجتمع تليجرام",
+  "telegramCommunitySubtitle": "للاستفسارات، إرسال الاقتراحات، والدعم الفني المباشر",
+  "joinCommunityAction": "الانضمام للمجموعة"
 }

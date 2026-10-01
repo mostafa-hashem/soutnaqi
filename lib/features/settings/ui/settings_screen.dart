@@ -14,6 +14,7 @@ import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_cache_row.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_language_selector.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_on_device_model_row.dart';
+import 'package:soutnaqi/features/settings/ui/widgets/settings_telegram_row.dart';
 import 'package:soutnaqi/features/settings/ui/widgets/settings_theme_selector.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
@@ -98,6 +99,16 @@ class SettingsScreen extends StatelessWidget {
                     _SettingsCard(
                       children: [
                         SettingsCacheRow(settingsCubit: settingsCubit),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _SectionLabel(
+                      settingsCubit: settingsCubit,
+                      label: l10n.communitySection,
+                    ),
+                    _SettingsCard(
+                      children: [
+                        SettingsTelegramRow(settingsCubit: settingsCubit),
                       ],
                     ),
                     const SizedBox(height: 24),

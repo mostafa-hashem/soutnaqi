@@ -291,5 +291,9 @@
   "guideModelStepDesc": "Download the AI model (~40 MB) once to enable full offline separation. Would you like to download it now?",
   "guideDownloadNow": "Download Now",
   "guideMaybeLater": "Maybe Later",
-  "guideSkip": "Skip Guide"
+  "guideSkip": "Skip Guide",
+  "communitySection": "Community & Support",
+  "telegramCommunityTitle": "Telegram Community",
+  "telegramCommunitySubtitle": "Questions, feature suggestions, and live support",
+  "joinCommunityAction": "Join Group"
 }

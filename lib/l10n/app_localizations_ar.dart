@@ -781,4 +781,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get guideSkip => 'تخطي الدليل';
+
+  @override
+  String get communitySection => 'المجتمع والدعم';
+
+  @override
+  String get telegramCommunityTitle => 'مجتمع تليجرام';
+
+  @override
+  String get telegramCommunitySubtitle =>
+      'للاستفسارات، إرسال الاقتراحات، والدعم الفني المباشر';
+
+  @override
+  String get joinCommunityAction => 'الانضمام للمجموعة';
 }

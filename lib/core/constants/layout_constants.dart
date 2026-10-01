@@ -10,3 +10,5 @@ const double kShellBottomNavBarHeight = 72;
 const String kAppVersion = '1.0.0';
 
 const Duration kSplashMinDuration = Duration(milliseconds: 1800);
+
+const String kTelegramCommunityUrl = 'https://t.me/+bhgjHPz-P9Y4MTc0';

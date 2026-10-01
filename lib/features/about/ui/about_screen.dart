@@ -8,6 +8,7 @@ import 'package:soutnaqi/features/about/ui/widgets/about_disclaimer_card.dart';
 import 'package:soutnaqi/features/about/ui/widgets/about_features_card.dart';
 import 'package:soutnaqi/features/about/ui/widgets/about_footer.dart';
 import 'package:soutnaqi/features/about/ui/widgets/about_header.dart';
+import 'package:soutnaqi/features/about/ui/widgets/about_telegram_card.dart';
 import 'package:soutnaqi/features/about/ui/widgets/about_tips_card.dart';
 import 'package:soutnaqi/features/about/ui/widgets/about_vision_card.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
@@ -62,6 +63,8 @@ class AboutScreen extends StatelessWidget {
                 AboutFeaturesCard(settingsCubit: settingsCubit),
                 const SizedBox(height: 16),
                 AboutTipsCard(settingsCubit: settingsCubit),
+                const SizedBox(height: 16),
+                AboutTelegramCard(settingsCubit: settingsCubit),
                 const SizedBox(height: 20),
                 AboutFooter(settingsCubit: settingsCubit),
                 const SizedBox(height: 16),

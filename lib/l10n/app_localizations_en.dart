@@ -790,4 +790,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideSkip => 'Skip Guide';
+
+  @override
+  String get communitySection => 'Community & Support';
+
+  @override
+  String get telegramCommunityTitle => 'Telegram Community';
+
+  @override
+  String get telegramCommunitySubtitle =>
+      'Questions, feature suggestions, and live support';
+
+  @override
+  String get joinCommunityAction => 'Join Group';
 }

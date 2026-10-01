@@ -1513,6 +1513,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip Guide'**
   String get guideSkip;
+
+  /// No description provided for @communitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Community & Support'**
+  String get communitySection;
+
+  /// No description provided for @telegramCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram Community'**
+  String get telegramCommunityTitle;
+
+  /// No description provided for @telegramCommunitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions, feature suggestions, and live support'**
+  String get telegramCommunitySubtitle;
+
+  /// No description provided for @joinCommunityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Group'**
+  String get joinCommunityAction;
 }
 
 class _AppLocalizationsDelegate
