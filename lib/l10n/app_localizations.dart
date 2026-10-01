@@ -584,6 +584,156 @@ abstract class AppLocalizations {
   /// **'Audio extracted successfully.'**
   String get extractAudioSuccess;
 
+  /// No description provided for @convertVideoToAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert video to audio'**
+  String get convertVideoToAudio;
+
+  /// No description provided for @convertVideoToAudioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract studio-grade audio with custom format and bitrate.'**
+  String get convertVideoToAudioHint;
+
+  /// No description provided for @audioFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio format'**
+  String get audioFormat;
+
+  /// No description provided for @formatM4aDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'High efficiency & quality (AAC)'**
+  String get formatM4aDesc;
+
+  /// No description provided for @formatMp3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Universal playback compatibility'**
+  String get formatMp3Desc;
+
+  /// No description provided for @formatWavDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncompressed studio audio'**
+  String get formatWavDesc;
+
+  /// No description provided for @formatFlacDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lossless high resolution audio'**
+  String get formatFlacDesc;
+
+  /// No description provided for @audioBitrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitrate / Quality'**
+  String get audioBitrate;
+
+  /// No description provided for @bitrateEco.
+  ///
+  /// In en, this message translates to:
+  /// **'Eco'**
+  String get bitrateEco;
+
+  /// No description provided for @bitrateStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get bitrateStandard;
+
+  /// No description provided for @bitrateHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get bitrateHigh;
+
+  /// No description provided for @bitrateUltra.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra'**
+  String get bitrateUltra;
+
+  /// No description provided for @audioChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Channels'**
+  String get audioChannels;
+
+  /// No description provided for @channelStereo.
+  ///
+  /// In en, this message translates to:
+  /// **'Stereo'**
+  String get channelStereo;
+
+  /// No description provided for @channelMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get channelMono;
+
+  /// No description provided for @soundEnhancements.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound enhancements'**
+  String get soundEnhancements;
+
+  /// No description provided for @normalizeVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalize loudness'**
+  String get normalizeVolume;
+
+  /// No description provided for @normalizeVolumeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Even out audio levels across the recording'**
+  String get normalizeVolumeDesc;
+
+  /// No description provided for @reduceNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce noise'**
+  String get reduceNoise;
+
+  /// No description provided for @reduceNoiseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Attenuate background hiss and noise'**
+  String get reduceNoiseDesc;
+
+  /// No description provided for @convertTrimOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract trimmed segment only'**
+  String get convertTrimOnly;
+
+  /// No description provided for @convertAndOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert & open in editor'**
+  String get convertAndOpen;
+
+  /// No description provided for @convertAndSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save directly'**
+  String get convertAndSave;
+
+  /// No description provided for @convertAndShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share audio'**
+  String get convertAndShare;
+
+  /// No description provided for @videoNoAudioTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'This video contains no audio track to extract.'**
+  String get videoNoAudioTrack;
+
   /// No description provided for @compressVideoLoading.
   ///
   /// In en, this message translates to:

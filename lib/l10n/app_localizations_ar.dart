@@ -248,7 +248,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get extractAudio => 'استخراج الصوت';
 
   @override
-  String get compressVideo => 'ضغط الفيدio';
+  String get compressVideo => 'ضغط الفيديو';
 
   @override
   String get extractAudioLoading => 'جاري استخراج الصوت…';
@@ -257,14 +257,90 @@ class AppLocalizationsAr extends AppLocalizations {
   String get extractAudioSuccess => 'تم استخراج الصوت بنجاح.';
 
   @override
-  String get compressVideoLoading => 'جاري ضغط الفيدio…';
+  String get convertVideoToAudio => 'تحويل فيديو إلى صوت';
 
   @override
-  String get compressVideoSuccess => 'تم ضغط الفيدio بنجاح.';
+  String get convertVideoToAudioHint =>
+      'استخراج صوت فائق النقاء بدقة وجودات وتنسيقات متعددة.';
+
+  @override
+  String get audioFormat => 'صيغة الصوت';
+
+  @override
+  String get formatM4aDesc => 'عالي الكفاءة والدقة (AAC)';
+
+  @override
+  String get formatMp3Desc => 'توافق شامل مع كافة المشغلات';
+
+  @override
+  String get formatWavDesc => 'جودة استوديو خام بدون ضغط';
+
+  @override
+  String get formatFlacDesc => 'صوت فائق الدقة بدون أي فقدان';
+
+  @override
+  String get audioBitrate => 'معدل الجودة (البت)';
+
+  @override
+  String get bitrateEco => 'اقتصادي';
+
+  @override
+  String get bitrateStandard => 'قياسي';
+
+  @override
+  String get bitrateHigh => 'عالي';
+
+  @override
+  String get bitrateUltra => 'فائق';
+
+  @override
+  String get audioChannels => 'القنوات الصوتية';
+
+  @override
+  String get channelStereo => 'ستيريو (ثنائي)';
+
+  @override
+  String get channelMono => 'مونو (أحادي)';
+
+  @override
+  String get soundEnhancements => 'تحسينات الصوت الذكية';
+
+  @override
+  String get normalizeVolume => 'موازنة وتضخيم الصوت';
+
+  @override
+  String get normalizeVolumeDesc => 'موازنة تفاوت مستوى الصوت ورفعه باحترافية';
+
+  @override
+  String get reduceNoise => 'تنقية وإزالة الضوضاء';
+
+  @override
+  String get reduceNoiseDesc => 'تخفيف التشويش وصوت الرياح والخلفية';
+
+  @override
+  String get convertTrimOnly => 'استخراج الجزء المحدد بالقص فقط';
+
+  @override
+  String get convertAndOpen => 'تحويل وفتح في المحرر';
+
+  @override
+  String get convertAndSave => 'حفظ مباشر في الجهاز';
+
+  @override
+  String get convertAndShare => 'مشاركة الصوت';
+
+  @override
+  String get videoNoAudioTrack => 'هذا الفيديو لا يحتوي على أي مسار صوتي.';
+
+  @override
+  String get compressVideoLoading => 'جاري ضغط الفيديو…';
+
+  @override
+  String get compressVideoSuccess => 'تم ضغط الفيديو بنجاح.';
 
   @override
   String get videoCanvasHint =>
-      'لوحة معاينة الفيدio — استخدم الأدوات بالأسفل للمعالجة.';
+      'لوحة معاينة الفيديو — استخدم الأدوات بالأسفل للمعالجة.';
 
   @override
   String get navHistory => 'السجل';

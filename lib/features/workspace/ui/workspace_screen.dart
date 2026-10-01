@@ -13,6 +13,7 @@ import 'package:soutnaqi/features/guide/ui/widgets/model_setup_guide_banner.dart
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/video_to_audio_sheet.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_empty_state.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_loaded_view.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_processing_overlay.dart';
@@ -89,6 +90,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                         showDropHint: kIsWeb,
                         onPickAudio: () => _pickAudio(context),
                         onPickVideo: () => _pickVideo(context),
+                        onConvertVideoToAudio: () =>
+                            _pickVideoAndConvert(context),
                       ),
                     ),
                   ],
@@ -144,6 +147,17 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     );
   }
 
+  Future<void> _pickVideoAndConvert(BuildContext context) async {
+    final picked = await _runWithToastResult(
+      context,
+      loadingMessage: AppLocalizations.of(context).pickVideoLoading,
+      successMessage: AppLocalizations.of(context).pickMediaSuccess,
+      action: context.read<WorkspaceCubit>().pickVideo,
+    );
+    if (!context.mounted || !picked) return;
+    await showVideoToAudioSheet(context);
+  }
+
   Future<void> _runWithToast(
     BuildContext context, {
     required String loadingMessage,
@@ -179,6 +193,47 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
       );
+    }
+  }
+
+  Future<bool> _runWithToastResult(
+    BuildContext context, {
+    required String loadingMessage,
+    required String successMessage,
+    required Future<bool> Function() action,
+  }) async {
+    final settingsCubit = context.read<SettingsCubit>();
+    final l10n = AppLocalizations.of(context);
+
+    AppToast.showLoading(
+      context,
+      settingsCubit: settingsCubit,
+      message: loadingMessage,
+    );
+
+    try {
+      final success = await action();
+      if (!context.mounted) return false;
+      final hasMedia = context.read<WorkspaceCubit>().state.hasMedia;
+      if (hasMedia && success) {
+        AppToast.showSuccess(
+          context,
+          settingsCubit: settingsCubit,
+          message: successMessage,
+        );
+        return true;
+      } else {
+        AppToast.dismiss();
+        return false;
+      }
+    } on AppException catch (error) {
+      if (!context.mounted) return false;
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: appExceptionMessage(error, l10n),
+      );
+      return false;
     }
   }
 }

@@ -12,6 +12,7 @@ class WorkspaceEmptyState extends StatelessWidget {
     required this.settingsCubit,
     required this.onPickAudio,
     required this.onPickVideo,
+    required this.onConvertVideoToAudio,
     required this.isBusy,
     this.showDropHint = false,
   });
@@ -19,6 +20,7 @@ class WorkspaceEmptyState extends StatelessWidget {
   final SettingsCubit settingsCubit;
   final VoidCallback onPickAudio;
   final VoidCallback onPickVideo;
+  final VoidCallback onConvertVideoToAudio;
   final bool isBusy;
   final bool showDropHint;
 
@@ -83,6 +85,15 @@ class WorkspaceEmptyState extends StatelessWidget {
                 onPressed: isBusy ? null : onPickVideo,
                 isSecondary: true,
               ),
+              const SizedBox(height: 12),
+              _PickButton(
+                settingsCubit: settingsCubit,
+                label: l10n.convertVideoToAudio,
+                icon: HugeIconsStrokeRounded.musicNote02,
+                onPressed: isBusy ? null : onConvertVideoToAudio,
+                isSecondary: true,
+                isHighlighted: true,
+              ),
             ],
           ),
         ),
@@ -98,6 +109,7 @@ class _PickButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.isSecondary = false,
+    this.isHighlighted = false,
   });
 
   final SettingsCubit settingsCubit;
@@ -105,15 +117,32 @@ class _PickButton extends StatelessWidget {
   final List<List<dynamic>> icon;
   final VoidCallback? onPressed;
   final bool isSecondary;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
-    final background = isSecondary ? context.inputFill : context.accentPrimary;
-    final foreground = isSecondary ? context.textPrimary : context.onAccent;
+    final background = isHighlighted
+        ? context.accentPrimary.withValues(alpha: 0.12)
+        : isSecondary
+            ? context.inputFill
+            : context.accentPrimary;
+
+    final foreground = isHighlighted
+        ? context.accentPrimary
+        : isSecondary
+            ? context.textPrimary
+            : context.onAccent;
 
     return Material(
       color: background,
-      borderRadius: BorderRadius.circular(12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isHighlighted
+              ? context.accentPrimary.withValues(alpha: 0.4)
+              : context.borderSubtle,
+        ),
+      ),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),

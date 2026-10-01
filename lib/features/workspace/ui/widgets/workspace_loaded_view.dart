@@ -11,6 +11,7 @@ import 'package:soutnaqi/features/video_processing/data/video_operation.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/speed_picker_sheet.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/video_to_audio_sheet.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_canvas.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_export_bar.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/workspace_media_card.dart';
@@ -137,13 +138,7 @@ class WorkspaceLoadedView extends StatelessWidget {
                     WorkspaceVideoTools(
                       settingsCubit: settingsCubit,
                       state: state,
-                      onExtractAudio: () => _runToast(
-                        context,
-                        loading: l10n.extractAudioLoading,
-                        success: l10n.extractAudioSuccess,
-                        action: () =>
-                            cubit.processVideo(VideoOperation.extractAudio),
-                      ),
+                      onExtractAudio: () => showVideoToAudioSheet(context),
                       onCompress: () => _runToast(
                         context,
                         loading: l10n.compressVideoLoading,

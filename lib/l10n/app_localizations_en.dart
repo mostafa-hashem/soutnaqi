@@ -262,6 +262,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get extractAudioSuccess => 'Audio extracted successfully.';
 
   @override
+  String get convertVideoToAudio => 'Convert video to audio';
+
+  @override
+  String get convertVideoToAudioHint =>
+      'Extract studio-grade audio with custom format and bitrate.';
+
+  @override
+  String get audioFormat => 'Audio format';
+
+  @override
+  String get formatM4aDesc => 'High efficiency & quality (AAC)';
+
+  @override
+  String get formatMp3Desc => 'Universal playback compatibility';
+
+  @override
+  String get formatWavDesc => 'Uncompressed studio audio';
+
+  @override
+  String get formatFlacDesc => 'Lossless high resolution audio';
+
+  @override
+  String get audioBitrate => 'Bitrate / Quality';
+
+  @override
+  String get bitrateEco => 'Eco';
+
+  @override
+  String get bitrateStandard => 'Standard';
+
+  @override
+  String get bitrateHigh => 'High';
+
+  @override
+  String get bitrateUltra => 'Ultra';
+
+  @override
+  String get audioChannels => 'Channels';
+
+  @override
+  String get channelStereo => 'Stereo';
+
+  @override
+  String get channelMono => 'Mono';
+
+  @override
+  String get soundEnhancements => 'Sound enhancements';
+
+  @override
+  String get normalizeVolume => 'Normalize loudness';
+
+  @override
+  String get normalizeVolumeDesc =>
+      'Even out audio levels across the recording';
+
+  @override
+  String get reduceNoise => 'Reduce noise';
+
+  @override
+  String get reduceNoiseDesc => 'Attenuate background hiss and noise';
+
+  @override
+  String get convertTrimOnly => 'Extract trimmed segment only';
+
+  @override
+  String get convertAndOpen => 'Convert & open in editor';
+
+  @override
+  String get convertAndSave => 'Save directly';
+
+  @override
+  String get convertAndShare => 'Share audio';
+
+  @override
+  String get videoNoAudioTrack =>
+      'This video contains no audio track to extract.';
+
+  @override
   String get compressVideoLoading => 'Compressing video…';
 
   @override

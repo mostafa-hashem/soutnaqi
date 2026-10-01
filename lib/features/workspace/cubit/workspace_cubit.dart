@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter_new_min/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
@@ -22,6 +24,7 @@ import 'package:soutnaqi/features/separation/data/separation_service.dart';
 import 'package:soutnaqi/features/separation/data/separation_target.dart';
 import 'package:soutnaqi/features/video_processing/data/video_operation.dart';
 import 'package:soutnaqi/features/video_processing/data/video_processing_service.dart';
+import 'package:soutnaqi/features/video_processing/data/video_to_audio_options.dart';
 import 'package:soutnaqi/features/waveform/data/waveform_service.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
 
@@ -82,9 +85,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     });
   }
 
-  Future<void> pickAudio() => _pickMedia(_mediaPickerRepository.pickAudio);
+  Future<bool> pickAudio() => _pickMedia(_mediaPickerRepository.pickAudio);
 
-  Future<void> pickVideo() => _pickMedia(_mediaPickerRepository.pickVideo);
+  Future<bool> pickVideo() => _pickMedia(_mediaPickerRepository.pickVideo);
 
   Future<void> importMediaFromPath(String path) async {
     emit(
@@ -139,7 +142,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     }
   }
 
-  Future<void> _pickMedia(Future<MediaFile?> Function() picker) async {
+  Future<bool> _pickMedia(Future<MediaFile?> Function() picker) async {
     emit(
       state.copyWith(
         status: WorkspaceStatus.picking,
@@ -157,10 +160,11 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
             status: state.hasMedia ? WorkspaceStatus.ready : WorkspaceStatus.empty,
           ),
         );
-        return;
+        return false;
       }
 
       await _applyMedia(media);
+      return true;
     } on AppException {
       emit(
         state.copyWith(
@@ -657,6 +661,142 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           lastOperation: _videoOperationKey(operation),
         ),
       );
+    } on AppException {
+      if (_activeOperationId == operationId) {
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.ready,
+            clearVideoOperation: true,
+            clearProcessingOverlay: true,
+          ),
+        );
+      }
+      rethrow;
+    } catch (error) {
+      if (_activeOperationId == operationId) {
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.ready,
+            clearVideoOperation: true,
+            clearProcessingOverlay: true,
+          ),
+        );
+      }
+      throw AppException(messageKey: 'processingFailed', cause: error);
+    } finally {
+      await BackgroundTaskService.instance.releaseWakeLock();
+    }
+  }
+
+  Future<String> convertVideoToAudio(
+    VideoToAudioOptions options, {
+    VideoToAudioDestination destination = VideoToAudioDestination.workspace,
+  }) async {
+    final media = state.media;
+    if (media == null || !media.isVideo || media.path == null) {
+      throw const AppException(messageKey: 'mediaPickFailed');
+    }
+
+    final operationId = ++_activeOperationId;
+
+    await BackgroundTaskService.instance.acquireWakeLock();
+    emit(
+      state.copyWith(
+        status: WorkspaceStatus.processing,
+        activeVideoOperation: VideoOperation.extractAudio,
+        clearProcessed: true,
+        clearHistoryPath: true,
+        processingPhase: WorkspaceProcessingPhase.extractingAudio,
+      ),
+    );
+
+    try {
+      final outputPath = await _videoProcessingService.convertVideoToAudio(
+        inputPath: media.path!,
+        options: options,
+      );
+
+      if (_activeOperationId != operationId) return outputPath;
+
+      final baseName = p.basenameWithoutExtension(media.name);
+      final fileName = '${baseName}_audio.${options.format.extension}';
+
+      if (destination == VideoToAudioDestination.saveToDevice) {
+        await _localExportService.saveToDevice(
+          sourcePath: outputPath,
+          bytes: null,
+          fileName: fileName,
+        );
+        await _projectHistoryRepository.saveProject(
+          localPath: outputPath,
+          fileName: fileName,
+          mediaType: ProjectMediaType.audio,
+          operation: 'extract_audio',
+        );
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.processed,
+            processedPath: outputPath,
+            clearProcessingOverlay: true,
+            clearVideoOperation: true,
+            lastOperation: 'extract_audio',
+          ),
+        );
+        return outputPath;
+      }
+
+      if (destination == VideoToAudioDestination.share) {
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(outputPath)]),
+        );
+        await _projectHistoryRepository.saveProject(
+          localPath: outputPath,
+          fileName: fileName,
+          mediaType: ProjectMediaType.audio,
+          operation: 'extract_audio',
+        );
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.processed,
+            processedPath: outputPath,
+            clearProcessingOverlay: true,
+            clearVideoOperation: true,
+            lastOperation: 'extract_audio',
+          ),
+        );
+        return outputPath;
+      }
+
+      // Default: Open in Workspace
+      final audioFile = MediaFile(
+        name: _fileNameFromPath(outputPath),
+        kind: MediaKind.audio,
+        mimeType: options.format.mimeType,
+        sizeBytes: File(outputPath).lengthSync(),
+        path: outputPath,
+      );
+
+      await _player.stop();
+      emit(
+        WorkspaceState(
+          status: WorkspaceStatus.processed,
+          media: audioFile,
+          processedPath: outputPath,
+          playbackSource: PlaybackSource.processed,
+          lastOperation: 'extract_audio',
+        ),
+      );
+      await _loadProcessedOutput(outputPath);
+      unawaited(_loadWaveform(audioFile));
+      unawaited(
+        _projectHistoryRepository.saveProject(
+          localPath: outputPath,
+          fileName: audioFile.name,
+          mediaType: ProjectMediaType.audio,
+          operation: 'extract_audio',
+        ),
+      );
+      return outputPath;
     } on AppException {
       if (_activeOperationId == operationId) {
         emit(
