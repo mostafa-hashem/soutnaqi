@@ -14,15 +14,25 @@ import 'package:soutnaqi/features/workspace/cubit/workspace_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
 
+class _VideoToAudioRequest {
+  const _VideoToAudioRequest({
+    required this.options,
+    required this.destination,
+  });
+
+  final VideoToAudioOptions options;
+  final VideoToAudioDestination destination;
+}
+
 Future<void> showVideoToAudioSheet(
   BuildContext context, {
   VoidCallback? onCompleted,
-}) {
+}) async {
   final settingsCubit = context.read<SettingsCubit>();
   final workspaceCubit = context.read<WorkspaceCubit>();
   final historyCubit = context.read<HistoryCubit>();
 
-  return showModalBottomSheet<void>(
+  final request = await showModalBottomSheet<_VideoToAudioRequest>(
     context: context,
     isScrollControlled: true,
     backgroundColor: context.surfacePrimary,
@@ -36,10 +46,66 @@ Future<void> showVideoToAudioSheet(
           BlocProvider.value(value: workspaceCubit),
           BlocProvider.value(value: historyCubit),
         ],
-        child: VideoToAudioSheet(onCompleted: onCompleted),
+        child: const VideoToAudioSheet(),
       );
     },
   );
+
+  if (request == null || !context.mounted) return;
+
+  final l10n = AppLocalizations.of(context);
+
+  AppToast.showLoading(
+    context,
+    settingsCubit: settingsCubit,
+    message: l10n.extractAudioLoading,
+  );
+
+  try {
+    await workspaceCubit.convertVideoToAudio(
+      request.options,
+      destination: request.destination,
+    );
+
+    if (!context.mounted) {
+      AppToast.dismiss();
+      return;
+    }
+
+    final successMsg = request.destination == VideoToAudioDestination.saveToDevice
+        ? l10n.saveSuccess
+        : request.destination == VideoToAudioDestination.share
+            ? l10n.shareSuccess
+            : l10n.extractAudioSuccess;
+
+    AppToast.showSuccess(
+      context,
+      settingsCubit: settingsCubit,
+      message: successMsg,
+    );
+
+    onCompleted?.call();
+  } on AppException catch (error) {
+    if (!context.mounted) {
+      AppToast.dismiss();
+      return;
+    }
+    AppToast.showFailure(
+      context,
+      settingsCubit: settingsCubit,
+      message: appExceptionMessage(error, l10n),
+    );
+  } catch (_) {
+    if (!context.mounted) {
+      AppToast.dismiss();
+      return;
+    }
+    AppToast.showFailure(
+      context,
+      settingsCubit: settingsCubit,
+      message: l10n.processingFailed,
+    );
+  }
 }
 
 class VideoToAudioSheet extends StatefulWidget {
@@ -68,17 +134,11 @@ class _VideoToAudioSheetState extends State<VideoToAudioSheet> {
         (state.trimEnd > Duration.zero && state.trimEnd < state.duration);
   }
 
-  Future<void> _executeConversion(
-    BuildContext context,
-    VideoToAudioDestination destination,
-  ) async {
+  void _submit(VideoToAudioDestination destination) {
     if (_isProcessing) return;
+    setState(() => _isProcessing = true);
 
-    final workspaceCubit = context.read<WorkspaceCubit>();
-    final settingsCubit = context.read<SettingsCubit>();
-    final l10n = AppLocalizations.of(context);
-    final workspaceState = workspaceCubit.state;
-
+    final workspaceState = context.read<WorkspaceCubit>().state;
     final options = VideoToAudioOptions(
       format: _selectedFormat,
       bitrate: _selectedBitrate,
@@ -89,51 +149,12 @@ class _VideoToAudioSheetState extends State<VideoToAudioSheet> {
       trimEnd: _trimOnly ? workspaceState.trimEnd : null,
     );
 
-    setState(() => _isProcessing = true);
-    Navigator.of(context).pop();
-
-    AppToast.showLoading(
-      context,
-      settingsCubit: settingsCubit,
-      message: l10n.extractAudioLoading,
-    );
-
-    try {
-      await workspaceCubit.convertVideoToAudio(
-        options,
+    Navigator.of(context).pop(
+      _VideoToAudioRequest(
+        options: options,
         destination: destination,
-      );
-
-      if (!context.mounted) return;
-
-      final successMsg = destination == VideoToAudioDestination.saveToDevice
-          ? l10n.saveSuccess
-          : destination == VideoToAudioDestination.share
-              ? l10n.shareSuccess
-              : l10n.extractAudioSuccess;
-
-      AppToast.showSuccess(
-        context,
-        settingsCubit: settingsCubit,
-        message: successMsg,
-      );
-
-      widget.onCompleted?.call();
-    } on AppException catch (error) {
-      if (!context.mounted) return;
-      AppToast.showFailure(
-        context,
-        settingsCubit: settingsCubit,
-        message: appExceptionMessage(error, l10n),
-      );
-    } catch (_) {
-      if (!context.mounted) return;
-      AppToast.showFailure(
-        context,
-        settingsCubit: settingsCubit,
-        message: l10n.processingFailed,
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -495,10 +516,7 @@ class _VideoToAudioSheetState extends State<VideoToAudioSheet> {
                       ),
                       onPressed: _isProcessing
                           ? null
-                          : () => _executeConversion(
-                                context,
-                                VideoToAudioDestination.workspace,
-                              ),
+                          : () => _submit(VideoToAudioDestination.workspace),
                     ),
                   ),
                 ],
@@ -529,10 +547,7 @@ class _VideoToAudioSheetState extends State<VideoToAudioSheet> {
                       ),
                       onPressed: _isProcessing
                           ? null
-                          : () => _executeConversion(
-                                context,
-                                VideoToAudioDestination.saveToDevice,
-                              ),
+                          : () => _submit(VideoToAudioDestination.saveToDevice),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -549,10 +564,7 @@ class _VideoToAudioSheetState extends State<VideoToAudioSheet> {
                     ),
                     onPressed: _isProcessing
                         ? null
-                        : () => _executeConversion(
-                              context,
-                              VideoToAudioDestination.share,
-                            ),
+                        : () => _submit(VideoToAudioDestination.share),
                     child: HugeIcon(
                       icon: HugeIconsStrokeRounded.share01,
                       color: context.textPrimary,
@@ -588,14 +600,16 @@ class _EnhancementSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.inputFill,
+    return Material(
+      color: context.inputFill,
+      borderRadius: BorderRadius.circular(12),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
+        side: BorderSide(
           color: value ? context.accentPrimary : context.borderSubtle,
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: SwitchListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
         activeThumbColor: context.accentPrimary,

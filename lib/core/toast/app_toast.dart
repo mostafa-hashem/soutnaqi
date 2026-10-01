@@ -17,7 +17,9 @@ class AppToast {
   static OverlayEntry? _currentEntry;
 
   static void dismiss() {
-    _currentEntry?.remove();
+    try {
+      _currentEntry?.remove();
+    } catch (_) {}
     _currentEntry = null;
   }
 
@@ -86,7 +88,8 @@ class AppToast {
   }) {
     dismiss();
 
-    final overlay = Overlay.of(context);
+    final overlay =
+        Overlay.maybeOf(context, rootOverlay: true) ?? Overlay.of(context);
     _currentEntry = OverlayEntry(
       builder: (overlayContext) {
         final colors = _phaseColors(overlayContext, phase);
@@ -164,6 +167,15 @@ class AppToast {
       final entry = _currentEntry;
       Future<void>.delayed(
         duration ?? const Duration(seconds: 3),
+        () {
+          if (_currentEntry == entry) dismiss();
+        },
+      );
+    } else if (phase == ToastPhase.loading) {
+      // Safety timeout: never leave a loading toast stuck indefinitely
+      final entry = _currentEntry;
+      Future<void>.delayed(
+        const Duration(minutes: 2),
         () {
           if (_currentEntry == entry) dismiss();
         },

@@ -175,7 +175,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
 
     try {
       await action();
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       final hasMedia = context.read<WorkspaceCubit>().state.hasMedia;
       if (hasMedia) {
         AppToast.showSuccess(
@@ -187,11 +190,24 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         AppToast.dismiss();
       }
     } on AppException catch (error) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.processingFailed,
       );
     }
   }
@@ -213,7 +229,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
 
     try {
       final success = await action();
-      if (!context.mounted) return false;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return false;
+      }
       final hasMedia = context.read<WorkspaceCubit>().state.hasMedia;
       if (hasMedia && success) {
         AppToast.showSuccess(
@@ -227,11 +246,25 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         return false;
       }
     } on AppException catch (error) {
-      if (!context.mounted) return false;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return false;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+      return false;
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return false;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.processingFailed,
       );
       return false;
     }
@@ -265,7 +298,10 @@ class _WebDropZoneState extends State<_WebDropZone> {
 
     try {
       await context.read<WorkspaceCubit>().importDroppedFile(file);
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       final hasMedia = context.read<WorkspaceCubit>().state.hasMedia;
       if (hasMedia) {
         AppToast.showSuccess(
@@ -277,11 +313,24 @@ class _WebDropZoneState extends State<_WebDropZone> {
         AppToast.dismiss();
       }
     } on AppException catch (error) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: widget.settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: widget.settingsCubit,
+        message: l10n.processingFailed,
       );
     }
   }

@@ -198,7 +198,10 @@ class WorkspaceLoadedView extends StatelessWidget {
 
     try {
       final saved = await context.read<WorkspaceCubit>().saveExport();
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       if (!saved) {
         AppToast.dismiss();
         return;
@@ -209,11 +212,24 @@ class WorkspaceLoadedView extends StatelessWidget {
         message: l10n.saveSuccess,
       );
     } on AppException catch (error) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.saveFailed,
       );
     }
   }
@@ -230,7 +246,10 @@ class WorkspaceLoadedView extends StatelessWidget {
 
     try {
       final record = await context.read<WorkspaceCubit>().saveToHistory();
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       context.read<HistoryCubit>().addProjectLocally(record);
       AppToast.showSuccess(
         context,
@@ -238,11 +257,24 @@ class WorkspaceLoadedView extends StatelessWidget {
         message: l10n.saveToHistorySuccess,
       );
     } on AppException catch (error) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.saveToHistoryFailed,
       );
     }
   }
@@ -290,18 +322,34 @@ class WorkspaceLoadedView extends StatelessWidget {
     );
     try {
       await action();
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showSuccess(
         context,
         settingsCubit: settingsCubit,
         message: success,
       );
     } on AppException catch (error) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
       AppToast.showFailure(
         context,
         settingsCubit: settingsCubit,
         message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.processingFailed,
       );
     }
   }

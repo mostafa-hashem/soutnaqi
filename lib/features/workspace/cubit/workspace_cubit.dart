@@ -768,25 +768,25 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       }
 
       // Default: Open in Workspace
+      final file = File(outputPath);
+      final sizeBytes = file.existsSync() ? file.lengthSync() : 0;
       final audioFile = MediaFile(
         name: _fileNameFromPath(outputPath),
         kind: MediaKind.audio,
         mimeType: options.format.mimeType,
-        sizeBytes: File(outputPath).lengthSync(),
+        sizeBytes: sizeBytes,
         path: outputPath,
       );
 
       await _player.stop();
       emit(
         WorkspaceState(
-          status: WorkspaceStatus.processed,
+          status: WorkspaceStatus.ready,
           media: audioFile,
-          processedPath: outputPath,
-          playbackSource: PlaybackSource.processed,
           lastOperation: 'extract_audio',
         ),
       );
-      await _loadProcessedOutput(outputPath);
+      await _loadAudioSource(media: audioFile, source: PlaybackSource.original);
       unawaited(_loadWaveform(audioFile));
       unawaited(
         _projectHistoryRepository.saveProject(
