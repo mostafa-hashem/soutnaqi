@@ -93,21 +93,10 @@ class WorkspaceModelGuideBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () => settingsCubit.completeModelGuide(),
-                child: Text(
-                  l10n.guideSkip,
-                  style: font14W500(
-                    settingsCubit: settingsCubit,
-                    color: context.textMuted,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Material(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 320;
+              final actionButton = Material(
                 color: context.accentPrimary,
                 borderRadius: BorderRadius.circular(AppRadii.md),
                 child: InkWell(
@@ -121,7 +110,8 @@ class WorkspaceModelGuideBanner extends StatelessWidget {
                       vertical: 8,
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: isNarrow ? MainAxisSize.max : MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           l10n.guideGoToSettings,
@@ -142,8 +132,39 @@ class WorkspaceModelGuideBanner extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-            ],
+              );
+
+              final skipButton = TextButton(
+                onPressed: () => settingsCubit.completeModelGuide(),
+                child: Text(
+                  l10n.guideSkip,
+                  style: font14W500(
+                    settingsCubit: settingsCubit,
+                    color: context.textMuted,
+                  ),
+                ),
+              );
+
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    actionButton,
+                    const SizedBox(height: 4),
+                    Center(child: skipButton),
+                  ],
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  skipButton,
+                  const SizedBox(width: 8),
+                  actionButton,
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -216,10 +237,10 @@ class SettingsModelGuideCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 320;
+              final maybeLaterButton = TextButton(
                 onPressed: () => settingsCubit.completeModelGuide(),
                 child: Text(
                   l10n.guideMaybeLater,
@@ -228,9 +249,9 @@ class SettingsModelGuideCard extends StatelessWidget {
                     color: context.textMuted,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              BlocBuilder<OnDeviceModelCubit, OnDeviceModelState>(
+              );
+
+              final downloadButton = BlocBuilder<OnDeviceModelCubit, OnDeviceModelState>(
                 builder: (context, modelState) {
                   final isDownloading =
                       modelState.status == OnDeviceModelStatus.downloading;
@@ -252,7 +273,8 @@ class SettingsModelGuideCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: isNarrow ? MainAxisSize.max : MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             HugeIcon(
                               icon: HugeIconsStrokeRounded.cloudDownload,
@@ -273,8 +295,28 @@ class SettingsModelGuideCard extends StatelessWidget {
                     ),
                   );
                 },
-              ),
-            ],
+              );
+
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    downloadButton,
+                    const SizedBox(height: 4),
+                    Center(child: maybeLaterButton),
+                  ],
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  maybeLaterButton,
+                  const SizedBox(width: 8),
+                  downloadButton,
+                ],
+              );
+            },
           ),
         ],
       ),

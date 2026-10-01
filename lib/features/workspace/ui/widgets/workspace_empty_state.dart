@@ -28,76 +28,117 @@ class WorkspaceEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              HugeIcon(
-                icon: HugeIconsStrokeRounded.upload04,
-                color: context.accentPrimary,
-                size: 56,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.workspaceEmptyTitle,
-                textAlign: TextAlign.center,
-                style: font20W700(
-                  settingsCubit: settingsCubit,
-                  color: context.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.workspaceEmptySubtitle,
-                textAlign: TextAlign.center,
-                style: font14W400(
-                  settingsCubit: settingsCubit,
-                  color: context.textSecondary,
-                ),
-              ),
-              if (showDropHint) ...[
-                const SizedBox(height: 12),
-                Text(
-                  l10n.dropHint,
-                  textAlign: TextAlign.center,
-                  style: font12W500(
-                    settingsCubit: settingsCubit,
-                    color: context.accentPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.hasBoundedHeight ? constraints.maxHeight : 0,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIconsStrokeRounded.upload04,
+                        color: context.accentPrimary,
+                        size: 56,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.workspaceEmptyTitle,
+                        textAlign: TextAlign.center,
+                        style: font20W700(
+                          settingsCubit: settingsCubit,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.workspaceEmptySubtitle,
+                        textAlign: TextAlign.center,
+                        style: font14W400(
+                          settingsCubit: settingsCubit,
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      if (showDropHint) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.dropHint,
+                          textAlign: TextAlign.center,
+                          style: font12W500(
+                            settingsCubit: settingsCubit,
+                            color: context.accentPrimary,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 28),
+                      LayoutBuilder(
+                        builder: (context, actionConstraints) {
+                          final isNarrow = actionConstraints.maxWidth < 320;
+                          final audioBtn = _PickButton(
+                            settingsCubit: settingsCubit,
+                            label: l10n.pickAudio,
+                            icon: HugeIconsStrokeRounded.audioWave01,
+                            onPressed: isBusy ? null : onPickAudio,
+                          );
+                          final videoBtn = _PickButton(
+                            settingsCubit: settingsCubit,
+                            label: l10n.pickVideo,
+                            icon: HugeIconsStrokeRounded.computerVideo,
+                            onPressed: isBusy ? null : onPickVideo,
+                            isSecondary: true,
+                          );
+                          final convertBtn = _PickButton(
+                            settingsCubit: settingsCubit,
+                            label: l10n.convertVideoToAudio,
+                            icon: HugeIconsStrokeRounded.musicNote02,
+                            onPressed: isBusy ? null : onConvertVideoToAudio,
+                            isSecondary: true,
+                            isHighlighted: true,
+                          );
+
+                          if (isNarrow) {
+                            return Column(
+                              children: [
+                                audioBtn,
+                                const SizedBox(height: 12),
+                                videoBtn,
+                                const SizedBox(height: 12),
+                                convertBtn,
+                              ],
+                            );
+                          }
+
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(child: audioBtn),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: videoBtn),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              convertBtn,
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-              ],
-              const SizedBox(height: 28),
-              _PickButton(
-                settingsCubit: settingsCubit,
-                label: l10n.pickAudio,
-                icon: HugeIconsStrokeRounded.audioWave01,
-                onPressed: isBusy ? null : onPickAudio,
               ),
-              const SizedBox(height: 12),
-              _PickButton(
-                settingsCubit: settingsCubit,
-                label: l10n.pickVideo,
-                icon: HugeIconsStrokeRounded.computerVideo,
-                onPressed: isBusy ? null : onPickVideo,
-                isSecondary: true,
-              ),
-              const SizedBox(height: 12),
-              _PickButton(
-                settingsCubit: settingsCubit,
-                label: l10n.convertVideoToAudio,
-                icon: HugeIconsStrokeRounded.musicNote02,
-                onPressed: isBusy ? null : onConvertVideoToAudio,
-                isSecondary: true,
-                isHighlighted: true,
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -149,19 +190,28 @@ class _PickButton extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              HugeIcon(icon: icon, color: foreground, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: font16W600(
-                  settingsCubit: settingsCubit,
-                  color: foreground,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HugeIcon(icon: icon, color: foreground, size: 20),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      style: font14W600(
+                        settingsCubit: settingsCubit,
+                        color: foreground,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
