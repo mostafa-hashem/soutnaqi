@@ -1018,8 +1018,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   }
 
   String? _resolveExportPath() {
-    if (state.playbackSource == PlaybackSource.processed &&
-        state.hasProcessedOutput) {
+    if (state.hasProcessedOutput) {
       return state.processedPath;
     }
     return state.media?.path;

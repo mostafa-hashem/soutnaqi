@@ -154,19 +154,21 @@ class WorkspaceLoadedView extends StatelessWidget {
                       ),
                       onChangeSpeed: () => _changeVideoSpeed(context),
                     ),
-                  const SizedBox(height: 16),
-                  WorkspaceExportBar(
-                    settingsCubit: settingsCubit,
-                    state: state,
-                    onSave: () => _save(context),
-                    onShare: () => _runToast(
-                      context,
-                      loading: l10n.shareLoading,
-                      success: l10n.shareSuccess,
-                      action: cubit.shareExport,
+                  if (state.hasProcessedOutput) ...[
+                    const SizedBox(height: 16),
+                    WorkspaceExportBar(
+                      settingsCubit: settingsCubit,
+                      state: state,
+                      onSave: () => _save(context),
+                      onShare: () => _runToast(
+                        context,
+                        loading: l10n.shareLoading,
+                        success: l10n.shareSuccess,
+                        action: cubit.shareExport,
+                      ),
+                      onSaveToHistory: () => _saveToHistory(context),
                     ),
-                    onSaveToHistory: () => _saveToHistory(context),
-                  ),
+                  ],
                 ],
               ),
             ),
