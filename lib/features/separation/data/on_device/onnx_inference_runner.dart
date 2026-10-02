@@ -15,7 +15,14 @@ import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec
 
 /// Top-level so [Isolate.run] does not capture unsendable locals from callers.
 Future<int> _loadNativeSessionInIsolate(String modelPath, int threads) {
-  return Isolate.run(() => _createNativeSession(modelPath, threads));
+  return Isolate.run(() {
+    try {
+      return _createNativeSession(modelPath, threads);
+    } catch (e) {
+      // Must not propagate private _OrtException across isolate boundary.
+      throw Exception('Failed to load ONNX native session: $e');
+    }
+  });
 }
 
 /// Builds the native session off the UI isolate. Returns the session
@@ -61,7 +68,19 @@ int _createNativeSession(String modelPath, int threads) {
     );
     _setSessionConfig(options, 'session.intra_op.allow_spinning', '0');
     _setSessionConfig(options, 'session.inter_op.allow_spinning', '0');
-    _appendXnnpack(options, threads);
+
+    // On 32-bit architectures (e.g. armeabi-v7a), XNNPACK can deadlock worker
+    // threads or crash on unaligned memory access (SIGBUS). Use CPU provider
+    // directly on 32-bit, and safely attempt XNNPACK on 64-bit devices with fallback.
+    final is32Bit = ffi.sizeOf<ffi.Pointer>() == 4;
+    if (!is32Bit) {
+      try {
+        _appendXnnpack(options, threads);
+      } catch (_) {
+        // Fall back cleanly to CPU provider
+      }
+    }
+
     OrtStatus.checkOrtStatus(
       onnxRuntimeBinding.OrtSessionOptionsAppendExecutionProvider_CPU(
         options,
@@ -159,22 +178,24 @@ class OnnxInferenceRunner {
   /// One core only. Extra workers plus spin-wait freeze the whole phone.
   static const _maxIntraOpThreads = 1;
 
-  /// One chunk can exceed the plugin's default 60s isolate timeout.
-  static const _chunkTimeout = Duration(minutes: 10);
+  /// One chunk timeout. Reduced to 90 seconds so worker hangs fail fast with actionable error.
+  static const _chunkTimeout = Duration(seconds: 90);
 
   static Future<OnnxInferenceRunner> load(String modelPath) async {
     if (!_envInitialized) {
       OrtEnv.instance.init();
       _envInitialized = true;
     }
-    final threads =
-        Platform.numberOfProcessors.clamp(1, _maxIntraOpThreads);
+    final is32Bit = ffi.sizeOf<ffi.Pointer>() == 4;
+    final threads = is32Bit
+        ? 1
+        : Platform.numberOfProcessors.clamp(1, _maxIntraOpThreads);
     // CreateSession on the download is multi-second sync work — never do it
     // on the UI isolate or Android reports ANR.
     final sessionAddress =
         await _loadNativeSessionInIsolate(modelPath, threads);
     appLog.d(
-      '⚡ On-device ONNX session: XNNPACK+CPU, intraOp=$threads, spinning=off',
+      '⚡ On-device ONNX session: is32Bit=$is32Bit, intraOp=$threads, spinning=off',
     );
     return OnnxInferenceRunner._(OrtSession.fromAddress(sessionAddress));
   }

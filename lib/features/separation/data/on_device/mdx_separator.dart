@@ -34,9 +34,9 @@ class MdxSeparator {
       starts.add(start);
     }
 
-    final accLeft = Float64List(mixtureLength);
-    final accRight = Float64List(mixtureLength);
-    final divider = Float64List(mixtureLength);
+    final accLeft = Float32List(mixtureLength);
+    final accRight = Float32List(mixtureLength);
+    final divider = Float32List(mixtureLength);
 
     for (var index = 0; index < starts.length; index++) {
       cancelToken?.throwIfCancelled();

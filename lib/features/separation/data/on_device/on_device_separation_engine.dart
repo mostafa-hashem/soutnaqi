@@ -34,6 +34,12 @@ class OnDeviceSeparationEngine {
   Future<void> warmUpIfNeeded({SeparationProgressCallback? onProgress}) async {
     if (_isWarmedUp && _runner != null) return;
     if (_warmUpTask != null) {
+      onProgress?.call(
+        const SeparationProgress(
+          stage: SeparationStage.warmingUpEngine,
+          progress: 0,
+        ),
+      );
       await _warmUpTask;
       return;
     }
