@@ -13,6 +13,8 @@ String projectOperationLabel(String? operationKey, AppLocalizations l10n) {
     'compress' => l10n.operationCompressVideo,
     'isolate_vocals' => l10n.operationIsolateVocals,
     'isolate_music' => l10n.operationIsolateMusic,
+    'mute_video' => l10n.muteVideo,
+    'replace_audio' => l10n.replaceVideoAudio,
     _ => operationKey,
   };
 }

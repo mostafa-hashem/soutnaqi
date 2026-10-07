@@ -295,5 +295,22 @@
   "communitySection": "Community & Support",
   "telegramCommunityTitle": "Telegram Community",
   "telegramCommunitySubtitle": "Questions, feature suggestions, and live support",
-  "joinCommunityAction": "Join Group"
+  "joinCommunityAction": "Join Group",
+  "cleanVideoFromMusic": "Remove Music from Video",
+  "cleanVideoFromMusicDesc": "Isolate and remove background music, keeping clear vocals in the video",
+  "cleanAudioFromMusic": "Remove Music from Audio",
+  "cleanAudioFromMusicDesc": "Extract pure human vocals and remove instruments and background music",
+  "muteVideo": "Mute Video",
+  "muteVideoDesc": "Remove audio track completely for a silent video",
+  "muteVideoLoading": "Muting video audio…",
+  "muteVideoSuccess": "Video muted successfully.",
+  "replaceVideoAudio": "Merge Clean Audio into Video",
+  "replaceVideoAudioDesc": "Merge a clean recitation, nasheed, or audio track onto the video",
+  "replaceVideoAudioLoading": "Merging new audio track onto video…",
+  "replaceVideoAudioSuccess": "Audio merged onto video successfully.",
+  "pickAudioPrompt": "Select an audio file to merge",
+  "comparePureTitle": "Purity Comparison (A/B)",
+  "comparePureSubtitle": "Switch seamlessly during playback to verify music has been removed",
+  "playbackOriginalWithMusic": "Original (With Music)",
+  "playbackPureNoMusic": "Pure Sound (No Music)"
 }

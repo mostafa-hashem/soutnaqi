@@ -47,6 +47,11 @@ class IoVideoProcessingService implements VideoProcessingService {
       VideoOperation.changeSpeed => throw StateError('handled above'),
       VideoOperation.compress =>
         '-y -i "$inputPath" -vcodec libx264 -crf 28 -acodec aac -b:a 128k "$outputPath"',
+      VideoOperation.muteVideo =>
+        '-y -i "$inputPath" -c:v copy -an "$outputPath"',
+      VideoOperation.replaceAudio => throw StateError(
+          'Use replaceAudioTrack directly',
+        ),
       VideoOperation.isolateVocals => throw StateError(
           'Separation operations use SeparationService',
         ),
@@ -246,6 +251,8 @@ class IoVideoProcessingService implements VideoProcessingService {
       VideoOperation.extractAudio => FfmpegAudioCodec.outputExtension,
       VideoOperation.compress => 'mp4',
       VideoOperation.changeSpeed => 'mp4',
+      VideoOperation.muteVideo => 'mp4',
+      VideoOperation.replaceAudio => 'mp4',
       VideoOperation.isolateVocals => throw StateError(
           'Separation operations use SeparationService',
         ),

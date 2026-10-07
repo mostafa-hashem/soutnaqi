@@ -803,4 +803,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get joinCommunityAction => 'Join Group';
+
+  @override
+  String get cleanVideoFromMusic => 'Remove Music from Video';
+
+  @override
+  String get cleanVideoFromMusicDesc =>
+      'Isolate and remove background music, keeping clear vocals in the video';
+
+  @override
+  String get cleanAudioFromMusic => 'Remove Music from Audio';
+
+  @override
+  String get cleanAudioFromMusicDesc =>
+      'Extract pure human vocals and remove instruments and background music';
+
+  @override
+  String get muteVideo => 'Mute Video';
+
+  @override
+  String get muteVideoDesc =>
+      'Remove audio track completely for a silent video';
+
+  @override
+  String get muteVideoLoading => 'Muting video audio…';
+
+  @override
+  String get muteVideoSuccess => 'Video muted successfully.';
+
+  @override
+  String get replaceVideoAudio => 'Merge Clean Audio into Video';
+
+  @override
+  String get replaceVideoAudioDesc =>
+      'Merge a clean recitation, nasheed, or audio track onto the video';
+
+  @override
+  String get replaceVideoAudioLoading => 'Merging new audio track onto video…';
+
+  @override
+  String get replaceVideoAudioSuccess =>
+      'Audio merged onto video successfully.';
+
+  @override
+  String get pickAudioPrompt => 'Select an audio file to merge';
+
+  @override
+  String get comparePureTitle => 'Purity Comparison (A/B)';
+
+  @override
+  String get comparePureSubtitle =>
+      'Switch seamlessly during playback to verify music has been removed';
+
+  @override
+  String get playbackOriginalWithMusic => 'Original (With Music)';
+
+  @override
+  String get playbackPureNoMusic => 'Pure Sound (No Music)';
 }

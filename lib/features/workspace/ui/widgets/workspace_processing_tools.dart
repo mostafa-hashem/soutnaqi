@@ -32,6 +32,8 @@ class WorkspaceProcessingTools extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isBusy = state.isBusy;
+    final isIsolating = state.status == WorkspaceStatus.processing &&
+        state.activeOperation == AudioOperation.isolateVocals;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -52,6 +54,22 @@ class WorkspaceProcessingTools extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
+            _HeroAudioCleanCard(
+              settingsCubit: settingsCubit,
+              isLoading: isIsolating,
+              onPressed: isBusy ? null : onIsolateVocals,
+            ),
+            if (AppEnv.isSeparationConfigured) ...[
+              const SizedBox(height: 8),
+              Text(
+                separationHintFor(l10n),
+                style: font12W400(
+                  settingsCubit: settingsCubit,
+                  color: context.textSecondary,
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -80,26 +98,8 @@ class WorkspaceProcessingTools extends StatelessWidget {
                       state.activeOperation == AudioOperation.changeSpeed,
                   onPressed: isBusy ? null : onChangeSpeed,
                 ),
-                _ToolButton(
-                  settingsCubit: settingsCubit,
-                  label: l10n.processIsolateVocals,
-                  icon: HugeIconsStrokeRounded.aiVoice,
-                  isLoading: state.status == WorkspaceStatus.processing &&
-                      state.activeOperation == AudioOperation.isolateVocals,
-                  onPressed: isBusy ? null : onIsolateVocals,
-                ),
               ],
             ),
-            if (AppEnv.isSeparationConfigured) ...[
-              const SizedBox(height: 8),
-              Text(
-                separationHintFor(l10n),
-                style: font12W400(
-                  settingsCubit: settingsCubit,
-                  color: context.textSecondary,
-                ),
-              ),
-            ],
             if (state.hasProcessedOutput) ...[
               const SizedBox(height: 12),
               Text(
@@ -111,6 +111,120 @@ class WorkspaceProcessingTools extends StatelessWidget {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroAudioCleanCard extends StatelessWidget {
+  const _HeroAudioCleanCard({
+    required this.settingsCubit,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final SettingsCubit settingsCubit;
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Material(
+      color: context.accentPrimary.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: context.accentPrimary.withValues(alpha: 0.35),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: context.accentPrimary,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const HugeIcon(
+                        icon: HugeIconsStrokeRounded.aiVoice,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.cleanAudioFromMusic,
+                            style: font16W600(
+                              settingsCubit: settingsCubit,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.accentPrimary,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'AI',
+                            style: font10W400(
+                              settingsCubit: settingsCubit,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.cleanAudioFromMusicDesc,
+                      style: font12W400(
+                        settingsCubit: settingsCubit,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              HugeIcon(
+                icon: HugeIconsStrokeRounded.arrowRight01,
+                color: context.accentPrimary,
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );

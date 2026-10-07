@@ -1537,6 +1537,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Join Group'**
   String get joinCommunityAction;
+
+  /// No description provided for @cleanVideoFromMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Music from Video'**
+  String get cleanVideoFromMusic;
+
+  /// No description provided for @cleanVideoFromMusicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Isolate and remove background music, keeping clear vocals in the video'**
+  String get cleanVideoFromMusicDesc;
+
+  /// No description provided for @cleanAudioFromMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Music from Audio'**
+  String get cleanAudioFromMusic;
+
+  /// No description provided for @cleanAudioFromMusicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract pure human vocals and remove instruments and background music'**
+  String get cleanAudioFromMusicDesc;
+
+  /// No description provided for @muteVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute Video'**
+  String get muteVideo;
+
+  /// No description provided for @muteVideoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove audio track completely for a silent video'**
+  String get muteVideoDesc;
+
+  /// No description provided for @muteVideoLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Muting video audio…'**
+  String get muteVideoLoading;
+
+  /// No description provided for @muteVideoSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Video muted successfully.'**
+  String get muteVideoSuccess;
+
+  /// No description provided for @replaceVideoAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Clean Audio into Video'**
+  String get replaceVideoAudio;
+
+  /// No description provided for @replaceVideoAudioDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge a clean recitation, nasheed, or audio track onto the video'**
+  String get replaceVideoAudioDesc;
+
+  /// No description provided for @replaceVideoAudioLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging new audio track onto video…'**
+  String get replaceVideoAudioLoading;
+
+  /// No description provided for @replaceVideoAudioSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio merged onto video successfully.'**
+  String get replaceVideoAudioSuccess;
+
+  /// No description provided for @pickAudioPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an audio file to merge'**
+  String get pickAudioPrompt;
+
+  /// No description provided for @comparePureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Purity Comparison (A/B)'**
+  String get comparePureTitle;
+
+  /// No description provided for @comparePureSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch seamlessly during playback to verify music has been removed'**
+  String get comparePureSubtitle;
+
+  /// No description provided for @playbackOriginalWithMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Original (With Music)'**
+  String get playbackOriginalWithMusic;
+
+  /// No description provided for @playbackPureNoMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure Sound (No Music)'**
+  String get playbackPureNoMusic;
 }
 
 class _AppLocalizationsDelegate

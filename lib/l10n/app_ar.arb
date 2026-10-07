@@ -280,5 +280,22 @@
   "communitySection": "المجتمع والدعم",
   "telegramCommunityTitle": "مجتمع تليجرام",
   "telegramCommunitySubtitle": "للاستفسارات، إرسال الاقتراحات، والدعم الفني المباشر",
-  "joinCommunityAction": "الانضمام للمجموعة"
+  "joinCommunityAction": "الانضمام للمجموعة",
+  "cleanVideoFromMusic": "تنقية الفيديو من الموسيقى",
+  "cleanVideoFromMusicDesc": "حذف المعازف والموسيقى مع الإبقاء على الصوت البشري وإعادة تركيبه بالفيديو",
+  "cleanAudioFromMusic": "تنقية الصوت من الموسيقى",
+  "cleanAudioFromMusicDesc": "استخراج الصوت البشري النقي وإلغاء الآلات الموسيقية والإيقاع",
+  "muteVideo": "كتم صوت الفيديو",
+  "muteVideoDesc": "إزالة الصوت تماماً وحفظ فيديو صامت",
+  "muteVideoLoading": "جاري كتم صوت الفيديو…",
+  "muteVideoSuccess": "تم كتم صوت الفيديو بنجاح.",
+  "replaceVideoAudio": "دمج صوت نقي بالفيديو",
+  "replaceVideoAudioDesc": "تركيب تلاوة أو نشيد أو مسار صوتي نقي على الفيديو",
+  "replaceVideoAudioLoading": "جاري دمج الصوت الجديد بالفيديو…",
+  "replaceVideoAudioSuccess": "تم دمج الصوت بالفيديو بنجاح.",
+  "pickAudioPrompt": "اختر ملف الصوت المراد دمجه",
+  "comparePureTitle": "مقارنة النقاء (A/B)",
+  "comparePureSubtitle": "بدّل أثناء التشغيل لسماع الفرق والتأكد من إزالة الموسيقى لحظياً",
+  "playbackOriginalWithMusic": "الأصلي (بالموسيقى)",
+  "playbackPureNoMusic": "صوت نقي (بدون موسيقى)"
 }

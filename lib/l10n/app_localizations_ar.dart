@@ -794,4 +794,59 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get joinCommunityAction => 'الانضمام للمجموعة';
+
+  @override
+  String get cleanVideoFromMusic => 'تنقية الفيديو من الموسيقى';
+
+  @override
+  String get cleanVideoFromMusicDesc =>
+      'حذف المعازف والموسيقى مع الإبقاء على الصوت البشري وإعادة تركيبه بالفيديو';
+
+  @override
+  String get cleanAudioFromMusic => 'تنقية الصوت من الموسيقى';
+
+  @override
+  String get cleanAudioFromMusicDesc =>
+      'استخراج الصوت البشري النقي وإلغاء الآلات الموسيقية والإيقاع';
+
+  @override
+  String get muteVideo => 'كتم صوت الفيديو';
+
+  @override
+  String get muteVideoDesc => 'إزالة الصوت تماماً وحفظ فيديو صامت';
+
+  @override
+  String get muteVideoLoading => 'جاري كتم صوت الفيديو…';
+
+  @override
+  String get muteVideoSuccess => 'تم كتم صوت الفيديو بنجاح.';
+
+  @override
+  String get replaceVideoAudio => 'دمج صوت نقي بالفيديو';
+
+  @override
+  String get replaceVideoAudioDesc =>
+      'تركيب تلاوة أو نشيد أو مسار صوتي نقي على الفيديو';
+
+  @override
+  String get replaceVideoAudioLoading => 'جاري دمج الصوت الجديد بالفيديو…';
+
+  @override
+  String get replaceVideoAudioSuccess => 'تم دمج الصوت بالفيديو بنجاح.';
+
+  @override
+  String get pickAudioPrompt => 'اختر ملف الصوت المراد دمجه';
+
+  @override
+  String get comparePureTitle => 'مقارنة النقاء (A/B)';
+
+  @override
+  String get comparePureSubtitle =>
+      'بدّل أثناء التشغيل لسماع الفرق والتأكد من إزالة الموسيقى لحظياً';
+
+  @override
+  String get playbackOriginalWithMusic => 'الأصلي (بالموسيقى)';
+
+  @override
+  String get playbackPureNoMusic => 'صوت نقي (بدون موسيقى)';
 }

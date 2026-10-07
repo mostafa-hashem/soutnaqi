@@ -152,6 +152,14 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateVocals),
                       ),
+                      onMuteVideo: () => _runToast(
+                        context,
+                        loading: l10n.muteVideoLoading,
+                        success: l10n.muteVideoSuccess,
+                        action: () =>
+                            cubit.processVideo(VideoOperation.muteVideo),
+                      ),
+                      onReplaceAudio: () => _replaceAudio(context),
                       onChangeSpeed: () => _changeVideoSpeed(context),
                     ),
                   if (state.hasProcessedOutput) ...[
@@ -402,6 +410,55 @@ class WorkspaceLoadedView extends StatelessWidget {
         speed: selected,
       ),
     );
+  }
+
+  Future<void> _replaceAudio(BuildContext context) async {
+    final cubit = context.read<WorkspaceCubit>();
+    final l10n = AppLocalizations.of(context);
+    final settingsCubit = context.read<SettingsCubit>();
+
+    AppToast.showLoading(
+      context,
+      settingsCubit: settingsCubit,
+      message: l10n.replaceVideoAudioLoading,
+    );
+
+    try {
+      final success = await cubit.replaceVideoAudioWithPicker();
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      if (!success) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showSuccess(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.replaceVideoAudioSuccess,
+      );
+    } on AppException catch (error) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: appExceptionMessage(error, l10n),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        AppToast.dismiss();
+        return;
+      }
+      AppToast.showFailure(
+        context,
+        settingsCubit: settingsCubit,
+        message: l10n.processingFailed,
+      );
+    }
   }
 
   String _formatBytes(int bytes) {

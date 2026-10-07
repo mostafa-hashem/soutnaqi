@@ -63,7 +63,9 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
       return;
     }
     if (sourceChanged && !_isProcessing) {
-      _initializePlayer();
+      final savedPos = _controller?.value.position;
+      final wasPlaying = _controller?.value.isPlaying ?? false;
+      _initializePlayer(seekToPosition: savedPos, autoPlay: wasPlaying);
     }
   }
 
@@ -79,7 +81,10 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
     await controller?.dispose();
   }
 
-  Future<void> _initializePlayer() async {
+  Future<void> _initializePlayer({
+    Duration? seekToPosition,
+    bool autoPlay = false,
+  }) async {
     if (_isProcessing) return;
 
     final generation = ++_playerGeneration;
@@ -122,6 +127,12 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
       if (!mounted || generation != _playerGeneration) {
         await controller.dispose();
         return;
+      }
+      if (seekToPosition != null && seekToPosition > Duration.zero) {
+        await controller.seekTo(seekToPosition);
+      }
+      if (autoPlay) {
+        await controller.play();
       }
       setState(() {});
     } catch (_) {

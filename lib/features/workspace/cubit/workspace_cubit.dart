@@ -955,6 +955,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     final media = state.media;
     if (media == null) return;
 
+    final wasPlaying = _player.playing;
+    final currentPosition = _player.position;
+
     emit(state.copyWith(playbackSource: source));
 
     if (!media.isAudio) return;
@@ -963,6 +966,86 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       await _loadAudioSource(media: media, source: PlaybackSource.original);
     } else {
       await _loadProcessedOutput(state.processedPath!);
+    }
+
+    if (currentPosition > Duration.zero) {
+      await _player.seek(currentPosition);
+    }
+    if (wasPlaying) {
+      await _player.play();
+    }
+  }
+
+  Future<bool> replaceVideoAudioWithPicker() async {
+    final media = state.media;
+    if (media == null || !media.isVideo) {
+      throw const AppException(messageKey: 'processingVideoOnly');
+    }
+
+    final pickedAudio = await _mediaPickerRepository.pickAudio();
+    if (pickedAudio == null || pickedAudio.path == null) {
+      return false;
+    }
+
+    _ensureLocalProcessing(media);
+
+    final operationId = ++_activeOperationId;
+    await BackgroundTaskService.instance.acquireWakeLock();
+
+    emit(
+      state.copyWith(
+        status: WorkspaceStatus.processing,
+        activeVideoOperation: VideoOperation.replaceAudio,
+        clearProcessed: true,
+        clearHistoryPath: true,
+        processingPhase: WorkspaceProcessingPhase.finalizingVideo,
+      ),
+    );
+
+    try {
+      final outputPath = await _videoProcessingService.replaceAudioTrack(
+        videoPath: media.path!,
+        audioPath: pickedAudio.path!,
+      );
+
+      if (_activeOperationId != operationId) return false;
+
+      await _player.stop();
+      emit(
+        state.copyWith(
+          status: WorkspaceStatus.processed,
+          processedPath: outputPath,
+          playbackSource: PlaybackSource.processed,
+          clearVideoOperation: true,
+          clearProcessingOverlay: true,
+          lastOperation: 'replace_audio',
+        ),
+      );
+      return true;
+    } on AppException {
+      if (_activeOperationId == operationId) {
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.ready,
+            clearVideoOperation: true,
+            clearProcessingOverlay: true,
+          ),
+        );
+      }
+      rethrow;
+    } catch (error) {
+      if (_activeOperationId == operationId) {
+        emit(
+          state.copyWith(
+            status: WorkspaceStatus.ready,
+            clearVideoOperation: true,
+            clearProcessingOverlay: true,
+          ),
+        );
+      }
+      throw AppException(messageKey: 'processingFailed', cause: error);
+    } finally {
+      await BackgroundTaskService.instance.releaseWakeLock();
     }
   }
 
@@ -1047,6 +1130,8 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       VideoOperation.isolateVocals => 'isolate_vocals',
       VideoOperation.isolateMusic => 'isolate_music',
       VideoOperation.changeSpeed => 'change_speed',
+      VideoOperation.muteVideo => 'mute_video',
+      VideoOperation.replaceAudio => 'replace_audio',
     };
   }
 

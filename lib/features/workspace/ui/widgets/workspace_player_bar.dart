@@ -6,7 +6,10 @@ import 'package:soutnaqi/core/theme/magliss_typography.dart';
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 import 'package:soutnaqi/features/workspace/cubit/workspace_state.dart';
 import 'package:soutnaqi/features/workspace/ui/widgets/speed_picker_sheet.dart';
+import 'package:soutnaqi/features/workspace/ui/widgets/workspace_playback_source_toggle.dart';
 import 'package:soutnaqi/l10n/app_localizations.dart';
+
+export 'package:soutnaqi/features/workspace/ui/widgets/workspace_playback_source_toggle.dart';
 
 class WorkspacePlayerBar extends StatelessWidget {
   const WorkspacePlayerBar({
@@ -164,77 +167,5 @@ class WorkspacePlayerBar extends StatelessWidget {
     final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
-  }
-}
-
-class WorkspacePlaybackSourceToggle extends StatelessWidget {
-  const WorkspacePlaybackSourceToggle({
-    super.key,
-    required this.settingsCubit,
-    required this.state,
-    required this.onSourceChanged,
-  });
-
-  final SettingsCubit settingsCubit;
-  final WorkspaceState state;
-  final ValueChanged<PlaybackSource> onSourceChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return Wrap(
-      spacing: 8,
-      children: [
-        _SourceChip(
-          settingsCubit: settingsCubit,
-          label: l10n.playbackOriginal,
-          selected: state.playbackSource == PlaybackSource.original,
-          onTap: () => onSourceChanged(PlaybackSource.original),
-        ),
-        _SourceChip(
-          settingsCubit: settingsCubit,
-          label: l10n.playbackProcessed,
-          selected: state.playbackSource == PlaybackSource.processed,
-          onTap: () => onSourceChanged(PlaybackSource.processed),
-        ),
-      ],
-    );
-  }
-}
-
-class _SourceChip extends StatelessWidget {
-  const _SourceChip({
-    required this.settingsCubit,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final SettingsCubit settingsCubit;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? context.accentPrimary : context.inputFill,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Text(
-            label,
-            style: font12W500(
-              settingsCubit: settingsCubit,
-              color: selected ? context.onAccent : context.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
