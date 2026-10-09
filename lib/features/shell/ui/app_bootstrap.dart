@@ -71,7 +71,7 @@ class _AppBootstrapState extends State<AppBootstrap> {
         BlocProvider(
           create: (_) => HistoryCubit(repository: _historyRepository),
         ),
-        BlocProvider(create: (_) => OnDeviceModelCubit()),
+        BlocProvider(create: (_) => OnDeviceModelCubit()..refresh()),
         BlocProvider(
           create: (_) => WorkspaceCubit(
             mediaPickerRepository: MediaPickerRepository(),

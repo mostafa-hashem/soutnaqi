@@ -27,6 +27,7 @@ class SettingsRepository {
 
   Future<void> saveOnboardingCompleted(bool completed) async {
     final preferences = await _store.preferences;
+    _preferences = preferences;
     await preferences.setBool(_onboardingCompletedKey, completed);
     appLog.d('✅ Onboarding completed saved: $completed');
   }
@@ -37,6 +38,7 @@ class SettingsRepository {
 
   Future<void> saveModelGuideCompleted(bool completed) async {
     final preferences = await _store.preferences;
+    _preferences = preferences;
     await preferences.setBool(_modelGuideCompletedKey, completed);
     appLog.d('✅ Model guide completed saved: $completed');
   }

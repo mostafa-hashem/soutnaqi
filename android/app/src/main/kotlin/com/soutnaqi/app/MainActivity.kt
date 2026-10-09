@@ -8,13 +8,13 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.OpenableColumns
 import androidx.activity.enableEdgeToEdge
-import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileOutputStream
 
-class MainActivity : FlutterFragmentActivity() {
+class MainActivity : FlutterActivity() {
     private val BACKGROUND_CHANNEL = "com.soutnaqi.app/background"
     private val INTENT_CHANNEL = "com.soutnaqi.app/incoming_media"
 

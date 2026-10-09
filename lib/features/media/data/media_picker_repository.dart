@@ -36,12 +36,25 @@ class MediaPickerRepository {
     '3gp',
   ];
 
-  Future<MediaFile?> pickAudio() => _pick(
+  Future<MediaFile?> pickAudio() async {
+    try {
+      final file = await _pick(
         type: FileType.audio,
         expectedKind: MediaKind.audio,
       );
+      if (file != null) return file;
+    } catch (error) {
+      appLog.w('⚠️ Standard audio picker failed, trying extensions fallback: $error');
+    }
 
-  /// Opens the system gallery/photos picker to select a video.
+    return _pick(
+      type: FileType.custom,
+      allowedExtensions: _audioExtensions,
+      expectedKind: MediaKind.audio,
+    );
+  }
+
+  /// Opens the system gallery/photos picker to select a video, with FilePicker fallback.
   Future<MediaFile?> pickVideo() async {
     appLog.d('🔍 Opening video gallery picker…');
     try {
@@ -49,46 +62,52 @@ class MediaPickerRepository {
         source: ImageSource.gallery,
       );
 
-      if (file == null) {
-        appLog.d('⚡ Video picker cancelled');
-        return null;
+      if (file != null) {
+        if (file.name.isEmpty) {
+          throw const AppException(messageKey: 'mediaPickFailed');
+        }
+
+        final bytes = kIsWeb ? await file.readAsBytes() : null;
+        final path = kIsWeb ? null : file.path;
+
+        if (!kIsWeb && (path == null || path.isEmpty)) {
+          throw const AppException(messageKey: 'mediaPickFailed');
+        }
+
+        if (kIsWeb && (bytes == null || bytes.isEmpty)) {
+          throw const AppException(messageKey: 'mediaPickFailed');
+        }
+
+        final sizeBytes = bytes?.length ?? await file.length();
+        final mimeType = lookupMimeType(file.name) ??
+            (path != null ? lookupMimeType(path) : null) ??
+            _fallbackMime(MediaKind.video);
+
+        final media = MediaFile(
+          name: file.name,
+          kind: MediaKind.video,
+          mimeType: mimeType,
+          sizeBytes: sizeBytes,
+          path: path,
+          bytes: bytes,
+        );
+
+        appLog.d('✅ Video picked from gallery: ${media.name}');
+        return media;
       }
-
-      if (file.name.isEmpty) {
-        throw const AppException(messageKey: 'mediaPickFailed');
-      }
-
-      final bytes = kIsWeb ? await file.readAsBytes() : null;
-      final path = kIsWeb ? null : file.path;
-
-      if (!kIsWeb && (path == null || path.isEmpty)) {
-        throw const AppException(messageKey: 'mediaPickFailed');
-      }
-
-      if (kIsWeb && (bytes == null || bytes.isEmpty)) {
-        throw const AppException(messageKey: 'mediaPickFailed');
-      }
-
-      final sizeBytes = bytes?.length ?? await file.length();
-      final mimeType = lookupMimeType(file.name) ??
-          (path != null ? lookupMimeType(path) : null) ??
-          _fallbackMime(MediaKind.video);
-
-      final media = MediaFile(
-        name: file.name,
-        kind: MediaKind.video,
-        mimeType: mimeType,
-        sizeBytes: sizeBytes,
-        path: path,
-        bytes: bytes,
-      );
-
-      appLog.d('✅ Video picked from gallery: ${media.name}');
-      return media;
-    } on AppException {
-      rethrow;
     } catch (error) {
-      appLog.e('❌ Video pick failed', error: error);
+      appLog.w('⚠️ Video gallery picker failed, falling back to file picker: $error');
+    }
+
+    // Fallback: pick via file picker
+    try {
+      appLog.d('🔍 Falling back to FilePicker for video…');
+      return await _pick(
+        type: FileType.video,
+        expectedKind: MediaKind.video,
+      );
+    } catch (error) {
+      appLog.e('❌ All video pick methods failed', error: error);
       throw AppException(messageKey: 'mediaPickFailed', cause: error);
     }
   }
@@ -196,7 +215,17 @@ class MediaPickerRepository {
       }
 
       if (kind != expectedKind) {
-        throw const AppException(messageKey: 'mediaPickFailed');
+        final pathMime = file.path != null ? lookupMimeType(file.path!) : null;
+        if (expectedKind == MediaKind.audio && pathMime != null && pathMime.startsWith('audio/')) {
+          kind = MediaKind.audio;
+        } else if (expectedKind == MediaKind.video && pathMime != null && pathMime.startsWith('video/')) {
+          kind = MediaKind.video;
+        } else if (allowedExtensions == null) {
+          // If the platform picker specifically opened for this type, treat as expectedKind
+          kind = expectedKind;
+        } else {
+          throw const AppException(messageKey: 'mediaPickFailed');
+        }
       }
 
       final mimeType = lookupMimeType(file.name) ??

@@ -194,7 +194,9 @@ class OnDeviceModelRepository {
             appLog.d('⚡ Starting model download (attempt ${attempt + 1})');
           }
 
-          final response = await client.send(request);
+          final response = await client.send(request).timeout(
+            const Duration(seconds: 45),
+          );
           if (_cancelRequested) {
             throw const AppException(
               messageKey: 'onDeviceModelDownloadCancelled',
@@ -279,8 +281,23 @@ class OnDeviceModelRepository {
               type: AppExceptionType.validation,
             );
           }
-        } on AppException {
-          rethrow;
+        } on AppException catch (e) {
+          if (_cancelRequested || e.messageKey == 'onDeviceModelDownloadCancelled') {
+            rethrow;
+          }
+          appLog.w(
+            '⚠️ Model download attempt ${attempt + 1} interrupted: $e',
+          );
+          if (attempt == maxRetries - 1) {
+            appLog.e(
+              '❌ On-device model download retries exhausted',
+              error: e,
+            );
+            rethrow;
+          }
+          await Future<void>.delayed(
+            Duration(seconds: (attempt + 1).clamp(1, 4)),
+          );
         } catch (error) {
           if (_cancelRequested) {
             throw const AppException(
