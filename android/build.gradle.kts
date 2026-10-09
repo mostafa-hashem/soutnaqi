@@ -19,6 +19,7 @@ subprojects {
 subprojects {
     plugins.withId("com.android.library") {
         extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+            compileSdk = 36
             lint {
                 checkReleaseBuilds = false
                 abortOnError = false
