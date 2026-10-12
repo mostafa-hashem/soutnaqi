@@ -150,6 +150,7 @@ class _HeroVideoCleanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return Material(
       color: context.accentPrimary.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(12),
@@ -238,7 +239,9 @@ class _HeroVideoCleanCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               HugeIcon(
-                icon: HugeIconsStrokeRounded.arrowRight01,
+                icon: isRtl
+                    ? HugeIconsStrokeRounded.arrowLeft01
+                    : HugeIconsStrokeRounded.arrowRight01,
                 color: context.accentPrimary,
                 size: 18,
               ),

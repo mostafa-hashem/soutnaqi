@@ -141,6 +141,7 @@ class _SettingsCacheRowState extends State<SettingsCacheRow> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final sizeFormatted = _isLoading ? '…' : _formatBytes(_cacheSizeBytes);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return InkWell(
       onTap: _confirmAndClear,
@@ -177,9 +178,11 @@ class _SettingsCacheRowState extends State<SettingsCacheRow> {
               ),
             ),
             HugeIcon(
-              icon: HugeIconsStrokeRounded.arrowRight01,
+              icon: isRtl
+                  ? HugeIconsStrokeRounded.arrowLeft01
+                  : HugeIconsStrokeRounded.arrowRight01,
               color: context.textMuted,
-              size: 18,
+              size: 20,
             ),
           ],
         ),
