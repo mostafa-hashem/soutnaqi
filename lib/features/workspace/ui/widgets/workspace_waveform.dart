@@ -47,8 +47,20 @@ class WorkspaceWaveform extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTapDown: (details) {
               final box = context.findRenderObject() as RenderBox?;
-              if (box == null) return;
-              final fraction = details.localPosition.dx / box.size.width;
+              if (box == null || box.size.width <= 0) return;
+              final fraction = (details.localPosition.dx / box.size.width).clamp(0.0, 1.0);
+              onSeekFraction(fraction);
+            },
+            onHorizontalDragStart: (details) {
+              final box = context.findRenderObject() as RenderBox?;
+              if (box == null || box.size.width <= 0) return;
+              final fraction = (details.localPosition.dx / box.size.width).clamp(0.0, 1.0);
+              onSeekFraction(fraction);
+            },
+            onHorizontalDragUpdate: (details) {
+              final box = context.findRenderObject() as RenderBox?;
+              if (box == null || box.size.width <= 0) return;
+              final fraction = (details.localPosition.dx / box.size.width).clamp(0.0, 1.0);
               onSeekFraction(fraction);
             },
           ),

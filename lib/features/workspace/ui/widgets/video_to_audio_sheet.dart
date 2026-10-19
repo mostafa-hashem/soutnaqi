@@ -62,7 +62,7 @@ Future<void> showVideoToAudioSheet(
   );
 
   try {
-    await workspaceCubit.convertVideoToAudio(
+    final savedPath = await workspaceCubit.convertVideoToAudio(
       request.options,
       destination: request.destination,
     );
@@ -72,8 +72,12 @@ Future<void> showVideoToAudioSheet(
       return;
     }
 
+    final pathSuffix = (request.destination == VideoToAudioDestination.saveToDevice &&
+            savedPath.isNotEmpty)
+        ? '\n$savedPath'
+        : '';
     final successMsg = request.destination == VideoToAudioDestination.saveToDevice
-        ? l10n.saveSuccess
+        ? '${l10n.saveSuccess}$pathSuffix'
         : request.destination == VideoToAudioDestination.share
             ? l10n.shareSuccess
             : l10n.extractAudioSuccess;

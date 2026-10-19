@@ -11,7 +11,7 @@ import 'package:soutnaqi/l10n/app_localizations.dart';
 
 export 'package:soutnaqi/features/workspace/ui/widgets/workspace_playback_source_toggle.dart';
 
-class WorkspacePlayerBar extends StatelessWidget {
+class WorkspacePlayerBar extends StatefulWidget {
   const WorkspacePlayerBar({
     super.key,
     required this.settingsCubit,
@@ -30,10 +30,24 @@ class WorkspacePlayerBar extends StatelessWidget {
   final ValueChanged<double> onSpeedChanged;
 
   @override
+  State<WorkspacePlayerBar> createState() => _WorkspacePlayerBarState();
+}
+
+class _WorkspacePlayerBarState extends State<WorkspacePlayerBar> {
+  double? _dragFraction;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final maxMs = state.duration.inMilliseconds;
-    final value = maxMs > 0 ? state.position.inMilliseconds / maxMs : 0.0;
+    final maxMs = widget.state.duration.inMilliseconds;
+    final progress =
+        maxMs > 0 ? widget.state.position.inMilliseconds / maxMs : 0.0;
+    final sliderValue = (_dragFraction ?? progress).clamp(0.0, 1.0);
+    final isCompleted = maxMs > 0 && widget.state.position >= widget.state.duration;
+
+    final currentDuration = _dragFraction != null
+        ? Duration(milliseconds: (_dragFraction! * maxMs).round())
+        : widget.state.position;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -48,19 +62,51 @@ class WorkspacePlayerBar extends StatelessWidget {
             Row(
               children: [
                 Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(18),
+                  child: InkWell(
+                    onTap: widget.state.isPlayerReady
+                        ? () {
+                            final target =
+                                widget.state.position - const Duration(seconds: 10);
+                            widget.onSeek(
+                              target < Duration.zero ? Duration.zero : target,
+                            );
+                          }
+                        : null,
+                    borderRadius: BorderRadius.circular(18),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIconsStrokeRounded.backward01,
+                          color: context.textPrimary,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Material(
                   color: context.accentPrimary,
                   borderRadius: BorderRadius.circular(24),
                   child: InkWell(
-                    onTap: state.isPlayerReady ? onTogglePlayback : null,
+                    onTap: widget.state.isPlayerReady
+                        ? widget.onTogglePlayback
+                        : null,
                     borderRadius: BorderRadius.circular(24),
                     child: SizedBox(
                       width: 44,
                       height: 44,
                       child: Center(
                         child: HugeIcon(
-                          icon: state.isPlaying
+                          icon: widget.state.isPlaying
                               ? HugeIconsStrokeRounded.pause
-                              : HugeIconsStrokeRounded.play,
+                              : (isCompleted
+                                  ? HugeIconsStrokeRounded.replay
+                                  : HugeIconsStrokeRounded.play),
                           color: Colors.white,
                           size: 22,
                         ),
@@ -68,7 +114,36 @@ class WorkspacePlayerBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 8),
+                Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(18),
+                  child: InkWell(
+                    onTap: widget.state.isPlayerReady
+                        ? () {
+                            final target =
+                                widget.state.position + const Duration(seconds: 10);
+                            final max = widget.state.duration;
+                            widget.onSeek(
+                              max > Duration.zero && target > max ? max : target,
+                            );
+                          }
+                        : null,
+                    borderRadius: BorderRadius.circular(18),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIconsStrokeRounded.forward01,
+                          color: context.textPrimary,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,15 +151,15 @@ class WorkspacePlayerBar extends StatelessWidget {
                       Text(
                         l10n.previewPlayback,
                         style: font14W600(
-                          settingsCubit: settingsCubit,
+                          settingsCubit: widget.settingsCubit,
                           color: context.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_formatDuration(state.position)} / ${_formatDuration(state.duration)}',
+                        '${_formatDuration(currentDuration)} / ${_formatDuration(widget.state.duration)}',
                         style: font12W400(
-                          settingsCubit: settingsCubit,
+                          settingsCubit: widget.settingsCubit,
                           color: context.textMuted,
                         ),
                       ),
@@ -95,15 +170,15 @@ class WorkspacePlayerBar extends StatelessWidget {
                   color: context.inputFill,
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
-                    onTap: state.isPlayerReady
+                    onTap: widget.state.isPlayerReady
                         ? () async {
                             final selected = await showSpeedPickerSheet(
                               context,
-                              settingsCubit: settingsCubit,
-                              currentSpeed: state.playbackSpeed,
+                              settingsCubit: widget.settingsCubit,
+                              currentSpeed: widget.state.playbackSpeed,
                             );
                             if (selected != null) {
-                              onSpeedChanged(selected);
+                              widget.onSpeedChanged(selected);
                             }
                           }
                         : null,
@@ -123,9 +198,9 @@ class WorkspacePlayerBar extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${state.playbackSpeed}x',
+                            '${widget.state.playbackSpeed}x',
                             style: font12W600(
-                              settingsCubit: settingsCubit,
+                              settingsCubit: widget.settingsCubit,
                               color: context.textPrimary,
                             ),
                           ),
@@ -138,23 +213,30 @@ class WorkspacePlayerBar extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Slider(
-              value: value.clamp(0, 1),
-              onChanged: state.isPlayerReady
-                  ? (next) => onSeek(
-                        Duration(
-                          milliseconds: (next * maxMs).round(),
-                        ),
-                      )
+              value: sliderValue,
+              onChangeStart: widget.state.isPlayerReady
+                  ? (val) => setState(() => _dragFraction = val)
+                  : null,
+              onChanged: widget.state.isPlayerReady
+                  ? (val) => setState(() => _dragFraction = val)
+                  : null,
+              onChangeEnd: widget.state.isPlayerReady
+                  ? (val) {
+                      widget.onSeek(
+                        Duration(milliseconds: (val * maxMs).round()),
+                      );
+                      setState(() => _dragFraction = null);
+                    }
                   : null,
               activeColor: context.accentPrimary,
               inactiveColor: context.borderSubtle,
             ),
-            if (state.hasProcessedOutput) ...[
+            if (widget.state.hasProcessedOutput) ...[
               const SizedBox(height: 8),
               WorkspacePlaybackSourceToggle(
-                settingsCubit: settingsCubit,
-                state: state,
-                onSourceChanged: onSourceChanged,
+                settingsCubit: widget.settingsCubit,
+                state: widget.state,
+                onSourceChanged: widget.onSourceChanged,
               ),
             ],
           ],

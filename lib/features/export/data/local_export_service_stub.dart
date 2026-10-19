@@ -14,10 +14,11 @@ class StubLocalExportService implements LocalExportService {
   bool get isSupported => true;
 
   @override
-  Future<bool> saveToDevice({
+  Future<LocalExportResult> saveToDevice({
     required String? sourcePath,
     required List<int>? bytes,
     required String fileName,
+    bool? isVideo,
   }) async {
     if (bytes == null) {
       throw const AppException(messageKey: 'exportFailed');
@@ -33,10 +34,14 @@ class StubLocalExportService implements LocalExportService {
 
     if (savedPath == null) {
       appLog.d('🔍 Save cancelled by user');
-      return false;
+      return LocalExportResult.failure;
     }
 
     appLog.d('✅ Saved export via browser download');
-    return true;
+    return LocalExportResult(
+      isSuccess: true,
+      displayPath: fileName,
+      fullPath: savedPath,
+    );
   }
 }

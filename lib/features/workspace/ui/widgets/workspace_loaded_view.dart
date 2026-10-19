@@ -207,19 +207,22 @@ class WorkspaceLoadedView extends StatelessWidget {
     );
 
     try {
-      final saved = await context.read<WorkspaceCubit>().saveExport();
+      final result = await context.read<WorkspaceCubit>().saveExport();
       if (!context.mounted) {
         AppToast.dismiss();
         return;
       }
-      if (!saved) {
+      if (!result.isSuccess) {
         AppToast.dismiss();
         return;
       }
+      final pathInfo = result.displayPath != null
+          ? '\n${result.displayPath}'
+          : '';
       AppToast.showSuccess(
         context,
         settingsCubit: settingsCubit,
-        message: l10n.saveSuccess,
+        message: '${l10n.saveSuccess}$pathInfo',
       );
     } on AppException catch (error) {
       if (!context.mounted) {

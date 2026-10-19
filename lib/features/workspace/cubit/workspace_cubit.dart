@@ -76,10 +76,16 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       );
     });
     _playerStateSubscription = _player.playerStateStream.listen((playerState) {
+      final isCompleted =
+          playerState.processingState == ProcessingState.completed;
+      final isReady = playerState.processingState == ProcessingState.ready ||
+          playerState.processingState == ProcessingState.completed ||
+          playerState.processingState == ProcessingState.buffering;
+
       emit(
         state.copyWith(
-          isPlaying: playerState.playing,
-          isPlayerReady: playerState.processingState == ProcessingState.ready,
+          isPlaying: playerState.playing && !isCompleted,
+          isPlayerReady: isReady,
         ),
       );
     });
@@ -722,10 +728,11 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       final fileName = '${baseName}_audio.${options.format.extension}';
 
       if (destination == VideoToAudioDestination.saveToDevice) {
-        await _localExportService.saveToDevice(
+        final exportResult = await _localExportService.saveToDevice(
           sourcePath: outputPath,
           bytes: null,
           fileName: fileName,
+          isVideo: false,
         );
         await _projectHistoryRepository.saveProject(
           localPath: outputPath,
@@ -742,7 +749,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
             lastOperation: 'extract_audio',
           ),
         );
-        return outputPath;
+        return exportResult.displayPath ?? outputPath;
       }
 
       if (destination == VideoToAudioDestination.share) {
@@ -839,7 +846,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     emit(state.copyWith(trimEnd: next));
   }
 
-  Future<bool> saveExport() async {
+  Future<LocalExportResult> saveExport() async {
     emit(state.copyWith(isSaving: true));
     try {
       final exportPath = _resolveExportPath();
@@ -854,13 +861,16 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
           ? _fileNameFromPath(exportPath)
           : media!.name;
 
-      final saved = await _localExportService.saveToDevice(
+      final isVideo = media?.isVideo ?? false;
+
+      final result = await _localExportService.saveToDevice(
         sourcePath: exportPath ?? media?.path,
         bytes: kIsWeb && exportPath == null ? media?.bytes : null,
         fileName: fileName,
+        isVideo: isVideo,
       );
       emit(state.copyWith(isSaving: false));
-      return saved;
+      return result;
     } on AppException {
       emit(state.copyWith(isSaving: false));
       rethrow;
@@ -1052,6 +1062,18 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   Future<void> togglePlayback() async {
     if (state.media?.isAudio != true) return;
 
+    final isCompleted =
+        _player.processingState == ProcessingState.completed ||
+        (state.duration > Duration.zero && state.position >= state.duration);
+
+    if (isCompleted) {
+      final start =
+          state.trimStart > Duration.zero ? state.trimStart : Duration.zero;
+      await _player.seek(start);
+      await _player.play();
+      return;
+    }
+
     if (_player.playing) {
       await _player.pause();
     } else {
@@ -1061,7 +1083,18 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
   Future<void> seekTo(Duration position) async {
     if (state.media?.isAudio != true) return;
-    await _player.seek(position);
+    var target = position;
+    if (target < Duration.zero) target = Duration.zero;
+    if (state.duration > Duration.zero && target > state.duration) {
+      target = state.duration;
+    }
+    await _player.seek(target);
+    emit(state.copyWith(position: target));
+  }
+
+  Future<void> seekRelative(Duration offset) async {
+    if (state.media?.isAudio != true) return;
+    await seekTo(state.position + offset);
   }
 
   Future<void> seekToFraction(double fraction) async {

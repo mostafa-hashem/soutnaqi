@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
@@ -11,63 +11,95 @@ LocalExportService createPlatformLocalExportService() =>
     IoLocalExportService();
 
 class IoLocalExportService implements LocalExportService {
+  static const _storageChannel = MethodChannel('com.soutnaqi.app/storage');
+
   @override
   bool get isSupported => true;
 
   @override
-  Future<bool> saveToDevice({
+  Future<LocalExportResult> saveToDevice({
     required String? sourcePath,
     required List<int>? bytes,
     required String fileName,
+    bool? isVideo,
   }) async {
     if (sourcePath == null && bytes == null) {
       throw const AppException(messageKey: 'exportFailed');
     }
 
-    final fileBytes =
-        bytes ?? await File(sourcePath!).readAsBytes();
+    final effectiveIsVideo = isVideo ?? _detectIsVideo(fileName);
 
-    if (Platform.isAndroid) {
-      final directPath = await _trySaveToPublicDownloads(
-        sourcePath: sourcePath,
-        fileName: fileName,
-      );
-      if (directPath != null) {
-        appLog.d('✅ Saved export to Downloads: $directPath');
-        return true;
+    File? tempFile;
+    String? effectiveSourcePath = sourcePath;
+
+    if (effectiveSourcePath == null || !File(effectiveSourcePath).existsSync()) {
+      if (bytes != null) {
+        final tempDir = Directory.systemTemp;
+        tempFile = File(p.join(tempDir.path, fileName));
+        await tempFile.writeAsBytes(bytes);
+        effectiveSourcePath = tempFile.path;
       }
     }
 
-    return _saveWithPicker(fileName: fileName, bytes: fileBytes);
+    try {
+      if (Platform.isAndroid && effectiveSourcePath != null) {
+        final nativeResult = await _saveViaNativeAndroid(
+          sourcePath: effectiveSourcePath,
+          fileName: fileName,
+          isVideo: effectiveIsVideo,
+        );
+        if (nativeResult != null && nativeResult.isSuccess) {
+          appLog.d('✅ Saved export to DCIM/SoutNaqi: ${nativeResult.displayPath}');
+          return nativeResult;
+        }
+      }
+
+      final fileBytes = bytes ?? (effectiveSourcePath != null ? await File(effectiveSourcePath).readAsBytes() : null);
+      if (fileBytes == null) {
+        return LocalExportResult.failure;
+      }
+
+      return await _saveWithPicker(fileName: fileName, bytes: fileBytes);
+    } finally {
+      if (tempFile != null && tempFile.existsSync()) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+      }
+    }
   }
 
-  Future<String?> _trySaveToPublicDownloads({
-    required String? sourcePath,
+  Future<LocalExportResult?> _saveViaNativeAndroid({
+    required String sourcePath,
     required String fileName,
+    required bool isVideo,
   }) async {
-    if (sourcePath == null) return null;
+    try {
+      final result = await _storageChannel.invokeMapMethod<String, dynamic>(
+        'saveMedia',
+        {
+          'sourcePath': sourcePath,
+          'fileName': fileName,
+          'isVideo': isVideo,
+        },
+      );
 
-    const roots = [
-      '/storage/emulated/0/Download/SoutNaqi',
-      '/sdcard/Download/SoutNaqi',
-    ];
-
-    for (final root in roots) {
-      try {
-        final directory = Directory(root);
-        await directory.create(recursive: true);
-        final destination = File('${directory.path}/$fileName');
-        await File(sourcePath).copy(destination.path);
-        return destination.path;
-      } catch (error) {
-        appLog.d('⚡ Downloads save attempt failed ($root): $error');
+      if (result != null && result['success'] == true) {
+        return LocalExportResult(
+          isSuccess: true,
+          displayPath: result['displayPath'] as String?,
+          fullPath: result['fullPath'] as String?,
+        );
+      } else if (result != null) {
+        appLog.w('⚠️ Android native save error: ${result['error']}');
       }
+    } catch (error) {
+      appLog.w('⚠️ Android native save channel failed: $error');
     }
-
     return null;
   }
 
-  Future<bool> _saveWithPicker({
+  Future<LocalExportResult> _saveWithPicker({
     required String fileName,
     required List<int> bytes,
   }) async {
@@ -82,10 +114,24 @@ class IoLocalExportService implements LocalExportService {
 
     if (savedPath == null) {
       appLog.d('🔍 Save cancelled by user');
-      return false;
+      return LocalExportResult.failure;
     }
 
     appLog.d('✅ Saved export via picker: $savedPath');
-    return true;
+    return LocalExportResult(
+      isSuccess: true,
+      displayPath: p.basename(savedPath),
+      fullPath: savedPath,
+    );
+  }
+
+  bool _detectIsVideo(String fileName) {
+    final ext = p.extension(fileName).toLowerCase();
+    return ext == '.mp4' ||
+        ext == '.mov' ||
+        ext == '.mkv' ||
+        ext == '.avi' ||
+        ext == '.webm' ||
+        ext == '.3gp';
   }
 }

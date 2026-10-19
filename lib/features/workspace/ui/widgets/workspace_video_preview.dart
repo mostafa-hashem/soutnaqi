@@ -190,7 +190,7 @@ class _WorkspaceVideoPreviewState extends State<WorkspaceVideoPreview> {
   }
 }
 
-class _VideoControls extends StatelessWidget {
+class _VideoControls extends StatefulWidget {
   const _VideoControls({
     required this.settingsCubit,
     required this.controller,
@@ -200,28 +200,69 @@ class _VideoControls extends StatelessWidget {
   final VideoPlayerController controller;
 
   @override
+  State<_VideoControls> createState() => _VideoControlsState();
+}
+
+class _VideoControlsState extends State<_VideoControls> {
+  double? _dragFraction;
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<VideoPlayerValue>(
-      valueListenable: controller,
+      valueListenable: widget.controller,
       builder: (context, value, _) {
         final position = value.position;
         final duration = value.duration;
         final maxMs = duration.inMilliseconds;
         final progress = maxMs > 0 ? position.inMilliseconds / maxMs : 0.0;
+        final isCompleted = maxMs > 0 && position >= duration;
+        final sliderValue = (_dragFraction ?? progress).clamp(0.0, 1.0);
+
+        final currentDuration = _dragFraction != null
+            ? Duration(milliseconds: (_dragFraction! * maxMs).round())
+            : position;
 
         return Column(
           children: [
             Row(
               children: [
                 Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(18),
+                  child: InkWell(
+                    onTap: () {
+                      final target = position - const Duration(seconds: 10);
+                      widget.controller.seekTo(
+                        target < Duration.zero ? Duration.zero : target,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(18),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIconsStrokeRounded.backward01,
+                          color: context.textPrimary,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Material(
                   color: context.accentPrimary,
                   borderRadius: BorderRadius.circular(24),
                   child: InkWell(
-                    onTap: () {
+                    onTap: () async {
                       if (value.isPlaying) {
-                        controller.pause();
+                        await widget.controller.pause();
                       } else {
-                        controller.play();
+                        if (isCompleted || position >= duration) {
+                          await widget.controller.seekTo(Duration.zero);
+                        }
+                        await widget.controller.play();
                       }
                     },
                     borderRadius: BorderRadius.circular(24),
@@ -232,7 +273,9 @@ class _VideoControls extends StatelessWidget {
                         child: HugeIcon(
                           icon: value.isPlaying
                               ? HugeIconsStrokeRounded.pause
-                              : HugeIconsStrokeRounded.play,
+                              : (isCompleted
+                                  ? HugeIconsStrokeRounded.replay
+                                  : HugeIconsStrokeRounded.play),
                           color: Colors.white,
                           size: 20,
                         ),
@@ -240,15 +283,44 @@ class _VideoControls extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  '${_format(position)} / ${_format(duration)}',
-                  style: font12W400(
-                    settingsCubit: settingsCubit,
-                    color: context.textMuted,
+                const SizedBox(width: 8),
+                Material(
+                  color: context.inputFill,
+                  borderRadius: BorderRadius.circular(18),
+                  child: InkWell(
+                    onTap: () {
+                      final target = position + const Duration(seconds: 10);
+                      widget.controller.seekTo(
+                        duration > Duration.zero && target > duration
+                            ? duration
+                            : target,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(18),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIconsStrokeRounded.forward01,
+                          color: context.textPrimary,
+                          size: 16,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '${_format(currentDuration)} / ${_format(duration)}',
+                    overflow: TextOverflow.ellipsis,
+                    style: font12W400(
+                      settingsCubit: widget.settingsCubit,
+                      color: context.textMuted,
+                    ),
+                  ),
+                ),
                 Material(
                   color: context.inputFill,
                   borderRadius: BorderRadius.circular(20),
@@ -256,11 +328,11 @@ class _VideoControls extends StatelessWidget {
                     onTap: () async {
                       final selected = await showSpeedPickerSheet(
                         context,
-                        settingsCubit: settingsCubit,
+                        settingsCubit: widget.settingsCubit,
                         currentSpeed: value.playbackSpeed,
                       );
                       if (selected != null) {
-                        await controller.setPlaybackSpeed(selected);
+                        await widget.controller.setPlaybackSpeed(selected);
                       }
                     },
                     borderRadius: BorderRadius.circular(20),
@@ -281,7 +353,7 @@ class _VideoControls extends StatelessWidget {
                           Text(
                             '${value.playbackSpeed}x',
                             style: font12W600(
-                              settingsCubit: settingsCubit,
+                              settingsCubit: widget.settingsCubit,
                               color: context.textPrimary,
                             ),
                           ),
@@ -293,11 +365,20 @@ class _VideoControls extends StatelessWidget {
               ],
             ),
             Slider(
-              value: progress.clamp(0, 1),
+              value: sliderValue,
+              onChangeStart: maxMs > 0
+                  ? (next) => setState(() => _dragFraction = next)
+                  : null,
               onChanged: maxMs > 0
-                  ? (next) => controller.seekTo(
-                        Duration(milliseconds: (next * maxMs).round()),
-                      )
+                  ? (next) => setState(() => _dragFraction = next)
+                  : null,
+              onChangeEnd: maxMs > 0
+                  ? (next) async {
+                      final target =
+                          Duration(milliseconds: (next * maxMs).round());
+                      await widget.controller.seekTo(target);
+                      setState(() => _dragFraction = null);
+                    }
                   : null,
               activeColor: context.accentPrimary,
               inactiveColor: context.borderSubtle,
