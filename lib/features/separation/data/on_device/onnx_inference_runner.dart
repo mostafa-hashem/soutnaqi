@@ -211,13 +211,14 @@ class OnnxInferenceRunner {
     OrtValueTensor? outputTensor;
     final stopwatch = Stopwatch()..start();
     try {
-      final outputs = await _session.runAsyncWithTimeout(
+      final outputs = await _session.runOnceAsyncWithTimeout(
         runOptions,
         {OnDeviceModelSpec.inputNodeName: inputTensor},
         _chunkTimeout,
         const [OnDeviceModelSpec.outputNodeName],
       );
-      outputTensor = outputs?.first as OrtValueTensor?;
+      outputTensor =
+          outputs.isNotEmpty ? outputs.first as OrtValueTensor? : null;
       if (outputTensor == null) {
         throw StateError('On-device model produced no output');
       }
@@ -258,6 +259,9 @@ class OnnxInferenceRunner {
   }
 
   Future<void> dispose() async {
+    try {
+      await _session.killAllIsolates();
+    } catch (_) {}
     await _session.release();
   }
 }

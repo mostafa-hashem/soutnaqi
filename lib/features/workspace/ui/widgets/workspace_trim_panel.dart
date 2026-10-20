@@ -53,46 +53,53 @@ class WorkspaceTrimPanel extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            RangeSlider(
-              values: RangeValues(
-                startValue.clamp(0, 1),
-                endValue.clamp(0, 1),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Column(
+                children: [
+                  RangeSlider(
+                    values: RangeValues(
+                      startValue.clamp(0, 1),
+                      endValue.clamp(0, 1),
+                    ),
+                    onChanged: state.isBusy
+                        ? null
+                        : (values) {
+                            onTrimStartChanged(
+                              Duration(
+                                milliseconds: (values.start * durationMs).round(),
+                              ),
+                            );
+                            onTrimEndChanged(
+                              Duration(
+                                milliseconds: (values.end * durationMs).round(),
+                              ),
+                            );
+                          },
+                    activeColor: context.accentPrimary,
+                    inactiveColor: context.borderSubtle,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${l10n.trimStart} \u200E${_format(state.trimStart)}',
+                        style: font12W400(
+                          settingsCubit: settingsCubit,
+                          color: context.textMuted,
+                        ),
+                      ),
+                      Text(
+                        '${l10n.trimEnd} \u200E${_format(state.effectiveTrimEnd)}',
+                        style: font12W400(
+                          settingsCubit: settingsCubit,
+                          color: context.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              onChanged: state.isBusy
-                  ? null
-                  : (values) {
-                      onTrimStartChanged(
-                        Duration(
-                          milliseconds: (values.start * durationMs).round(),
-                        ),
-                      );
-                      onTrimEndChanged(
-                        Duration(
-                          milliseconds: (values.end * durationMs).round(),
-                        ),
-                      );
-                    },
-              activeColor: context.accentPrimary,
-              inactiveColor: context.borderSubtle,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${l10n.trimStart} ${_format(state.trimStart)}',
-                  style: font12W400(
-                    settingsCubit: settingsCubit,
-                    color: context.textMuted,
-                  ),
-                ),
-                Text(
-                  '${l10n.trimEnd} ${_format(state.effectiveTrimEnd)}',
-                  style: font12W400(
-                    settingsCubit: settingsCubit,
-                    color: context.textMuted,
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 12),
             Material(

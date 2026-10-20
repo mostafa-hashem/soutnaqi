@@ -61,86 +61,94 @@ class _WorkspacePlayerBarState extends State<WorkspacePlayerBar> {
           children: [
             Row(
               children: [
-                Material(
-                  color: context.inputFill,
-                  borderRadius: BorderRadius.circular(18),
-                  child: InkWell(
-                    onTap: widget.state.isPlayerReady
-                        ? () {
-                            final target =
-                                widget.state.position - const Duration(seconds: 10);
-                            widget.onSeek(
-                              target < Duration.zero ? Duration.zero : target,
-                            );
-                          }
-                        : null,
-                    borderRadius: BorderRadius.circular(18),
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: HugeIconsStrokeRounded.backward01,
-                          color: context.textPrimary,
-                          size: 18,
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Material(
+                        color: context.inputFill,
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
+                          onTap: widget.state.isPlayerReady
+                              ? () {
+                                  final target =
+                                      widget.state.position - const Duration(seconds: 10);
+                                  widget.onSeek(
+                                    target < Duration.zero ? Duration.zero : target,
+                                  );
+                                }
+                              : null,
+                          borderRadius: BorderRadius.circular(18),
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: HugeIconsStrokeRounded.backward01,
+                                color: context.textPrimary,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Material(
-                  color: context.accentPrimary,
-                  borderRadius: BorderRadius.circular(24),
-                  child: InkWell(
-                    onTap: widget.state.isPlayerReady
-                        ? widget.onTogglePlayback
-                        : null,
-                    borderRadius: BorderRadius.circular(24),
-                    child: SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: widget.state.isPlaying
-                              ? HugeIconsStrokeRounded.pause
-                              : (isCompleted
-                                  ? HugeIconsStrokeRounded.replay
-                                  : HugeIconsStrokeRounded.play),
-                          color: Colors.white,
-                          size: 22,
+                      const SizedBox(width: 8),
+                      Material(
+                        color: context.accentPrimary,
+                        borderRadius: BorderRadius.circular(24),
+                        child: InkWell(
+                          onTap: widget.state.isPlayerReady
+                              ? widget.onTogglePlayback
+                              : null,
+                          borderRadius: BorderRadius.circular(24),
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: widget.state.isPlaying
+                                    ? HugeIconsStrokeRounded.pause
+                                    : (isCompleted
+                                        ? HugeIconsStrokeRounded.replay
+                                        : HugeIconsStrokeRounded.play),
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Material(
-                  color: context.inputFill,
-                  borderRadius: BorderRadius.circular(18),
-                  child: InkWell(
-                    onTap: widget.state.isPlayerReady
-                        ? () {
-                            final target =
-                                widget.state.position + const Duration(seconds: 10);
-                            final max = widget.state.duration;
-                            widget.onSeek(
-                              max > Duration.zero && target > max ? max : target,
-                            );
-                          }
-                        : null,
-                    borderRadius: BorderRadius.circular(18),
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: HugeIconsStrokeRounded.forward01,
-                          color: context.textPrimary,
-                          size: 18,
+                      const SizedBox(width: 8),
+                      Material(
+                        color: context.inputFill,
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
+                          onTap: widget.state.isPlayerReady
+                              ? () {
+                                  final target =
+                                      widget.state.position + const Duration(seconds: 10);
+                                  final max = widget.state.duration;
+                                  widget.onSeek(
+                                    max > Duration.zero && target > max ? max : target,
+                                  );
+                                }
+                              : null,
+                          borderRadius: BorderRadius.circular(18),
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: HugeIconsStrokeRounded.forward01,
+                                color: context.textPrimary,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -156,11 +164,14 @@ class _WorkspacePlayerBarState extends State<WorkspacePlayerBar> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '${_formatDuration(currentDuration)} / ${_formatDuration(widget.state.duration)}',
-                        style: font12W400(
-                          settingsCubit: widget.settingsCubit,
-                          color: context.textMuted,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '${_formatDuration(currentDuration)} / ${_formatDuration(widget.state.duration)}',
+                          style: font12W400(
+                            settingsCubit: widget.settingsCubit,
+                            color: context.textMuted,
+                          ),
                         ),
                       ),
                     ],
@@ -212,24 +223,27 @@ class _WorkspacePlayerBarState extends State<WorkspacePlayerBar> {
               ],
             ),
             const SizedBox(height: 12),
-            Slider(
-              value: sliderValue,
-              onChangeStart: widget.state.isPlayerReady
-                  ? (val) => setState(() => _dragFraction = val)
-                  : null,
-              onChanged: widget.state.isPlayerReady
-                  ? (val) => setState(() => _dragFraction = val)
-                  : null,
-              onChangeEnd: widget.state.isPlayerReady
-                  ? (val) {
-                      widget.onSeek(
-                        Duration(milliseconds: (val * maxMs).round()),
-                      );
-                      setState(() => _dragFraction = null);
-                    }
-                  : null,
-              activeColor: context.accentPrimary,
-              inactiveColor: context.borderSubtle,
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Slider(
+                value: sliderValue,
+                onChangeStart: widget.state.isPlayerReady
+                    ? (val) => setState(() => _dragFraction = val)
+                    : null,
+                onChanged: widget.state.isPlayerReady
+                    ? (val) => setState(() => _dragFraction = val)
+                    : null,
+                onChangeEnd: widget.state.isPlayerReady
+                    ? (val) {
+                        widget.onSeek(
+                          Duration(milliseconds: (val * maxMs).round()),
+                        );
+                        setState(() => _dragFraction = null);
+                      }
+                    : null,
+                activeColor: context.accentPrimary,
+                inactiveColor: context.borderSubtle,
+              ),
             ),
             if (widget.state.hasProcessedOutput) ...[
               const SizedBox(height: 8),

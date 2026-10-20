@@ -226,98 +226,109 @@ class _VideoControlsState extends State<_VideoControls> {
           children: [
             Row(
               children: [
-                Material(
-                  color: context.inputFill,
-                  borderRadius: BorderRadius.circular(18),
-                  child: InkWell(
-                    onTap: () {
-                      final target = position - const Duration(seconds: 10);
-                      widget.controller.seekTo(
-                        target < Duration.zero ? Duration.zero : target,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(18),
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: HugeIconsStrokeRounded.backward01,
-                          color: context.textPrimary,
-                          size: 16,
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Material(
+                        color: context.inputFill,
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
+                          onTap: () {
+                            final target = position - const Duration(seconds: 10);
+                            widget.controller.seekTo(
+                              target < Duration.zero ? Duration.zero : target,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(18),
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: HugeIconsStrokeRounded.backward01,
+                                color: context.textPrimary,
+                                size: 16,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Material(
-                  color: context.accentPrimary,
-                  borderRadius: BorderRadius.circular(24),
-                  child: InkWell(
-                    onTap: () async {
-                      if (value.isPlaying) {
-                        await widget.controller.pause();
-                      } else {
-                        if (isCompleted || position >= duration) {
-                          await widget.controller.seekTo(Duration.zero);
-                        }
-                        await widget.controller.play();
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(24),
-                    child: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: value.isPlaying
-                              ? HugeIconsStrokeRounded.pause
-                              : (isCompleted
-                                  ? HugeIconsStrokeRounded.replay
-                                  : HugeIconsStrokeRounded.play),
-                          color: Colors.white,
-                          size: 20,
+                      const SizedBox(width: 8),
+                      Material(
+                        color: context.accentPrimary,
+                        borderRadius: BorderRadius.circular(24),
+                        child: InkWell(
+                          onTap: () async {
+                            if (value.isPlaying) {
+                              await widget.controller.pause();
+                            } else {
+                              if (isCompleted || position >= duration) {
+                                await widget.controller.seekTo(Duration.zero);
+                              }
+                              await widget.controller.play();
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(24),
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: value.isPlaying
+                                    ? HugeIconsStrokeRounded.pause
+                                    : (isCompleted
+                                        ? HugeIconsStrokeRounded.replay
+                                        : HugeIconsStrokeRounded.play),
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Material(
-                  color: context.inputFill,
-                  borderRadius: BorderRadius.circular(18),
-                  child: InkWell(
-                    onTap: () {
-                      final target = position + const Duration(seconds: 10);
-                      widget.controller.seekTo(
-                        duration > Duration.zero && target > duration
-                            ? duration
-                            : target,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(18),
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: HugeIconsStrokeRounded.forward01,
-                          color: context.textPrimary,
-                          size: 16,
+                      const SizedBox(width: 8),
+                      Material(
+                        color: context.inputFill,
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
+                          onTap: () {
+                            final target = position + const Duration(seconds: 10);
+                            widget.controller.seekTo(
+                              duration > Duration.zero && target > duration
+                                  ? duration
+                                  : target,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(18),
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: HugeIcon(
+                                icon: HugeIconsStrokeRounded.forward01,
+                                color: context.textPrimary,
+                                size: 16,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    '${_format(currentDuration)} / ${_format(duration)}',
-                    overflow: TextOverflow.ellipsis,
-                    style: font12W400(
-                      settingsCubit: widget.settingsCubit,
-                      color: context.textMuted,
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      '${_format(currentDuration)} / ${_format(duration)}',
+                      overflow: TextOverflow.ellipsis,
+                      style: font12W400(
+                        settingsCubit: widget.settingsCubit,
+                        color: context.textMuted,
+                      ),
                     ),
                   ),
                 ),
@@ -364,24 +375,27 @@ class _VideoControlsState extends State<_VideoControls> {
                 ),
               ],
             ),
-            Slider(
-              value: sliderValue,
-              onChangeStart: maxMs > 0
-                  ? (next) => setState(() => _dragFraction = next)
-                  : null,
-              onChanged: maxMs > 0
-                  ? (next) => setState(() => _dragFraction = next)
-                  : null,
-              onChangeEnd: maxMs > 0
-                  ? (next) async {
-                      final target =
-                          Duration(milliseconds: (next * maxMs).round());
-                      await widget.controller.seekTo(target);
-                      setState(() => _dragFraction = null);
-                    }
-                  : null,
-              activeColor: context.accentPrimary,
-              inactiveColor: context.borderSubtle,
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Slider(
+                value: sliderValue,
+                onChangeStart: maxMs > 0
+                    ? (next) => setState(() => _dragFraction = next)
+                    : null,
+                onChanged: maxMs > 0
+                    ? (next) => setState(() => _dragFraction = next)
+                    : null,
+                onChangeEnd: maxMs > 0
+                    ? (next) async {
+                        final target =
+                            Duration(milliseconds: (next * maxMs).round());
+                        await widget.controller.seekTo(target);
+                        setState(() => _dragFraction = null);
+                      }
+                    : null,
+                activeColor: context.accentPrimary,
+                inactiveColor: context.borderSubtle,
+              ),
             ),
           ],
         );
