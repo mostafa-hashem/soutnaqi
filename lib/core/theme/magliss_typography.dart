@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:soutnaqi/features/settings/cubit/settings_cubit.dart';
 
-const String kFontFamilyArabic = 'Cairo';
-const String kFontFamilyLatin = 'Inter';
+const String kFontFamilyArabic = 'IBMPlexSansArabic';
+const String kFontFamilyLatin = 'PlusJakartaSans';
 
 String fontFamilyFor(Locale locale) =>
     locale.languageCode == 'ar' ? kFontFamilyArabic : kFontFamilyLatin;
