@@ -11,6 +11,9 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.soutnaqi.app">
+    <img src="https://img.shields.io/badge/Google_Play-com.soutnaqi.app-4285F4?logo=googleplay&logoColor=white" alt="Google Play" />
+  </a>
   <a href="https://github.com/mostafa-hashem/soutnaqi/releases/latest">
     <img src="https://img.shields.io/github/v/release/mostafa-hashem/soutnaqi?color=2563EB&label=Download%20APK&logo=android" alt="Download Release" />
   </a>
@@ -32,11 +35,19 @@
 
 ---
 
-## 📥 Download APK
+## 📥 Download
 
-You can download the latest installable Android APK directly from GitHub Releases:
+Get it on Google Play or download the APK directly from GitHub Releases:
 
-[![Download APK](https://img.shields.io/badge/Download_APK-Direct_Download-2563EB?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mostafa-hashem/soutnaqi/releases/latest)
+<p align="left">
+  <a href="https://play.google.com/store/apps/details?id=com.soutnaqi.app">
+    <img src="https://img.shields.io/badge/Google_Play-Get_it_on_Play_Store-4285F4?style=for-the-badge&logo=googleplay&logoColor=white" alt="Google Play" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/mostafa-hashem/soutnaqi/releases/latest">
+    <img src="https://img.shields.io/badge/Download_APK-GitHub_Releases-2563EB?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+</p>
 
 > 💡 **Quick Note:** After installing and launching the app, head over to **Settings → On-device model** and download the Demucs AI model (~160 MB) once. After this one-time download, vocal separation runs completely offline without any internet connection!
 
