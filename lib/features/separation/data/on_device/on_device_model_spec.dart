@@ -13,8 +13,17 @@ class OnDeviceModelSpec {
 
   static const modelFileName = 'UVR-MDX-NET-Voc_FT.onnx';
   static const legacyModelFileName = 'htdemucs_ft_vocals_fp16weights.onnx';
+
+  /// Primary high-speed global CDN (Hugging Face / CloudFront).
   static const downloadUrl =
-      'https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/$modelFileName';
+      'https://huggingface.co/Anjok/model-repo/resolve/main/$modelFileName';
+
+  /// Ordered list of mirrors: Hugging Face CDN primary, GitHub Releases fallback.
+  static const downloadUrls = [
+    'https://huggingface.co/Anjok/model-repo/resolve/main/$modelFileName',
+    'https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/$modelFileName',
+  ];
+
   static const expectedSizeBytes = 66762490;
   static const expectedSha256 =
       '534b2070fcc7df514b13ef660dc8cbb328679c2374d04354a5c42bb14ecce111';

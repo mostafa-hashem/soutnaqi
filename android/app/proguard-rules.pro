@@ -9,6 +9,10 @@
 # ONNX Runtime
 -keep class ai.onnxruntime.** { *; }
 -dontwarn ai.onnxruntime.**
+-keep class com.microsoft.onnxruntime.** { *; }
+-dontwarn com.microsoft.onnxruntime.**
+-keep class com.gtbluesky.onnxruntime.** { *; }
+-dontwarn com.gtbluesky.onnxruntime.**
 
 # FFmpeg Kit
 -keep class com.arthenica.ffmpegkit.** { *; }
@@ -25,6 +29,10 @@
 # Audio & Video plugins
 -keep class com.ryanheise.just_audio.** { *; }
 -dontwarn com.ryanheise.just_audio.**
+-keep class com.google.android.exoplayer2.** { *; }
+-dontwarn com.google.android.exoplayer2.**
+-keep class androidx.media3.** { *; }
+-dontwarn androidx.media3.**
 -keep class io.flutter.plugins.videoplayer.** { *; }
 -dontwarn io.flutter.plugins.videoplayer.**
 

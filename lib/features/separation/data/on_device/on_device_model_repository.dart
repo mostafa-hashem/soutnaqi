@@ -178,24 +178,29 @@ class OnDeviceModelRepository {
 
         http.Client? client;
         IOSink? sink;
+        final targetUrl = OnDeviceModelSpec.downloadUrls[
+            attempt % OnDeviceModelSpec.downloadUrls.length];
 
         try {
           client = http.Client();
           _downloadClient = client;
 
-          final request =
-              http.Request('GET', Uri.parse(OnDeviceModelSpec.downloadUrl));
+          final request = http.Request('GET', Uri.parse(targetUrl));
+          request.headers['User-Agent'] =
+              'Mozilla/5.0 (Linux; Android 14; Mobile) SoutNaqi/1.0';
           if (existingLength > 0) {
             request.headers['Range'] = 'bytes=$existingLength-';
             appLog.d(
-              '⚡ Resuming model download from $existingLength bytes (attempt ${attempt + 1})',
+              '⚡ Resuming model download from $existingLength bytes (attempt ${attempt + 1}, url: $targetUrl)',
             );
           } else {
-            appLog.d('⚡ Starting model download (attempt ${attempt + 1})');
+            appLog.d(
+              '⚡ Starting model download (attempt ${attempt + 1}, url: $targetUrl)',
+            );
           }
 
           final response = await client.send(request).timeout(
-            const Duration(seconds: 45),
+            const Duration(seconds: 60),
           );
           if (_cancelRequested) {
             throw const AppException(
@@ -361,7 +366,20 @@ class OnDeviceModelRepository {
       return false;
     }
 
-    await partFile.rename(targetFile.path);
+    if (await targetFile.exists()) {
+      try {
+        await targetFile.delete();
+      } catch (_) {}
+    }
+
+    try {
+      await partFile.rename(targetFile.path);
+    } catch (_) {
+      await partFile.copy(targetFile.path);
+      try {
+        await partFile.delete();
+      } catch (_) {}
+    }
     appLog.d('✅ Model downloaded and verified: ${targetFile.path}');
     return true;
   }

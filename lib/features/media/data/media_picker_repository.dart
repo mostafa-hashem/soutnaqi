@@ -63,12 +63,8 @@ class MediaPickerRepository {
       );
 
       if (file != null) {
-        if (file.name.isEmpty) {
-          throw const AppException(messageKey: 'mediaPickFailed');
-        }
-
-        final bytes = kIsWeb ? await file.readAsBytes() : null;
         final path = kIsWeb ? null : file.path;
+        final bytes = kIsWeb ? await file.readAsBytes() : null;
 
         if (!kIsWeb && (path == null || path.isEmpty)) {
           throw const AppException(messageKey: 'mediaPickFailed');
@@ -79,12 +75,15 @@ class MediaPickerRepository {
         }
 
         final sizeBytes = bytes?.length ?? await file.length();
-        final mimeType = lookupMimeType(file.name) ??
+        final name = file.name.isNotEmpty
+            ? file.name
+            : (path != null ? p.basename(path) : 'video.mp4');
+        final mimeType = lookupMimeType(name) ??
             (path != null ? lookupMimeType(path) : null) ??
             _fallbackMime(MediaKind.video);
 
         final media = MediaFile(
-          name: file.name,
+          name: name,
           kind: MediaKind.video,
           mimeType: mimeType,
           sizeBytes: sizeBytes,
@@ -99,11 +98,24 @@ class MediaPickerRepository {
       appLog.w('⚠️ Video gallery picker failed, falling back to file picker: $error');
     }
 
-    // Fallback: pick via file picker
+    // Fallback 1: pick via FilePicker video type
     try {
       appLog.d('🔍 Falling back to FilePicker for video…');
-      return await _pick(
+      final file = await _pick(
         type: FileType.video,
+        expectedKind: MediaKind.video,
+      );
+      if (file != null) return file;
+    } catch (error) {
+      appLog.w('⚠️ Video type file picker failed: $error');
+    }
+
+    // Fallback 2: pick via custom video extensions
+    try {
+      appLog.d('🔍 Falling back to FilePicker custom extensions for video…');
+      return await _pick(
+        type: FileType.custom,
+        allowedExtensions: _videoExtensions,
         expectedKind: MediaKind.video,
       );
     } catch (error) {
@@ -220,11 +232,9 @@ class MediaPickerRepository {
           kind = MediaKind.audio;
         } else if (expectedKind == MediaKind.video && pathMime != null && pathMime.startsWith('video/')) {
           kind = MediaKind.video;
-        } else if (allowedExtensions == null) {
-          // If the platform picker specifically opened for this type, treat as expectedKind
-          kind = expectedKind;
         } else {
-          throw const AppException(messageKey: 'mediaPickFailed');
+          // Trust the user selection from the specialized picker dialog
+          kind = expectedKind;
         }
       }
 
