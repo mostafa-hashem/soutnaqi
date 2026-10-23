@@ -57,3 +57,16 @@
 -dontwarn org.checkerframework.**
 -dontwarn com.google.errorprone.annotations.**
 -dontwarn com.google.android.play.core.**
+
+# Preserve debugging attributes for crash reports and Google Play Console deobfuscation
+-keepattributes SourceFile,LineNumberTable
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses,EnclosingMethod
+
+# Additional Flutter community plugins
+-keep class dev.fluttercommunity.plus.** { *; }
+-dontwarn dev.fluttercommunity.plus.**
+-keep class io.flutter.plugins.urllauncher.** { *; }
+-dontwarn io.flutter.plugins.urllauncher.**
+
