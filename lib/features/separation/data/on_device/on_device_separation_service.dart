@@ -63,7 +63,7 @@ StereoSamples _subtractVocals({
 /// cached by [OnDeviceModelRepository].
 class OnDeviceSeparationService implements SeparationService {
   OnDeviceSeparationService({OnDeviceModelRepository? modelRepository})
-      : _modelRepository = modelRepository ?? OnDeviceModelRepository();
+    : _modelRepository = modelRepository ?? OnDeviceModelRepository();
 
   static const _uuid = Uuid();
 
@@ -85,6 +85,7 @@ class OnDeviceSeparationService implements SeparationService {
     }
 
     appLog.d('⚡ Starting on-device MDX separation: $target');
+    final stopwatch = Stopwatch()..start();
     var preparedPath = inputAudioPath;
     try {
       cancelToken?.throwIfCancelled();
@@ -99,7 +100,10 @@ class OnDeviceSeparationService implements SeparationService {
       }
 
       onProgress?.call(
-        const SeparationProgress(stage: SeparationStage.preparingAudio, progress: 1),
+        const SeparationProgress(
+          stage: SeparationStage.preparingAudio,
+          progress: 1,
+        ),
       );
       final mix = await _decodeWavInIsolate(preparedPath);
       cancelToken?.throwIfCancelled();
@@ -138,12 +142,21 @@ class OnDeviceSeparationService implements SeparationService {
       cancelToken?.throwIfCancelled();
 
       final outputPath = await SeparationAudioIo.encodeWavToM4a(wavOutput);
-      appLog.d('✅ On-device separation complete: $outputPath');
+      stopwatch.stop();
+      appLog.d(
+        '✅ On-device separation complete in '
+        '${stopwatch.elapsedMilliseconds}ms: $outputPath',
+      );
       return outputPath;
     } on AppException {
       rethrow;
     } catch (error) {
-      appLog.e('❌ On-device separation failed', error: error);
+      stopwatch.stop();
+      appLog.e(
+        '❌ On-device separation failed after '
+        '${stopwatch.elapsedMilliseconds}ms',
+        error: error,
+      );
       throw AppException(messageKey: 'separationFailed', cause: error);
     } finally {
       if (preparedPath != inputAudioPath) {

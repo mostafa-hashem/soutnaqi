@@ -3,6 +3,12 @@ allprojects {
         google()
         mavenCentral()
     }
+    configurations.all {
+        resolutionStrategy {
+            cacheDynamicVersionsFor(720, java.util.concurrent.TimeUnit.HOURS)
+            cacheChangingModulesFor(720, java.util.concurrent.TimeUnit.HOURS)
+        }
+    }
 }
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()

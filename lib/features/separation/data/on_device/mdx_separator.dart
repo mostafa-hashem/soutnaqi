@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/mdx_stft.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
@@ -14,6 +15,11 @@ import 'package:soutnaqi/features/separation/data/separation_cancel_token.dart';
 /// apply [OnDeviceModelSpec.compensate] only when deriving the instrumental.
 class MdxSeparator {
   MdxSeparator._();
+
+  /// All chunks except the tail share the same window length.
+  static final Float64List _fullChunkWindow = _numpyHanning(
+    OnDeviceModelSpec.chunkSamples,
+  );
 
   static Future<StereoSamples> separate({
     required StereoSamples mix,
@@ -37,6 +43,11 @@ class MdxSeparator {
     final accLeft = Float32List(mixtureLength);
     final accRight = Float32List(mixtureLength);
     final divider = Float32List(mixtureLength);
+    final timer = Stopwatch();
+    var forwardUs = 0;
+    var inferenceUs = 0;
+    var inverseUs = 0;
+    var overlapUs = 0;
 
     for (var index = 0; index < starts.length; index++) {
       cancelToken?.throwIfCancelled();
@@ -44,6 +55,9 @@ class MdxSeparator {
       final end = math.min(start + chunk, mixtureLength);
       final actual = end - start;
 
+      timer
+        ..reset()
+        ..start();
       final chunkLeft = Float32List(chunk);
       final chunkRight = Float32List(chunk);
       for (var i = 0; i < actual; i++) {
@@ -54,23 +68,47 @@ class MdxSeparator {
         chunkRight[i] = mix.right[sample];
       }
 
-      final spectrum = await MdxStft.forward(left: chunkLeft, right: chunkRight);
+      final spectrum = await MdxStft.forward(
+        left: chunkLeft,
+        right: chunkRight,
+      );
       _zeroLowBins(spectrum);
+      timer.stop();
+      forwardUs += timer.elapsedMicroseconds;
+
+      timer.start();
       final predicted = await runSpectrum(spectrum);
       cancelToken?.throwIfCancelled();
-      final wave = await MdxStft.inverse(predicted);
-      final window = _numpyHanning(actual);
+      timer.stop();
+      inferenceUs += timer.elapsedMicroseconds;
 
+      timer.start();
+      final wave = await MdxStft.inverse(predicted);
+      timer.stop();
+      inverseUs += timer.elapsedMicroseconds;
+
+      timer.start();
+      final window = actual == chunk ? _fullChunkWindow : _numpyHanning(actual);
       for (var i = 0; i < actual; i++) {
         final weight = window[i];
         accLeft[start + i] += wave.left[i] * weight;
         accRight[start + i] += wave.right[i] * weight;
         divider[start + i] += weight;
       }
+      timer.stop();
+      overlapUs += timer.elapsedMicroseconds;
 
       onProgress?.call(index + 1, starts.length);
       await Future<void>.delayed(Duration.zero);
     }
+
+    appLog.d(
+      '⚡ MDX timing: chunks=${starts.length}, '
+      'forward=${forwardUs ~/ 1000}ms, '
+      'inference=${inferenceUs ~/ 1000}ms, '
+      'inverse=${inverseUs ~/ 1000}ms, '
+      'overlap=${overlapUs ~/ 1000}ms',
+    );
 
     final left = Float32List(length);
     final right = Float32List(length);

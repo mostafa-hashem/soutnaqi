@@ -15,7 +15,9 @@ class MdxStft {
   MdxStft._();
 
   static final FFT _fft = FFT(OnDeviceModelSpec.nFft);
-  static final Float64List _analysisWindow = _periodicHann(OnDeviceModelSpec.nFft);
+  static final Float64List _analysisWindow = _periodicHann(
+    OnDeviceModelSpec.nFft,
+  );
 
   /// Spectrum shaped `[4, dimF, dimT]`, row-major with time as the last axis.
   ///
@@ -90,9 +92,12 @@ class MdxStft {
     const dimF = OnDeviceModelSpec.dimF;
     const dimT = OnDeviceModelSpec.dimT;
     const nBins = OnDeviceModelSpec.frequencyBins;
+    final freq = Float64x2List(nFft);
+    final zero = Float64x2(0, 0);
 
     for (var t = 0; t < dimT; t++) {
-      final freq = Float64x2List(nFft);
+      // realInverseFft mutates its input, so reset the shared scratch buffer.
+      freq.fillRange(0, nFft, zero);
       for (var f = 0; f < dimF; f++) {
         freq[f] = Float64x2(
           spectrum[(complexBase * dimF + f) * dimT + t],

@@ -4,7 +4,7 @@ class FfmpegAudioCodec {
 
   static const outputExtension = 'm4a';
   static const mimeType = 'audio/mp4';
-  static const _bitrate = '192k';
+  static const _bitrate = '320k';
 
   static String encodeTo(String outputPath) {
     return '-c:a aac -b:a $_bitrate "$outputPath"';
