@@ -53,9 +53,12 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             val releaseConfig = signingConfigs.getByName("release")
             signingConfig = if (releaseConfig.storeFile != null && releaseConfig.storeFile!!.exists()) {
                 releaseConfig
