@@ -67,8 +67,14 @@ class OnDeviceModelRepository {
   }
 
   Future<Directory> _modelDirectory() async {
-    final supportDir = await getApplicationSupportDirectory();
-    final dir = Directory(p.join(supportDir.path, 'models'));
+    Directory baseDir;
+    try {
+      baseDir = await getApplicationSupportDirectory();
+    } catch (e) {
+      appLog.w('⚠️ getApplicationSupportDirectory failed, falling back to docs: $e');
+      baseDir = await getApplicationDocumentsDirectory();
+    }
+    final dir = Directory(p.join(baseDir.path, 'models'));
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }

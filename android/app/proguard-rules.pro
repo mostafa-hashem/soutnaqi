@@ -39,12 +39,22 @@
 # File & Image Pickers
 -keep class com.mr.flutter.plugin.filepicker.** { *; }
 -dontwarn com.mr.flutter.plugin.filepicker.**
+-keep class com.miguelruivo.flutter.plugin.filepicker.** { *; }
+-dontwarn com.miguelruivo.flutter.plugin.filepicker.**
 -keep class io.flutter.plugins.imagepicker.** { *; }
 -dontwarn io.flutter.plugins.imagepicker.**
+-keep class androidx.lifecycle.** { *; }
+-dontwarn androidx.lifecycle.**
 
-# Storage & Preferences plugins
+# Storage & Preferences plugins (including AndroidX DataStore and Coroutines used by shared_preferences)
 -keep class io.flutter.plugins.sharedpreferences.** { *; }
 -dontwarn io.flutter.plugins.sharedpreferences.**
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+-keep class androidx.preference.** { *; }
+-dontwarn androidx.preference.**
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
 -keep class io.flutter.plugins.pathprovider.** { *; }
 -dontwarn io.flutter.plugins.pathprovider.**
 

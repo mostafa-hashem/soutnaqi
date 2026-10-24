@@ -17,12 +17,25 @@ class PreferencesStore {
     _initializing = null;
   }
 
-  Future<void> ensureInitialized() {
-    return _initializing ??= _openWithRetry();
+  Future<void> ensureInitialized() async {
+    if (_preferences != null) return;
+    if (_initializing != null) {
+      await _initializing;
+      return;
+    }
+    try {
+      final initFuture = _openWithRetry();
+      _initializing = initFuture;
+      await initFuture;
+    } catch (error) {
+      _initializing = null;
+      rethrow;
+    }
   }
 
   Future<SharedPreferences> get preferences async {
     await ensureInitialized();
+    _preferences ??= await SharedPreferences.getInstance();
     return _preferences!;
   }
 
