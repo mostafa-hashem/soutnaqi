@@ -129,3 +129,14 @@ import 'service_stub.dart'
 
 ### 10.3. Native Debug Symbols & Deobfuscation
 - **Native Debug Symbols**: Always specify `ndk { debugSymbolLevel = "SYMBOL_TABLE" }` in `buildTypes.release` in `android/app/build.gradle.kts`. This packages native C/C++ debug symbol tables (for FFmpeg, ONNX Runtime, and the Flutter engine) directly into the App Bundle (`.aab`), completely eliminating the missing debug symbols warning in Google Play Console.
+
+---
+
+## 11. Assistant Replies & User Interaction
+
+- **User Name Prefix**: Always begin every reply to the user with their name followed by a comma: `مصطفى، ` (Mostafa, ).
+- **Concise Responses**: Keep task completion replies concise (a brief 3–4 word summary), unless the user specifically asks a question requiring a detailed technical explanation.
+- **Arabic (RTL) Guidelines**:
+  - Write the main reply in natural RTL Arabic.
+  - Keep code, file paths, URLs, JSON, and symbol names in separate LTR blocks.
+  - Use proper Arabic punctuation (، ؟).

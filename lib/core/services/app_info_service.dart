@@ -11,11 +11,8 @@ class AppInfoService {
   String get version => _version;
   String get buildNumber => _buildNumber;
 
-  /// Returns formatted version string, e.g. "1.0.2 (7)"
-  String get displayVersion {
-    if (_buildNumber.isEmpty) return _version;
-    return '$_version ($_buildNumber)';
-  }
+  /// Returns clean semantic version for display, e.g. "1.0.2"
+  String get displayVersion => _version;
 
   /// Returns clean semantic version, e.g. "1.0.2"
   String get versionName => _version;
