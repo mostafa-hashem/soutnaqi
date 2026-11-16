@@ -824,6 +824,18 @@ abstract class AppLocalizations {
   /// **'Remove music'**
   String get processIsolateVocals;
 
+  /// No description provided for @processIsolateSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove music from selection'**
+  String get processIsolateSelection;
+
+  /// No description provided for @separationBundledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Music separation runs offline on this device.'**
+  String get separationBundledHint;
+
   /// No description provided for @processIsolateMusic.
   ///
   /// In en, this message translates to:
@@ -857,7 +869,7 @@ abstract class AppLocalizations {
   /// No description provided for @separationAiHint.
   ///
   /// In en, this message translates to:
-  /// **'AI separation (Demucs) — may take several minutes.'**
+  /// **'AI separation — may take several minutes.'**
   String get separationAiHint;
 
   /// No description provided for @separationNotConfigured.
@@ -1439,7 +1451,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFeature3Desc.
   ///
   /// In en, this message translates to:
-  /// **'You will be guided to download the AI model in Settings. It takes about 40 MB once, and you can separate audio anywhere offline.'**
+  /// **'You will be guided to download the AI model in Settings. It takes about 67 MB once, and you can separate audio anywhere offline.'**
   String get onboardingFeature3Desc;
 
   /// No description provided for @onboardingContinue.
@@ -1493,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @guideModelStepDesc.
   ///
   /// In en, this message translates to:
-  /// **'Download the AI model (~40 MB) once to enable full offline separation. Would you like to download it now?'**
+  /// **'Download the AI model (~67 MB) once to enable full offline separation. Would you like to download it now?'**
   String get guideModelStepDesc;
 
   /// No description provided for @guideDownloadNow.

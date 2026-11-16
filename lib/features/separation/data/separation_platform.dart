@@ -32,3 +32,5 @@ Future<void> warmUpSeparationIfReady() async {
   }
   await on_device_impl.warmUpOnDeviceSeparationIfReady();
 }
+
+Future<void> disposeOnDeviceSeparation() => on_device_impl.disposeOnDeviceSeparation();

@@ -1,6 +1,5 @@
 import 'dart:ffi' as ffi;
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
@@ -15,43 +14,14 @@ import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec
 
 typedef _NativeSessionInfo = ({int address, bool xnnpack, bool nnapi});
 
-/// Top-level so [Isolate.run] does not capture unsendable locals from callers.
-Future<_NativeSessionInfo> _loadNativeSessionInIsolate(
-  String modelPath,
-  int threads,
-  bool allowSpinning,
-  bool useNnapi,
-  int nnapiFlags,
-) {
-  return Isolate.run(() {
-    try {
-      return _createNativeSession(
-        modelPath,
-        threads,
-        allowSpinning,
-        useNnapi,
-        nnapiFlags,
-      );
-    } catch (e) {
-      // Must not propagate private _OrtException across isolate boundary.
-      throw Exception('Failed to load ONNX native session: $e');
-    }
-  });
-}
-
-/// Builds the native session off the UI isolate. Returns the session
-/// pointer address; ownership transfers to the caller (do not release here).
-///
-/// XNNPACK/CPU workers use the big cores. Spinning is opt-in because it
-/// keeps cores busy between operators and can increase heat on phones.
 _NativeSessionInfo _createNativeSession(
   String modelPath,
   int threads,
+  int ortThreads,
   bool allowSpinning,
   bool useNnapi,
   int nnapiFlags,
 ) {
-  OrtEnv.instance.init();
   final api = OrtEnv.instance.ortApiPtr.ref;
 
   final optionsPtrPtr = calloc<ffi.Pointer<bg.OrtSessionOptions>>();
@@ -67,7 +37,7 @@ _NativeSessionInfo _createNativeSession(
     OrtStatus.checkOrtStatus(
       api.SetIntraOpNumThreads.asFunction<
         bg.OrtStatusPtr Function(ffi.Pointer<bg.OrtSessionOptions>, int)
-      >()(options, threads),
+      >()(options, ortThreads),
     );
     OrtStatus.checkOrtStatus(
       api.SetInterOpNumThreads.asFunction<
@@ -98,7 +68,7 @@ _NativeSessionInfo _createNativeSession(
     // directly on 32-bit, and safely attempt XNNPACK on 64-bit devices with fallback.
     final is32Bit = ffi.sizeOf<ffi.Pointer>() == 4;
     var xnnpack = false;
-    if (!is32Bit) {
+    if (!is32Bit && OnnxInferenceRunner._useXnnpack) {
       try {
         _appendXnnpack(options, threads);
         xnnpack = true;
@@ -206,20 +176,32 @@ void _appendXnnpack(ffi.Pointer<bg.OrtSessionOptions> options, int threads) {
   }
 }
 
-/// Owns a single ONNX Runtime session and runs model-sized chunks through it.
-/// `runAsyncWithTimeout` reuses the plugin's persistent background isolate,
-/// so inference never blocks the UI thread after the first chunk.
-///
-/// The Dimensity 8200 Ultra has four big A78 cores, so four workers give a
-/// large speedup without waking the little cores. Spinning is opt-in via
-/// `--dart-define=MDX_SPINNING=true`; it can help latency but increases heat.
+/// Owns one ORT session and two reusable, CPU-backed spectrogram tensors.
 class OnnxInferenceRunner {
-  OnnxInferenceRunner._(this._session);
+  OnnxInferenceRunner._(this._session) {
+    try {
+      _inputName.value = OnDeviceModelSpec.inputNodeName.toNativeUtf8().cast();
+      _outputName.value = OnDeviceModelSpec.outputNodeName
+          .toNativeUtf8()
+          .cast();
+      _initializeTensors();
+    } catch (_) {
+      dispose();
+      rethrow;
+    }
+  }
 
-  final OrtSession _session;
-  static bool _envInitialized = false;
+  final ffi.Pointer<bg.OrtSession> _session;
+  final _inputName = calloc<ffi.Pointer<ffi.Char>>();
+  final _outputName = calloc<ffi.Pointer<ffi.Char>>();
+  final _inputValue = calloc<ffi.Pointer<bg.OrtValue>>();
+  final _outputValue = calloc<ffi.Pointer<bg.OrtValue>>();
+  static const _elements = OnDeviceModelSpec.spectrumElementCount;
+  final _inputData = calloc<ffi.Float>(_elements);
+  final _outputData = calloc<ffi.Float>(_elements);
+  late final Float32List input = _inputData.asTypedList(_elements);
+  late final Float32List _output = _outputData.asTypedList(_elements);
 
-  /// Four big cores. Override with `--dart-define=MDX_THREADS=N` for A/B tests.
   static const _maxIntraOpThreads = int.fromEnvironment(
     'MDX_THREADS',
     defaultValue: 4,
@@ -227,6 +209,11 @@ class OnnxInferenceRunner {
 
   /// Opt-in spin-wait for benchmarking. Defaults off to avoid extra heat.
   static const _allowSpinning = bool.fromEnvironment('MDX_SPINNING');
+  static const _useXnnpack = bool.fromEnvironment(
+    'MDX_XNNPACK',
+    defaultValue: true,
+  );
+  static const _ortThreads = int.fromEnvironment('MDX_ORT_THREADS');
 
   /// NNAPI is opt-in: it can use the Dimensity APU/GPU, but some models fall
   /// back to NNAPI's slow CPU implementation. A/B it per device.
@@ -241,138 +228,171 @@ class OnnxInferenceRunner {
     defaultValue: true,
   );
 
-  /// One chunk timeout. Reduced to 90 seconds so worker hangs fail fast with actionable error.
-  static const _chunkTimeout = Duration(seconds: 90);
-
-  static Future<OnnxInferenceRunner> load(String modelPath) async {
-    if (!_envInitialized) {
-      OrtEnv.instance.init();
-      _envInitialized = true;
-    }
+  factory OnnxInferenceRunner.load(String modelPath) {
     final is32Bit = ffi.sizeOf<ffi.Pointer>() == 4;
+    final maxThreads = _maxIntraOpThreads < 1 ? 1 : _maxIntraOpThreads;
     final threads = is32Bit
         ? 1
-        : Platform.numberOfProcessors.clamp(1, _maxIntraOpThreads);
+        : Platform.numberOfProcessors.clamp(1, maxThreads);
+    final ortThreads = _ortThreads > 0
+        ? _ortThreads.clamp(1, threads)
+        : threads;
     final spinning = !is32Bit && _allowSpinning;
+    final useNnapi = !is32Bit && Platform.isAndroid && _useNnapi;
     final nnapiFlags =
         (_nnapiFp16 ? NnapiFlags.useFp16.value : 0) |
         (_nnapiNchw ? NnapiFlags.useNCHW.value : 0) |
         (_nnapiCpuDisabled ? NnapiFlags.cpuDisabled.value : 0);
 
+    final _NativeSessionInfo info;
     try {
-      final providers = OrtEnv.instance.availableProviders();
-      appLog.d('⚡ ORT providers: ${providers.map((p) => p.name).join(', ')}');
-    } catch (_) {
-      // Provider introspection is best-effort.
-    }
-
-    // CreateSession is multi-second sync work — never do it on the UI
-    // isolate or Android reports ANR.
-    _NativeSessionInfo info;
-    try {
-      info = await _loadNativeSessionInIsolate(
+      info = _createNativeSession(
         modelPath,
         threads,
+        ortThreads,
         spinning,
-        !is32Bit && _useNnapi,
+        useNnapi,
         nnapiFlags,
       );
     } catch (error) {
-      if (!_useNnapi) rethrow;
+      if (!useNnapi) rethrow;
       appLog.w(
-        '⚡ NNAPI session failed; retrying with CPU/XNNPACK only',
+        'ONNX NNAPI initialization failed, retrying on CPU',
         error: error,
       );
-      info = await _loadNativeSessionInIsolate(
-        modelPath,
-        threads,
-        spinning,
-        false,
-        0,
+      return OnnxInferenceRunner._(
+        ffi.Pointer.fromAddress(
+          _createNativeSession(
+            modelPath,
+            threads,
+            ortThreads,
+            spinning,
+            false,
+            0,
+          ).address,
+        ),
       );
     }
     appLog.d(
-      '⚡ On-device ONNX session: is32Bit=$is32Bit, intraOp=$threads, '
-      'spinning=$spinning, xnnpack=${info.xnnpack}, nnapi=${info.nnapi}',
+      'ONNX session threads=$threads, xnnpack=${info.xnnpack}, nnapi=${info.nnapi}',
     );
-    return OnnxInferenceRunner._(OrtSession.fromAddress(info.address));
+    return OnnxInferenceRunner._(ffi.Pointer.fromAddress(info.address));
   }
 
-  /// Runs one spectrogram and returns the model's spectrum, same length as
-  /// [spectrum] (`[1, 4, dimF, dimT]` packed row-major).
-  Future<Float32List> runSpectrum(Float32List spectrum) async {
-    final inputTensor = OrtValueTensor.createTensorWithDataList(
-      spectrum,
-      const [1, 4, OnDeviceModelSpec.dimF, OnDeviceModelSpec.dimT],
-    );
-    final runOptions = OrtRunOptions();
-    OrtValueTensor? outputTensor;
-    final stopwatch = Stopwatch()..start();
+  void _initializeTensors() {
+    final api = OrtEnv.instance.ortApiPtr.ref;
+    final memory = calloc<ffi.Pointer<bg.OrtMemoryInfo>>();
+    final shape = calloc<ffi.Int64>(4);
     try {
-      final future = _session.runAsyncWithTimeout(
-        runOptions,
-        {OnDeviceModelSpec.inputNodeName: inputTensor},
-        _chunkTimeout,
-        const [OnDeviceModelSpec.outputNodeName],
+      shape.asTypedList(4).setAll(0, const [
+        1,
+        4,
+        OnDeviceModelSpec.dimF,
+        OnDeviceModelSpec.dimT,
+      ]);
+      OrtStatus.checkOrtStatus(
+        api.CreateCpuMemoryInfo.asFunction<
+          bg.OrtStatusPtr Function(
+            int,
+            int,
+            ffi.Pointer<ffi.Pointer<bg.OrtMemoryInfo>>,
+          )
+        >()(
+          bg.OrtAllocatorType.OrtDeviceAllocator,
+          bg.OrtMemType.OrtMemTypeDefault,
+          memory,
+        ),
       );
-      if (future == null) {
-        throw StateError('On-device model session is not available');
-      }
-      final outputs = await future;
-      outputTensor = outputs.isNotEmpty
-          ? outputs.first as OrtValueTensor?
-          : null;
-      if (outputTensor == null) {
-        throw StateError('On-device model produced no output');
-      }
-      await Future<void>.delayed(Duration.zero);
-      final predicted = _copyFloats(
-        outputTensor,
-        OnDeviceModelSpec.spectrumElementCount,
+      final createTensor =
+          api.CreateTensorWithDataAsOrtValue.asFunction<
+            bg.OrtStatusPtr Function(
+              ffi.Pointer<bg.OrtMemoryInfo>,
+              ffi.Pointer<ffi.Void>,
+              int,
+              ffi.Pointer<ffi.Int64>,
+              int,
+              int,
+              ffi.Pointer<ffi.Pointer<bg.OrtValue>>,
+            )
+          >();
+      OrtStatus.checkOrtStatus(
+        createTensor(
+          memory.value,
+          _inputData.cast(),
+          _elements * 4,
+          shape,
+          4,
+          ONNXTensorElementDataType.float.value,
+          _inputValue,
+        ),
       );
-      stopwatch.stop();
-      appLog.d(
-        '⚡ On-device chunk inference ${stopwatch.elapsedMilliseconds}ms',
+      OrtStatus.checkOrtStatus(
+        createTensor(
+          memory.value,
+          _outputData.cast(),
+          _elements * 4,
+          shape,
+          4,
+          ONNXTensorElementDataType.float.value,
+          _outputValue,
+        ),
       );
-      return predicted;
     } finally {
-      inputTensor.release();
-      outputTensor?.release();
-      runOptions.release();
+      if (memory.value != ffi.nullptr) {
+        api.ReleaseMemoryInfo.asFunction<
+          void Function(ffi.Pointer<bg.OrtMemoryInfo>)
+        >()(memory.value);
+      }
+      calloc.free(memory);
+      calloc.free(shape);
     }
   }
 
-  static Float32List _copyFloats(OrtValueTensor tensor, int elementCount) {
-    final dataPtrPtr = calloc<ffi.Pointer<ffi.Float>>();
-    try {
-      final statusPtr =
-          OrtEnv.instance.ortApiPtr.ref.GetTensorMutableData
-              .asFunction<
-                bg.OrtStatusPtr Function(
-                  ffi.Pointer<bg.OrtValue>,
-                  ffi.Pointer<ffi.Pointer<ffi.Void>>,
-                )
-              >()(
-            ffi.Pointer<bg.OrtValue>.fromAddress(tensor.address),
-            dataPtrPtr.cast(),
-          );
-      OrtStatus.checkOrtStatus(statusPtr);
-      final copy = Float32List(elementCount);
-      copy.setRange(
-        0,
-        elementCount,
-        dataPtrPtr.value.asTypedList(elementCount),
-      );
-      return copy;
-    } finally {
-      calloc.free(dataPtrPtr);
-    }
+  /// Runs on the worker. The caller owns the run options until this returns.
+  Float32List runSpectrum(int runOptionsAddress) {
+    final api = OrtEnv.instance.ortApiPtr.ref;
+    OrtStatus.checkOrtStatus(
+      api.Run.asFunction<
+        bg.OrtStatusPtr Function(
+          ffi.Pointer<bg.OrtSession>,
+          ffi.Pointer<bg.OrtRunOptions>,
+          ffi.Pointer<ffi.Pointer<ffi.Char>>,
+          ffi.Pointer<ffi.Pointer<bg.OrtValue>>,
+          int,
+          ffi.Pointer<ffi.Pointer<ffi.Char>>,
+          int,
+          ffi.Pointer<ffi.Pointer<bg.OrtValue>>,
+        )
+      >()(
+        _session,
+        ffi.Pointer.fromAddress(runOptionsAddress),
+        _inputName,
+        _inputValue,
+        1,
+        _outputName,
+        1,
+        _outputValue,
+      ),
+    );
+    return _output;
   }
 
-  Future<void> dispose() async {
-    try {
-      await _session.killAllIsolates();
-    } catch (_) {}
-    await _session.release();
+  void dispose() {
+    final api = OrtEnv.instance.ortApiPtr.ref;
+    final releaseValue =
+        api.ReleaseValue.asFunction<void Function(ffi.Pointer<bg.OrtValue>)>();
+    if (_inputValue.value != ffi.nullptr) releaseValue(_inputValue.value);
+    if (_outputValue.value != ffi.nullptr) releaseValue(_outputValue.value);
+    api.ReleaseSession.asFunction<void Function(ffi.Pointer<bg.OrtSession>)>()(
+      _session,
+    );
+    calloc.free(_inputName.value);
+    calloc.free(_outputName.value);
+    calloc.free(_inputName);
+    calloc.free(_outputName);
+    calloc.free(_inputValue);
+    calloc.free(_outputValue);
+    calloc.free(_inputData);
+    calloc.free(_outputData);
   }
 }

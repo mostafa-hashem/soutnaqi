@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:hugeicons/styles/stroke_rounded.dart';
 
+import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/errors/app_exception_l10n.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
@@ -154,6 +155,8 @@ class _TrailingAction extends StatelessWidget {
         ),
       );
     }
+
+    if (AppEnv.offlineOnly) return const SizedBox.shrink();
 
     if (state.status == OnDeviceModelStatus.ready) {
       return IconButton(

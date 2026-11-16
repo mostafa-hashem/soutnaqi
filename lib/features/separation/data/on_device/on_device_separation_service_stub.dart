@@ -4,3 +4,5 @@ import 'package:soutnaqi/features/separation/data/separation_service_stub.dart';
 SeparationService createOnDeviceSeparationService() => StubSeparationService();
 
 Future<void> warmUpOnDeviceSeparationIfReady() async {}
+
+Future<void> disposeOnDeviceSeparation() async {}

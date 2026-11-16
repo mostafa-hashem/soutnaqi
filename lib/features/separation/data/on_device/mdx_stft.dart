@@ -2,146 +2,113 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:fftea/fftea.dart';
-import 'package:soutnaqi/features/separation/data/on_device/audio_tensor_codec.dart';
 import 'package:soutnaqi/features/separation/data/on_device/on_device_model_spec.dart';
 
-/// Torch-compatible STFT used by UVR's MDX separator.
-///
-/// Forward: reflect-pad by `n_fft/2`, periodic Hann window, real FFT, pack
-/// stereo as `[left real, left imag, right real, right imag, freq, time]`
-/// and keep the first [OnDeviceModelSpec.dimF] bins.
-/// Inverse undoes that packing and the center pad.
+/// Torch-compatible MDX STFT and inverse with scratch space reused per job.
 class MdxStft {
-  MdxStft._();
+  static const _nFft = OnDeviceModelSpec.nFft;
+  static const _hop = OnDeviceModelSpec.hopLength;
+  static const _dimF = OnDeviceModelSpec.dimF;
+  static const _dimT = OnDeviceModelSpec.dimT;
+  static const _trim = OnDeviceModelSpec.trimSamples;
+  static const _chunk = OnDeviceModelSpec.chunkSamples;
+  static const _olaLength = _chunk + _nFft;
 
-  static final FFT _fft = FFT(OnDeviceModelSpec.nFft);
-  static final Float64List _analysisWindow = _periodicHann(
-    OnDeviceModelSpec.nFft,
+  static final _analysisWindow = Float64List.fromList(
+    List.generate(_nFft, (i) => 0.5 - 0.5 * math.cos(2 * math.pi * i / _nFft)),
   );
 
-  /// Spectrum shaped `[4, dimF, dimT]`, row-major with time as the last axis.
-  ///
-  /// Yields every few frames so a chunk of 512 FFTs does not freeze the UI.
-  static Future<Float32List> forward({
-    required Float32List left,
-    required Float32List right,
-  }) async {
-    final spec = Float32List(OnDeviceModelSpec.spectrumElementCount);
-    await _writeChannel(spec, 0, left);
-    await _writeChannel(spec, 2, right);
-    return spec;
+  static final _inverseScale = _createInverseScale();
+
+  final _fft = FFT(_nFft);
+  final _freq = Float64x2List(_nFft);
+  final _acc = Float64List(_olaLength);
+  final _padded = Float64List(_olaLength);
+
+  /// Packs [left real, left imag, right real, right imag, freq, time].
+  void forward(Float32List left, Float32List right, Float32List spectrum) {
+    _writeChannel(spectrum, 0, left);
+    _writeChannel(spectrum, 2, right);
   }
 
-  static Future<StereoSamples> inverse(Float32List spectrum) async {
-    const chunk = OnDeviceModelSpec.chunkSamples;
-    const trim = OnDeviceModelSpec.trimSamples;
-    const olaLength = chunk + OnDeviceModelSpec.nFft;
-    final accLeft = Float64List(olaLength);
-    final accRight = Float64List(olaLength);
-    final envelope = Float64List(olaLength);
-    await _accumulate(spectrum, 0, accLeft, envelope, writeEnvelope: true);
-    await _accumulate(spectrum, 2, accRight, envelope, writeEnvelope: false);
-
-    final left = Float32List(chunk);
-    final right = Float32List(chunk);
-    for (var i = 0; i < chunk; i++) {
-      final weight = envelope[trim + i];
-      final scale = weight < 1e-8 ? 0.0 : 1.0 / weight;
-      left[i] = accLeft[trim + i] * scale;
-      right[i] = accRight[trim + i] * scale;
-    }
-    return StereoSamples(left: left, right: right);
+  void inverse(Float32List spectrum, Float32List left, Float32List right) {
+    _readChannel(spectrum, 0, left);
+    _readChannel(spectrum, 2, right);
   }
 
-  static Future<void> _writeChannel(
-    Float32List spec,
-    int complexBase,
-    Float32List samples,
-  ) async {
-    const nFft = OnDeviceModelSpec.nFft;
-    const hop = OnDeviceModelSpec.hopLength;
-    const dimF = OnDeviceModelSpec.dimF;
-    const dimT = OnDeviceModelSpec.dimT;
-    final padded = _reflectPad(samples);
-    final frame = Float64List(nFft);
-
-    for (var t = 0; t < dimT; t++) {
-      final start = t * hop;
-      for (var n = 0; n < nFft; n++) {
-        frame[n] = padded[start + n] * _analysisWindow[n];
-      }
-      final freq = _fft.realFft(frame);
-      for (var f = 0; f < dimF; f++) {
-        final bin = freq[f];
-        spec[(complexBase * dimF + f) * dimT + t] = bin.x;
-        spec[((complexBase + 1) * dimF + f) * dimT + t] = bin.y;
-      }
-      if (t % 4 == 3) await Future<void>.delayed(Duration.zero);
-    }
-  }
-
-  static Future<void> _accumulate(
+  void _writeChannel(
     Float32List spectrum,
     int complexBase,
-    Float64List acc,
-    Float64List envelope, {
-    required bool writeEnvelope,
-  }) async {
-    const nFft = OnDeviceModelSpec.nFft;
-    const hop = OnDeviceModelSpec.hopLength;
-    const dimF = OnDeviceModelSpec.dimF;
-    const dimT = OnDeviceModelSpec.dimT;
-    const nBins = OnDeviceModelSpec.frequencyBins;
-    final freq = Float64x2List(nFft);
+    Float32List samples,
+  ) {
+    // PyTorch center padding uses reflection at both ends.
+    _padded.setRange(_trim, _trim + _chunk, samples);
+    for (var i = 0; i < _trim; i++) {
+      _padded[i] = samples[_trim - i];
+      _padded[_trim + _chunk + i] = samples[_chunk - 2 - i];
+    }
+
+    final realBase = complexBase * _dimF * _dimT;
+    final imagBase = realBase + _dimF * _dimT;
+    for (var t = 0; t < _dimT; t++) {
+      final start = t * _hop;
+      for (var n = 0; n < _nFft; n++) {
+        _freq[n] = Float64x2(_padded[start + n] * _analysisWindow[n], 0);
+      }
+      _fft.inPlaceFft(_freq);
+      for (var f = 0; f < _dimF; f++) {
+        final bin = _freq[f];
+        final offset = f * _dimT + t;
+        spectrum[realBase + offset] = bin.x;
+        spectrum[imagBase + offset] = bin.y;
+      }
+    }
+  }
+
+  void _readChannel(Float32List spectrum, int complexBase, Float32List output) {
+    _acc.fillRange(0, _olaLength, 0);
+    final realBase = complexBase * _dimF * _dimT;
+    final imagBase = realBase + _dimF * _dimT;
     final zero = Float64x2(0, 0);
+    for (var t = 0; t < _dimT; t++) {
+      // Bins outside the model's spectrum are zero, including Nyquist.
+      _freq.fillRange(_dimF, _nFft - _dimF + 1, zero);
+      for (var f = 0; f < _dimF; f++) {
+        final offset = f * _dimT + t;
+        final real = spectrum[realBase + offset];
+        final imaginary = spectrum[imagBase + offset];
+        _freq[f] = Float64x2(real, imaginary);
+        if (f > 0) _freq[_nFft - f] = Float64x2(real, -imaginary);
+      }
 
-    for (var t = 0; t < dimT; t++) {
-      // realInverseFft mutates its input, so reset the shared scratch buffer.
-      freq.fillRange(0, nFft, zero);
-      for (var f = 0; f < dimF; f++) {
-        freq[f] = Float64x2(
-          spectrum[(complexBase * dimF + f) * dimT + t],
-          spectrum[((complexBase + 1) * dimF + f) * dimT + t],
-        );
+      // The real inverse equals the reversed real part of the forward FFT,
+      // scaled by its length. Read directly into overlap-add scratch space.
+      _fft.inPlaceFft(_freq);
+      final start = t * _hop;
+      _acc[start] += (_freq[0].x / _nFft) * _analysisWindow[0];
+      for (var n = 1; n < _nFft; n++) {
+        _acc[start + n] += (_freq[_nFft - n].x / _nFft) * _analysisWindow[n];
       }
-      for (var f = 1; f < nBins - 1; f++) {
-        final bin = freq[f];
-        freq[nFft - f] = Float64x2(bin.x, -bin.y);
-      }
-      final time = _fft.realInverseFft(freq);
-      final start = t * hop;
-      for (var n = 0; n < nFft; n++) {
-        final window = _analysisWindow[n];
-        acc[start + n] += time[n] * window;
-        if (writeEnvelope) envelope[start + n] += window * window;
-      }
-      if (t % 4 == 3) await Future<void>.delayed(Duration.zero);
+    }
+    for (var i = 0; i < _chunk; i++) {
+      output[i] = _acc[_trim + i] * _inverseScale[i];
     }
   }
 
-  /// PyTorch `reflect` pad of `n_fft/2` on both sides.
-  static Float64List _reflectPad(Float32List samples) {
-    const trim = OnDeviceModelSpec.trimSamples;
-    final padded = Float64List(samples.length + OnDeviceModelSpec.nFft);
-    for (var i = 0; i < trim; i++) {
-      padded[i] = samples[trim - i];
+  static Float64List _createInverseScale() {
+    final envelope = Float64List(_olaLength);
+    for (var t = 0; t < _dimT; t++) {
+      final start = t * _hop;
+      for (var n = 0; n < _nFft; n++) {
+        final weight = _analysisWindow[n];
+        envelope[start + n] += weight * weight;
+      }
     }
-    for (var i = 0; i < samples.length; i++) {
-      padded[trim + i] = samples[i];
+    final scale = Float64List(_chunk);
+    for (var i = 0; i < _chunk; i++) {
+      final weight = envelope[_trim + i];
+      scale[i] = weight < 1e-8 ? 0 : 1 / weight;
     }
-    final n = samples.length;
-    for (var i = 0; i < trim; i++) {
-      padded[trim + n + i] = samples[n - 2 - i];
-    }
-    return padded;
-  }
-
-  /// `torch.hann_window(..., periodic=True)`.
-  static Float64List _periodicHann(int length) {
-    final window = Float64List(length);
-    for (var n = 0; n < length; n++) {
-      window[n] = 0.5 - 0.5 * math.cos(2 * math.pi * n / length);
-    }
-    return window;
+    return scale;
   }
 }

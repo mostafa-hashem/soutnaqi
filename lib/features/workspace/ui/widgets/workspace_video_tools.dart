@@ -18,6 +18,7 @@ class WorkspaceVideoTools extends StatelessWidget {
     required this.onExtractAudio,
     required this.onCompress,
     required this.onIsolateVocals,
+    required this.onIsolateMusic,
     required this.onChangeSpeed,
     required this.onMuteVideo,
     required this.onReplaceAudio,
@@ -28,6 +29,7 @@ class WorkspaceVideoTools extends StatelessWidget {
   final VoidCallback onExtractAudio;
   final VoidCallback onCompress;
   final VoidCallback onIsolateVocals;
+  final VoidCallback onIsolateMusic;
   final VoidCallback onChangeSpeed;
   final VoidCallback onMuteVideo;
   final VoidCallback onReplaceAudio;
@@ -86,6 +88,15 @@ class WorkspaceVideoTools extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
+                if (AppEnv.isSeparationConfigured)
+                  _ToolButton(
+                    settingsCubit: settingsCubit,
+                    label: l10n.processIsolateMusic,
+                    icon: HugeIconsStrokeRounded.musicNote02,
+                    isLoading: state.status == WorkspaceStatus.processing &&
+                        state.activeVideoOperation == VideoOperation.isolateMusic,
+                    onPressed: isBusy ? null : onIsolateMusic,
+                  ),
                 _ToolButton(
                   settingsCubit: settingsCubit,
                   label: l10n.extractAudio,

@@ -12,6 +12,7 @@ class OnDeviceModelSpec {
   OnDeviceModelSpec._();
 
   static const modelFileName = 'UVR-MDX-NET-Voc_FT.onnx';
+  static const assetPath = 'assets/models/$modelFileName';
   static const legacyModelFileName = 'htdemucs_ft_vocals_fp16weights.onnx';
 
   /// Primary high-speed global CDN (Hugging Face / CloudFront).

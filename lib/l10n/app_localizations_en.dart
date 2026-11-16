@@ -388,6 +388,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get processIsolateVocals => 'Remove music';
 
   @override
+  String get processIsolateSelection => 'Remove music from selection';
+
+  @override
+  String get separationBundledHint =>
+      'Music separation runs offline on this device.';
+
+  @override
   String get processIsolateMusic => 'Music only';
 
   @override
@@ -405,8 +412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get processIsolateMusicSuccess => 'Music extracted successfully.';
 
   @override
-  String get separationAiHint =>
-      'AI separation (Demucs) — may take several minutes.';
+  String get separationAiHint => 'AI separation — may take several minutes.';
 
   @override
   String get separationNotConfigured =>
@@ -751,7 +757,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingFeature3Desc =>
-      'You will be guided to download the AI model in Settings. It takes about 40 MB once, and you can separate audio anywhere offline.';
+      'You will be guided to download the AI model in Settings. It takes about 67 MB once, and you can separate audio anywhere offline.';
 
   @override
   String get onboardingContinue => 'Continue';
@@ -780,7 +786,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideModelStepDesc =>
-      'Download the AI model (~40 MB) once to enable full offline separation. Would you like to download it now?';
+      'Download the AI model (~67 MB) once to enable full offline separation. Would you like to download it now?';
 
   @override
   String get guideDownloadNow => 'Download Now';

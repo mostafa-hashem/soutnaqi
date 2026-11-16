@@ -61,6 +61,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   SeparationCancelToken? _separationCancelToken;
   DateTime? _separatingStartedAt;
   int _activeOperationId = 0;
+  _SeparatedClip? _separatedClip;
 
   Future<void> initialize() async {
     _positionSubscription = _player.positionStream.listen((position) {
@@ -189,6 +190,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   }
 
   Future<void> _applyMedia(MediaFile media) async {
+    _separatedClip = null;
     await _player.stop();
     emit(
       WorkspaceState(
@@ -207,14 +209,39 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     emit(state.copyWith(isWaveformLoading: true));
     try {
       final peaks = await _waveformService.extractPeaks(media: media);
-      emit(state.copyWith(waveformPeaks: peaks, isWaveformLoading: false));
+      if (isClosed || !_isCurrentWaveform(media)) return;
+      final clip = _activeSeparatedClip;
+      if (clip != null && identical(state.media, media)) {
+        clip.originalPeaks = peaks;
+      }
+      emit(state.copyWith(
+        waveformPeaks: clip != null && state.playbackSource == PlaybackSource.processed
+            ? clip.peaks
+            : peaks,
+        isWaveformLoading: false,
+      ));
     } catch (error) {
       appLog.e('❌ Waveform load failed', error: error);
-      emit(state.copyWith(isWaveformLoading: false));
+      if (!isClosed && _isCurrentWaveform(media)) {
+        emit(state.copyWith(isWaveformLoading: false));
+      }
     }
   }
 
-  Future<void> processAudio(AudioOperation operation, {double speed = 1.0}) async {
+  bool _isCurrentWaveform(MediaFile media) =>
+      identical(state.media, media) ||
+      (media.path != null && state.processedPath == media.path);
+
+  _SeparatedClip? get _activeSeparatedClip {
+    final clip = _separatedClip;
+    return clip?.path == state.processedPath ? clip : null;
+  }
+
+  Future<void> processAudio(
+    AudioOperation operation, {
+    double speed = 1.0,
+    bool useTrimRange = false,
+  }) async {
     final media = state.media;
     if (media == null || !media.isAudio) {
       throw const AppException(messageKey: 'processingAudioOnly');
@@ -223,7 +250,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     _ensureLocalProcessing(media);
 
     if (_isSeparationOperation(operation)) {
-      return _processAudioSeparation(operation);
+      return _processAudioSeparation(operation, useTrimRange: useTrimRange);
     }
 
     final operationId = ++_activeOperationId;
@@ -298,66 +325,167 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     }
   }
 
-  Future<void> _processAudioSeparation(AudioOperation operation) async {
+  bool get canSeparateAudioRange => _separationService is MediaSeparationService;
+
+  Future<void> _processAudioSeparation(
+    AudioOperation operation, {
+    required bool useTrimRange,
+  }) async {
     final media = state.media!;
-    _ensureSeparationSupported();
-
-    final operationId = ++_activeOperationId;
-    await BackgroundTaskService.instance.acquireWakeLock();
-
-    final cancelToken = SeparationCancelToken();
-    _separationCancelToken = cancelToken;
-    _separatingStartedAt = null;
-
-    emit(
-      state.copyWith(
-        status: WorkspaceStatus.processing,
-        activeOperation: operation,
-        clearProcessed: true,
-        clearHistoryPath: true,
-        processingPhase: WorkspaceProcessingPhase.preparingAudio,
+    final service = _separationService;
+    final target = _separationTargetFromAudioOperation(operation);
+    final start = useTrimRange ? state.trimStart : null;
+    final end = useTrimRange ? state.effectiveTrimEnd : null;
+    final sourceDuration = _activeSeparatedClip?.sourceDuration ?? state.duration;
+    if (start != null && end! <= start) {
+      throw const AppException(messageKey: 'separationFailed');
+    }
+    await _runSeparation(
+      audioOperation: operation,
+      run: (progress, cancelToken) => service is MediaSeparationService
+          ? service.separate(
+              inputAudioPath: media.path!,
+              start: start,
+              end: end,
+              target: target,
+              onProgress: progress,
+              cancelToken: cancelToken,
+            )
+          : service.separate(
+              inputAudioPath: media.path!,
+              target: target,
+              onProgress: progress,
+              cancelToken: cancelToken,
+            ),
+      apply: (path, operationId) => _applySeparatedAudio(
+        outputPath: path,
+        operationId: operationId,
+        operationKey: _operationKey(operation),
+        start: start,
+        end: end,
+        sourceDuration: sourceDuration,
       ),
     );
+  }
 
+  Future<void> _processVideoSeparation(VideoOperation operation) async {
+    final media = state.media!;
+    final service = _separationService;
+    final target = _separationTargetFromVideoOperation(operation);
+    await _runSeparation(
+      videoOperation: operation,
+      run: (progress, cancelToken) {
+        if (service is MediaSeparationService) {
+          return service.separateVideo(
+            videoPath: media.path!,
+            target: target,
+            onProgress: progress,
+            cancelToken: cancelToken,
+          );
+        }
+        return _separateVideoViaLegacyService(
+          media.path!, target, progress, cancelToken,
+        );
+      },
+      apply: (path, operationId) async {
+        await _player.stop();
+        if (!_isCurrentOperation(operationId)) return;
+        emit(state.copyWith(
+          status: WorkspaceStatus.processed,
+          processedPath: path,
+          playbackSource: PlaybackSource.processed,
+          clearVideoOperation: true,
+          clearProcessingOverlay: true,
+          lastOperation: _videoOperationKey(operation),
+        ));
+      },
+    );
+  }
+
+  Future<String> _separateVideoViaLegacyService(
+    String path,
+    SeparationTarget target,
+    SeparationProgressCallback onProgress,
+    SeparationCancelToken cancelToken,
+  ) async {
+    String? audioPath;
+    String? separatedPath;
     try {
-      final outputPath = await _separationService.separate(
-        inputAudioPath: media.path!,
-        target: _separationTargetFromAudioOperation(operation),
-        onProgress: _reportSeparationProgress,
+      cancelToken.throwIfCancelled();
+      audioPath = await _videoProcessingService.process(
+        inputPath: path,
+        operation: VideoOperation.extractAudio,
+      );
+      cancelToken.throwIfCancelled();
+      separatedPath = await _separationService.separate(
+        inputAudioPath: audioPath,
+        target: target,
+        onProgress: onProgress,
         cancelToken: cancelToken,
       );
       cancelToken.throwIfCancelled();
-      if (_activeOperationId != operationId) return;
-      await _applySeparatedAudio(
-        outputPath: outputPath,
-        operationKey: _operationKey(operation),
+      onProgress(const SeparationProgress(stage: SeparationStage.finalizingVideo));
+      return await _videoProcessingService.replaceAudioTrack(
+        videoPath: path,
+        audioPath: separatedPath,
       );
-    } on AppException catch (error) {
-      if (_activeOperationId == operationId) {
-        emit(
-          state.copyWith(
-            status: WorkspaceStatus.ready,
-            clearOperation: true,
-            clearProcessingOverlay: true,
-          ),
-        );
-      }
-      if (error.messageKey == 'separationCancelled') {
-        appLog.d('🔍 Audio separation cancelled by user');
-      }
-      rethrow;
+    } finally {
+      if (audioPath != null) await _deleteSeparationOutput(audioPath);
+      if (separatedPath != null) await _deleteSeparationOutput(separatedPath);
+    }
+  }
+
+  Future<void> _runSeparation({
+    AudioOperation? audioOperation,
+    VideoOperation? videoOperation,
+    required Future<String> Function(
+      SeparationProgressCallback, SeparationCancelToken,
+    ) run,
+    required Future<void> Function(String, int) apply,
+  }) async {
+    _ensureSeparationSupported();
+    if (state.isBusy) return;
+    final operationId = ++_activeOperationId;
+    final cancelToken = SeparationCancelToken();
+    _separationCancelToken = cancelToken;
+    _separatingStartedAt = null;
+    emit(state.copyWith(
+      status: WorkspaceStatus.processing,
+      activeOperation: audioOperation,
+      activeVideoOperation: videoOperation,
+      processingPhase: videoOperation == null
+          ? WorkspaceProcessingPhase.preparingAudio
+          : WorkspaceProcessingPhase.extractingAudio,
+      updateProcessingProgress: true,
+      clearProcessingChunks: true,
+    ));
+    await BackgroundTaskService.instance.acquireWakeLock();
+
+    String? outputPath;
+    try {
+      cancelToken.throwIfCancelled();
+      outputPath = await run((progress) {
+        if (_isCurrentOperation(operationId) && !cancelToken.isCancelled) {
+          _reportSeparationProgress(progress);
+        }
+      }, cancelToken);
+      cancelToken.throwIfCancelled();
+      if (_isCurrentOperation(operationId)) await apply(outputPath, operationId);
     } catch (error) {
-      if (_activeOperationId == operationId) {
-        emit(
-          state.copyWith(
-            status: WorkspaceStatus.ready,
-            clearOperation: true,
-            clearProcessingOverlay: true,
-          ),
-        );
+      if (_isCurrentOperation(operationId)) {
+        emit(state.copyWith(
+          status: WorkspaceStatus.ready,
+          clearOperation: true,
+          clearVideoOperation: true,
+          clearProcessingOverlay: true,
+        ));
       }
+      if (error is AppException) rethrow;
       throw AppException(messageKey: 'separationFailed', cause: error);
     } finally {
+      if (outputPath != null && state.processedPath != outputPath) {
+        await _deleteSeparationOutput(outputPath);
+      }
       await BackgroundTaskService.instance.releaseWakeLock();
       if (identical(_separationCancelToken, cancelToken)) {
         _separationCancelToken = null;
@@ -365,97 +493,13 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     }
   }
 
-  Future<void> _processVideoSeparation(VideoOperation operation) async {
-    final media = state.media!;
-    _ensureSeparationSupported();
+  bool _isCurrentOperation(int id) => !isClosed && _activeOperationId == id;
 
-    final operationId = ++_activeOperationId;
-    await BackgroundTaskService.instance.acquireWakeLock();
-
-    final cancelToken = SeparationCancelToken();
-    _separationCancelToken = cancelToken;
-    _separatingStartedAt = null;
-
-    emit(
-      state.copyWith(
-        status: WorkspaceStatus.processing,
-        activeVideoOperation: operation,
-        clearProcessed: true,
-        clearHistoryPath: true,
-        processingPhase: WorkspaceProcessingPhase.extractingAudio,
-      ),
-    );
-
+  Future<void> _deleteSeparationOutput(String path) async {
     try {
-      cancelToken.throwIfCancelled();
-      final audioPath = await _videoProcessingService.process(
-        inputPath: media.path!,
-        operation: VideoOperation.extractAudio,
-      );
-      cancelToken.throwIfCancelled();
-      if (_activeOperationId != operationId) return;
-      final separatedAudioPath = await _separationService.separate(
-        inputAudioPath: audioPath,
-        target: _separationTargetFromVideoOperation(operation),
-        onProgress: _reportSeparationProgress,
-        cancelToken: cancelToken,
-      );
-      cancelToken.throwIfCancelled();
-      if (_activeOperationId != operationId) return;
-      emit(
-        state.copyWith(
-          processingPhase: WorkspaceProcessingPhase.finalizingVideo,
-          updateProcessingProgress: true,
-          clearProcessingChunks: true,
-        ),
-      );
-      final outputPath = await _videoProcessingService.replaceAudioTrack(
-        videoPath: media.path!,
-        audioPath: separatedAudioPath,
-      );
-      cancelToken.throwIfCancelled();
-      if (_activeOperationId != operationId) return;
-      await _player.stop();
-      emit(
-        state.copyWith(
-          status: WorkspaceStatus.processed,
-          processedPath: outputPath,
-          playbackSource: PlaybackSource.processed,
-          clearVideoOperation: true,
-          clearProcessingOverlay: true,
-          lastOperation: _videoOperationKey(operation),
-        ),
-      );
-    } on AppException catch (error) {
-      if (_activeOperationId == operationId) {
-        emit(
-          state.copyWith(
-            status: WorkspaceStatus.ready,
-            clearVideoOperation: true,
-            clearProcessingOverlay: true,
-          ),
-        );
-      }
-      if (error.messageKey == 'separationCancelled') {
-        appLog.d('🔍 Video separation cancelled by user');
-      }
-      rethrow;
-    } catch (error) {
-      if (_activeOperationId == operationId) {
-        emit(
-          state.copyWith(
-            status: WorkspaceStatus.ready,
-            clearVideoOperation: true,
-            clearProcessingOverlay: true,
-          ),
-        );
-      }
-      throw AppException(messageKey: 'separationFailed', cause: error);
-    } finally {
-      await BackgroundTaskService.instance.releaseWakeLock();
-      if (identical(_separationCancelToken, cancelToken)) {
-        _separationCancelToken = null;
-      }
+      await File(path).delete();
+    } on FileSystemException catch (error) {
+      appLog.w('Could not delete separation temporary file', error: error);
     }
   }
 
@@ -464,9 +508,11 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     if (!state.hasProcessingOverlay) return;
     appLog.d('⚡ Cancelling active processing immediately');
     _activeOperationId++;
-    _separationCancelToken?.cancel();
-    FFmpegKit.cancel();
-    unawaited(BackgroundTaskService.instance.forceReleaseWakeLock());
+    final token = _separationCancelToken;
+    token?.cancel();
+    if (token == null || _separationService is! MediaSeparationService) {
+      unawaited(FFmpegKit.cancel());
+    }
     emit(
       state.copyWith(
         status: WorkspaceStatus.ready,
@@ -491,6 +537,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       SeparationStage.warmingUpEngine => WorkspaceProcessingPhase.warmingUpEngine,
       SeparationStage.separating => WorkspaceProcessingPhase.separating,
       SeparationStage.encodingOutput => WorkspaceProcessingPhase.encodingOutput,
+      SeparationStage.finalizingVideo => WorkspaceProcessingPhase.finalizingVideo,
     };
 
     final isSeparating = phase == WorkspaceProcessingPhase.separating;
@@ -532,31 +579,35 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
   Future<void> _applySeparatedAudio({
     required String outputPath,
+    required int operationId,
     required String operationKey,
+    required Duration sourceDuration,
+    Duration? start,
+    Duration? end,
   }) async {
-    final audioFile = MediaFile(
-      name: _fileNameFromPath(outputPath),
-      kind: MediaKind.audio,
-      mimeType: FfmpegAudioCodec.mimeType,
-      sizeBytes: 0,
-      path: outputPath,
-    );
     await _player.stop();
+    if (!_isCurrentOperation(operationId)) return;
+    final originalPeaks = _activeSeparatedClip?.originalPeaks ?? state.waveformPeaks;
+    final clip = _separatedClip = start != null && end != null
+        ? _SeparatedClip(outputPath, start, end, sourceDuration, originalPeaks)
+        : null;
     emit(
-      WorkspaceState(
+      state.copyWith(
         status: WorkspaceStatus.processed,
-        media: audioFile,
         processedPath: outputPath,
         playbackSource: PlaybackSource.processed,
         lastOperation: operationKey,
+        clearOperation: true,
+        clearProcessingOverlay: true,
+        clearHistoryPath: true,
+        position: Duration.zero,
+        duration: clip?.duration ?? sourceDuration,
+        trimStart: Duration.zero,
+        trimEnd: Duration.zero,
+        waveformPeaks: clip?.peaks ?? originalPeaks,
       ),
     );
-    try {
-      await _loadProcessedOutput(outputPath);
-      unawaited(_loadWaveform(audioFile));
-    } catch (error) {
-      appLog.e('❌ Failed to prepare separated audio preview', error: error);
-    }
+    await _loadProcessedOutput(outputPath);
   }
 
   void _ensureSeparationSupported() {
@@ -965,10 +1016,29 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     final media = state.media;
     if (media == null) return;
 
+    if (state.playbackSource == source) return;
     final wasPlaying = _player.playing;
     final currentPosition = _player.position;
 
-    emit(state.copyWith(playbackSource: source));
+    final clip = _activeSeparatedClip;
+    var seekTo = currentPosition;
+    if (clip == null) {
+      emit(state.copyWith(playbackSource: source));
+    } else {
+      final original = source == PlaybackSource.original;
+      final duration = original ? clip.sourceDuration : clip.duration;
+      seekTo = original ? currentPosition + clip.start : currentPosition - clip.start;
+      if (seekTo < Duration.zero) seekTo = Duration.zero;
+      if (seekTo > duration) seekTo = duration;
+      emit(state.copyWith(
+        playbackSource: source,
+        duration: duration,
+        position: seekTo,
+        trimStart: Duration.zero,
+        trimEnd: Duration.zero,
+        waveformPeaks: original ? clip.originalPeaks : clip.peaks,
+      ));
+    }
 
     if (!media.isAudio) return;
 
@@ -978,8 +1048,8 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
       await _loadProcessedOutput(state.processedPath!);
     }
 
-    if (currentPosition > Duration.zero) {
-      await _player.seek(currentPosition);
+    if (seekTo > Duration.zero) {
+      await _player.seek(seekTo);
     }
     if (wasPlaying) {
       await _player.play();
@@ -1117,6 +1187,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
   Future<void> clearWorkspace() async {
     appLog.d('🔍 Clearing workspace…');
+    _separatedClip = null;
     await _player.stop();
     emit(const WorkspaceState());
   }
@@ -1213,10 +1284,33 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
 
   @override
   Future<void> close() async {
+    _activeOperationId++;
+    _separationCancelToken?.cancel();
     await _positionSubscription?.cancel();
     await _durationSubscription?.cancel();
     await _playerStateSubscription?.cancel();
     await _player.dispose();
     return super.close();
+  }
+}
+
+class _SeparatedClip {
+  _SeparatedClip(this.path, this.start, this.end, this.sourceDuration, this.originalPeaks);
+
+  final String path;
+  final Duration start;
+  final Duration end;
+  final Duration sourceDuration;
+  List<double> originalPeaks;
+
+  Duration get duration => end - start;
+
+  List<double> get peaks {
+    if (originalPeaks.isEmpty || sourceDuration <= Duration.zero) return const [];
+    final count = originalPeaks.length;
+    final total = sourceDuration.inMicroseconds;
+    final first = (start.inMicroseconds * count ~/ total).clamp(0, count - 1);
+    final last = ((end.inMicroseconds * count + total - 1) ~/ total).clamp(first + 1, count);
+    return originalPeaks.sublist(first, last);
   }
 }

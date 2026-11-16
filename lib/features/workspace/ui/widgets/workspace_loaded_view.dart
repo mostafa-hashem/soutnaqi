@@ -132,6 +132,23 @@ class WorkspaceLoadedView extends StatelessWidget {
                         action: () =>
                             cubit.processAudio(AudioOperation.isolateVocals),
                       ),
+                      onIsolateMusic: () => _runSeparation(
+                        context,
+                        success: l10n.processIsolateMusicSuccess,
+                        action: () => cubit.processAudio(AudioOperation.isolateMusic),
+                      ),
+                      onIsolateSelection: state.isTrimModified &&
+                              state.playbackSource == PlaybackSource.original &&
+                              cubit.canSeparateAudioRange
+                          ? () => _runSeparation(
+                              context,
+                              success: l10n.processIsolateVocalsSuccess,
+                              action: () => cubit.processAudio(
+                                AudioOperation.isolateVocals,
+                                useTrimRange: true,
+                              ),
+                            )
+                          : null,
                       onChangeSpeed: () => _changeAudioSpeed(context),
                     ),
                   ] else
@@ -151,6 +168,11 @@ class WorkspaceLoadedView extends StatelessWidget {
                         success: l10n.processIsolateVocalsSuccess,
                         action: () =>
                             cubit.processVideo(VideoOperation.isolateVocals),
+                      ),
+                      onIsolateMusic: () => _runSeparation(
+                        context,
+                        success: l10n.processIsolateMusicSuccess,
+                        action: () => cubit.processVideo(VideoOperation.isolateMusic),
                       ),
                       onMuteVideo: () => _runToast(
                         context,

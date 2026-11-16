@@ -3,13 +3,15 @@ import 'package:flutter/foundation.dart';
 class AppEnv {
   AppEnv._();
 
+  static const offlineOnly = bool.fromEnvironment('SOUTNAQI_OFFLINE_ONLY');
+
   /// Free option: Demucs server on your PC (see tools/local_demucs_server).
   static const separationServerUrl = String.fromEnvironment(
     'SEPARATION_SERVER_URL',
   );
 
   static bool get isLocalSeparationConfigured =>
-      separationServerUrl.isNotEmpty;
+      !offlineOnly && separationServerUrl.isNotEmpty;
 
   /// Paid cloud option (Replicate credits).
   static const replicateApiToken = String.fromEnvironment(
@@ -17,7 +19,7 @@ class AppEnv {
   );
 
   static bool get isReplicateSeparationConfigured =>
-      replicateApiToken.isNotEmpty;
+      !offlineOnly && replicateApiToken.isNotEmpty;
 
   /// Free, fully offline option: an on-device ONNX model (UVR-MDX-NET Voc FT),
   /// downloaded once and cached (see `features/separation/data/on_device`).

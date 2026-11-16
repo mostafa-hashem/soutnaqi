@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:hugeicons/styles/stroke_rounded.dart';
+import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/constants/layout_constants.dart';
 import 'package:soutnaqi/core/layout/magliss_safe_insets.dart';
 import 'package:soutnaqi/core/theme/app_radii.dart';
@@ -25,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingsCubit = context.read<SettingsCubit>();
     final l10n = AppLocalizations.of(context);
-    final showModelGuide = context.select<SettingsCubit, bool>(
+    final showModelGuide = !AppEnv.offlineOnly && context.select<SettingsCubit, bool>(
       (cubit) => !cubit.state.hasCompletedModelGuide,
     );
 

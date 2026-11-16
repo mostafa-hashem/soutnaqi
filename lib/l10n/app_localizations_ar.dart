@@ -379,6 +379,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get processIsolateVocals => 'حذف الموسيقى';
 
   @override
+  String get processIsolateSelection => 'حذف الموسيقى من الجزء المحدد';
+
+  @override
+  String get separationBundledHint =>
+      'فصل الموسيقى بيتم على هذا الجهاز دون إنترنت.';
+
+  @override
   String get processIsolateMusic => 'موسيقى فقط';
 
   @override
@@ -397,7 +404,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get separationAiHint =>
-      'الفصل بالذكاء الاصطناعي (Demucs) — قد يستغرق عدة دقائق.';
+      'الفصل بالذكاء الاصطناعي — قد يستغرق عدة دقائق.';
 
   @override
   String get separationNotConfigured =>
@@ -742,7 +749,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingFeature3Desc =>
-      'سنرشدك في البداية لتحميل موديل الذكاء الاصطناعي من الإعدادات (حجمه حوالي 40 ميغابايت لمرة واحدة)، ليعمل معك في أي وقت دون إنترنت.';
+      'سنرشدك في البداية لتحميل موديل الذكاء الاصطناعي من الإعدادات (حجمه حوالي 67 ميغابايت لمرة واحدة)، ليعمل معك في أي وقت دون إنترنت.';
 
   @override
   String get onboardingContinue => 'متابعة';
@@ -771,7 +778,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get guideModelStepDesc =>
-      'قم بتحميل الموديل (حوالي 40 ميغابايت) لمرة واحدة ليعمل التطبيق بدون إنترنت. هل تود التحميل الآن؟';
+      'قم بتحميل الموديل (حوالي 67 ميغابايت) لمرة واحدة ليعمل التطبيق بدون إنترنت. هل تود التحميل الآن؟';
 
   @override
   String get guideDownloadNow => 'تحميل الموديل الآن';

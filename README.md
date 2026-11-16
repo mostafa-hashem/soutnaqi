@@ -19,7 +19,7 @@
   </a>
   <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter" alt="Flutter" />
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android" alt="Android" />
-  <img src="https://img.shields.io/badge/AI_Engine-ONNX%20Demucs-FF6F00" alt="ONNX Demucs" />
+  <img src="https://img.shields.io/badge/AI_Engine-ONNX%20UVR--MDX--Net-FF6F00" alt="ONNX UVR MDX-Net" />
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
 </p>
 
@@ -49,7 +49,7 @@ Get it on Google Play or download the APK directly from GitHub Releases:
   </a>
 </p>
 
-> 💡 **Quick Note:** After installing and launching the app, head over to **Settings → On-device model** and download the Demucs AI model (~160 MB) once. After this one-time download, vocal separation runs completely offline without any internet connection!
+An offline build bundles UVR-MDX-NET Voc FT (66.8 MB) and separates media on the phone from the first launch. Builds without the bundled model can download it once from **Settings → On-device model**.
 
 ---
 
@@ -57,7 +57,7 @@ Get it on Google Play or download the APK directly from GitHub Releases:
 
 | Feature | Description |
 | :--- | :--- |
-| 🎙️ **AI Vocal Separation** | Extract vocals or instrumental stems (Acappella / Karaoke) using Demucs AI running directly on your mobile device. |
+| 🎙️ **AI Vocal Separation** | Extract vocals or instrumental stems (Acappella / Karaoke) using UVR-MDX-NET Voc FT on your mobile device. |
 | ✂️ **Audio & Video Trimmer** | High-precision timeline trimming with real-time waveform visual scrubbing. |
 | 🔄 **Format Conversion** | Rapidly convert audio tracks between popular formats: **MP3, AAC, WAV, FLAC, OGG, M4A**. |
 | 🎬 **Video Tools** | One-tap audio extraction from video clips, mute audio, and compress media. |
@@ -121,8 +121,19 @@ flutter build apk --split-per-abi
 The output APK for modern devices (64-bit) will be at:
 `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk` (~60 MB).
 
+### Offline build
+
+```bash
+python3 tool/prepare_offline_model.py
+flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=SOUTNAQI_OFFLINE_ONLY=true
+```
+
+Use `--model /path/to/UVR-MDX-NET-Voc_FT.onnx` to stage a local copy. The script checks the size and SHA-256 before bundling. The app verifies the bundled weights before use and the offline build selects the on-device engine. Model credit belongs to [Ultimate Vocal Remover and its developers](https://github.com/Anjok07/ultimatevocalremovergui).
+
+To exercise the native model and FFmpeg integration on a developer machine, set `SOUTNAQI_TEST_MODEL` to the verified weights and `SOUTNAQI_TEST_FFMPEG` to a local FFmpeg executable before running Flutter tests. Set `SOUTNAQI_TEST_BUNDLE=1` after staging the bundle to also test its installation. On macOS, include the ONNX Runtime plugin's `macos` library folder in `DYLD_LIBRARY_PATH`.
+
 ### Optional: Remote Demucs Server
-By default, the app runs Demucs on-device using ONNX Runtime. If you prefer running Demucs on an external PC server or via Replicate, configure `dart_defines.json`:
+Standard builds run UVR-MDX-NET Voc FT on-device using ONNX Runtime. If you prefer running Demucs on an external PC server or via Replicate, configure `dart_defines.json`:
 
 ```bash
 cp dart_defines.example.json dart_defines.json
@@ -135,7 +146,7 @@ cp dart_defines.example.json dart_defines.json
 - **Framework:** [Flutter](https://flutter.dev) (Dart 3)
 - **State Management:** `flutter_bloc` (Cubit Pattern)
 - **Audio & Video Processing:** `ffmpeg_kit_flutter_new_min`, `just_audio`, `video_player`
-- **AI Neural Engine:** `onnxruntime_v2` (HT-Demucs Model)
+- **AI Neural Engine:** `onnxruntime_v2` (UVR-MDX-NET Voc FT)
 - **Typography & Icons:** Cairo & Inter Fonts, HugeIcons
 
 ---

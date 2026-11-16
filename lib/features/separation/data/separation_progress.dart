@@ -5,6 +5,7 @@ enum SeparationStage {
   warmingUpEngine,
   separating,
   encodingOutput,
+  finalizingVideo,
 }
 
 /// Progress snapshot for separation UI and logging.

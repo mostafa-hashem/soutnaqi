@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/logging/app_log.dart';
 import 'package:soutnaqi/core/services/background_task_service.dart';
@@ -28,6 +30,8 @@ class OnDeviceModelRepository {
   bool _cancelRequested = false;
 
   Future<void>? _activeDownloadFuture;
+  Future<bool>? _bundledInstallation;
+  Future<AssetManifest>? _assetManifest;
   final Set<void Function(double progress)> _progressListeners = {};
   double _lastReportedProgress = 0.0;
 
@@ -95,9 +99,35 @@ class OnDeviceModelRepository {
   Future<bool> isModelCached() async {
     await _deleteLegacyModel();
     final file = await _modelFile();
-    if (!await file.exists()) return false;
-    final size = await file.length();
-    return size == OnDeviceModelSpec.expectedSizeBytes;
+    if (await file.exists() &&
+        await file.length() == OnDeviceModelSpec.expectedSizeBytes) {
+      return true;
+    }
+    final install = _bundledInstallation ??= _installBundledModel(file);
+    try {
+      return await install;
+    } finally {
+      if (identical(_bundledInstallation, install)) _bundledInstallation = null;
+    }
+  }
+
+  Future<bool> _installBundledModel(File target) async {
+    final manifest = await (_assetManifest ??= AssetManifest.loadFromAssetBundle(rootBundle));
+    if (!manifest.listAssets().contains(OnDeviceModelSpec.assetPath)) return false;
+    final candidate = File('${target.path}.bundled');
+    try {
+      final bytes = await rootBundle.load(OnDeviceModelSpec.assetPath);
+      if (bytes.lengthInBytes != OnDeviceModelSpec.expectedSizeBytes) {
+        throw const FormatException('Bundled separation model has incorrect size');
+      }
+      await candidate.writeAsBytes(
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+      );
+      if (await _verifyAndFinalize(candidate, target)) return true;
+      throw const FormatException('Bundled separation model failed verification');
+    } finally {
+      if (await candidate.exists()) await candidate.delete();
+    }
   }
 
   Future<int> cachedModelSizeBytes() async {
@@ -114,6 +144,9 @@ class OnDeviceModelRepository {
     void Function(double progress)? onProgress,
   }) async {
     if (await isModelCached()) return;
+    if (AppEnv.offlineOnly) {
+      throw const AppException(messageKey: 'separationModelRequired');
+    }
 
     if (onProgress != null) {
       _progressListeners.add(onProgress);
@@ -386,7 +419,7 @@ class OnDeviceModelRepository {
         await partFile.delete();
       } catch (_) {}
     }
-    appLog.d('✅ Model downloaded and verified: ${targetFile.path}');
+    appLog.d('✅ Model verified: ${targetFile.path}');
     return true;
   }
 

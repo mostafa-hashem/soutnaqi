@@ -3,6 +3,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/errors/app_exception.dart';
 import 'package:soutnaqi/core/errors/app_exception_l10n.dart';
 import 'package:soutnaqi/core/services/incoming_media_service.dart';
@@ -70,7 +71,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   @override
   Widget build(BuildContext context) {
     final settingsCubit = context.read<SettingsCubit>();
-    final showModelGuide = context.select<SettingsCubit, bool>(
+    final showModelGuide = !AppEnv.offlineOnly && context.select<SettingsCubit, bool>(
       (cubit) => !cubit.state.hasCompletedModelGuide,
     );
 

@@ -56,3 +56,6 @@ key.properties
 /tool/generate_store_assets.py
 /tool/store_generator_temp/
 
+
+# Verified model staged for offline releases
+/assets/models/*.onnx

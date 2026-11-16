@@ -12,7 +12,7 @@ SoutNaqi is an open-source, on-device audio and video processing application bui
 
 **We do not collect, store, transmit, or share any of your personal data or media files.**
 
-- **Completely Offline Processing:** All audio and video processing, including AI vocal separation using the Demucs AI model, happens **entirely offline on your device**. 
+- **Completely Offline Processing:** All audio and video processing, including AI vocal separation using the UVR-MDX-NET Voc FT model, happens **entirely offline on your device**.
 - **No Cloud Servers:** We do not upload your audio recordings, videos, or processed media to any external servers or cloud services.
 - **No Analytics or Tracking:** We do not integrate third-party analytics or tracking SDKs that monitor your usage behavior.
 

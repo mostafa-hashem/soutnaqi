@@ -16,7 +16,7 @@ void main() {
     }
   });
 
-  test('MDX STFT round-trips one model window', () async {
+  test('MDX STFT round-trips one model window', () {
     const length = OnDeviceModelSpec.chunkSamples;
     final left = Float32List(length);
     final right = Float32List(length);
@@ -25,14 +25,17 @@ void main() {
       right[i] = 0.15 * math.sin(i * 0.05);
     }
 
-    final wave = await MdxStft.inverse(
-      await MdxStft.forward(left: left, right: right),
-    );
+    final stft = MdxStft();
+    final spectrum = Float32List(OnDeviceModelSpec.spectrumElementCount);
+    final waveLeft = Float32List(length);
+    final waveRight = Float32List(length);
+    stft.forward(left, right, spectrum);
+    stft.inverse(spectrum, waveLeft, waveRight);
 
     const margin = OnDeviceModelSpec.trimSamples;
     for (var i = margin; i < length - margin; i += 64) {
-      expect(wave.left[i], closeTo(left[i], 1e-3));
-      expect(wave.right[i], closeTo(right[i], 1e-3));
+      expect(waveLeft[i], closeTo(left[i], 1e-3));
+      expect(waveRight[i], closeTo(right[i], 1e-3));
     }
   });
 }

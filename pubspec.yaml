@@ -51,6 +51,7 @@ flutter:
   generate: true
   assets:
     - assets/brand/
+    - assets/models/
   fonts:
     - family: IBMPlexSansArabic
       fonts:

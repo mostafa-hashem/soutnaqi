@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:hugeicons/styles/stroke_rounded.dart';
+import 'package:soutnaqi/core/config/app_env.dart';
 import 'package:soutnaqi/core/theme/app_radii.dart';
 import 'package:soutnaqi/core/theme/magliss_context_colors.dart';
 import 'package:soutnaqi/core/theme/magliss_typography.dart';
@@ -135,9 +136,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     icon: HugeIconsStrokeRounded.cloudDownload,
                     badgeText: l10n.onboardingFeature3Subtitle,
                     title: l10n.onboardingFeature3Title,
-                    description: l10n.onboardingFeature3Desc,
+                    description: AppEnv.offlineOnly
+                        ? l10n.separationBundledHint
+                        : l10n.onboardingFeature3Desc,
                     highlights: [
-                      OnboardingFeatureItem(
+                      if (!AppEnv.offlineOnly) OnboardingFeatureItem(
                         icon: HugeIconsStrokeRounded.settings01,
                         title: l10n.navSettings,
                         description: l10n.guideSettingsStepDesc,
@@ -145,7 +148,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       OnboardingFeatureItem(
                         icon: HugeIconsStrokeRounded.checkmarkCircle02,
                         title: l10n.separationSection,
-                        description: l10n.guideModelStepDesc,
+                        description: AppEnv.offlineOnly
+                            ? l10n.separationBundledHint
+                            : l10n.guideModelStepDesc,
                       ),
                     ],
                   ),

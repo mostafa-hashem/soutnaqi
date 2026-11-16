@@ -97,7 +97,6 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
         },
       );
       await refresh();
-      unawaited(warmUpSeparationIfReady());
     } on AppException catch (error) {
       if (isClosed) return;
       if (error.messageKey == 'onDeviceModelDownloadCancelled') {
@@ -138,6 +137,7 @@ class OnDeviceModelCubit extends Cubit<OnDeviceModelState> {
   Future<void> delete() async {
     try {
       await _repository.deleteCachedModel();
+      await disposeOnDeviceSeparation();
     } catch (error) {
       appLog.e('❌ On-device model delete failed', error: error);
     }
