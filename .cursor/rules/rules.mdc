@@ -119,13 +119,8 @@ import 'service_stub.dart'
 - **Queries Declaration**: Always maintain system picker intents (`GET_CONTENT`, `OPEN_DOCUMENT`, `CHOOSER`, `PICK`) in the `<queries>` block of `AndroidManifest.xml` for package visibility on Android 11+ (API 30+).
 
 ### 10.2. Release Builds & Minification (R8)
-- **Minification Disabled**: Keep `isMinifyEnabled = false` and `isShrinkResources = false` in `android/app/build.gradle.kts`. In Flutter, application logic is compiled directly to native machine code (`libapp.so`). Minifying the Java/Kotlin wrapper saves virtually no space, but frequently breaks DataStore, Coroutines, Pigeon platform channels, and plugin reflection.
-- **ProGuard Keep Rules**: Maintain complete keep rules in `android/app/proguard-rules.pro` for:
-  - `androidx.datastore.**` (used by `shared_preferences_android`)
-  - `kotlinx.coroutines.**`
-  - `androidx.lifecycle.**` (used by `file_picker`)
-  - `com.mr.flutter.plugin.filepicker.**` and `com.miguelruivo.flutter.plugin.filepicker.**`
-  - `io.flutter.plugins.**`
+- **R8 Optimization & Obfuscation Enabled**: Keep `isMinifyEnabled = true` and `isShrinkResources = true` with `proguard-android-optimize.txt` in `android/app/build.gradle.kts` to satisfy Google Play Console's DEX code optimization and obfuscation threshold (>= 25%).
+- **Targeted ProGuard Keep Rules**: In `android/app/proguard-rules.pro`, keep Flutter/JNI/plugin entrypoints (`io.flutter.**`, `io.flutter.plugins.**`, `com.arthenica.ffmpegkit.**`, `ai.onnxruntime.**`, `com.mr.flutter.plugin.filepicker.**`, `com.miguelruivo.flutter.plugin.filepicker.**`) and targeted reflection/protobuf/atomic members (`androidx.datastore.preferences.PreferencesProto**`, `GeneratedMessageLite` members, `kotlinx.coroutines.**` volatile fields, `androidx.lifecycle.DefaultLifecycleObserver`). Never put blanket `-keep class` on large AndroidX/KotlinX packages (`androidx.media3.**`, `androidx.datastore.**`, `kotlinx.coroutines.**`), as that prevents R8 from obfuscating most of the DEX and drops obfuscation below Google Play's 25% requirement.
 
 ### 10.3. Native Debug Symbols & Deobfuscation
 - **Native Debug Symbols**: Always specify `ndk { debugSymbolLevel = "SYMBOL_TABLE" }` in `buildTypes.release` in `android/app/build.gradle.kts`. This packages native C/C++ debug symbol tables (for FFmpeg, ONNX Runtime, and the Flutter engine) directly into the App Bundle (`.aab`), completely eliminating the missing debug symbols warning in Google Play Console.

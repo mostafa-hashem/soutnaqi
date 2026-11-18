@@ -26,34 +26,41 @@
 # SoutNaqi app classes
 -keep class com.soutnaqi.app.** { *; }
 
-# Audio & Video plugins
+# Audio & Video plugins (Media3 AARs bundle their own consumer reflection keep rules)
 -keep class com.ryanheise.just_audio.** { *; }
 -dontwarn com.ryanheise.just_audio.**
--keep class com.google.android.exoplayer2.** { *; }
 -dontwarn com.google.android.exoplayer2.**
--keep class androidx.media3.** { *; }
 -dontwarn androidx.media3.**
 -keep class io.flutter.plugins.videoplayer.** { *; }
 -dontwarn io.flutter.plugins.videoplayer.**
 
-# File & Image Pickers
+# File & Image Pickers (Lifecycle AARs bundle their own consumer rules)
 -keep class com.mr.flutter.plugin.filepicker.** { *; }
 -dontwarn com.mr.flutter.plugin.filepicker.**
 -keep class com.miguelruivo.flutter.plugin.filepicker.** { *; }
 -dontwarn com.miguelruivo.flutter.plugin.filepicker.**
 -keep class io.flutter.plugins.imagepicker.** { *; }
 -dontwarn io.flutter.plugins.imagepicker.**
--keep class androidx.lifecycle.** { *; }
+-keep class androidx.lifecycle.DefaultLifecycleObserver
+-keep class * implements androidx.lifecycle.LifecycleObserver { *; }
+-keep class * implements androidx.lifecycle.DefaultLifecycleObserver { *; }
 -dontwarn androidx.lifecycle.**
 
-# Storage & Preferences plugins (including AndroidX DataStore and Coroutines used by shared_preferences)
+# Storage & Preferences plugins (keep DataStore protobuf messages & Coroutines volatile fields while allowing R8 to obfuscate internal classes)
 -keep class io.flutter.plugins.sharedpreferences.** { *; }
 -dontwarn io.flutter.plugins.sharedpreferences.**
--keep class androidx.datastore.** { *; }
+-keep class androidx.datastore.preferences.PreferencesProto** { *; }
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+    <methods>;
+}
 -dontwarn androidx.datastore.**
--keep class androidx.preference.** { *; }
 -dontwarn androidx.preference.**
--keep class kotlinx.coroutines.** { *; }
+-keepclassmembers class kotlinx.coroutines.** {
+    volatile <fields>;
+}
+-keep class kotlinx.coroutines.android.AndroidDispatcherFactory { *; }
+-keep class kotlinx.coroutines.android.AndroidExceptionPreHandler { *; }
 -dontwarn kotlinx.coroutines.**
 -keep class io.flutter.plugins.pathprovider.** { *; }
 -dontwarn io.flutter.plugins.pathprovider.**
