@@ -26,6 +26,7 @@ subprojects {
     plugins.withId("com.android.library") {
         extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
             compileSdk = 36
+            ndkVersion = "28.2.13676358"
             lint {
                 checkReleaseBuilds = false
                 abortOnError = false

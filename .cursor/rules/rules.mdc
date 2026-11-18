@@ -130,6 +130,10 @@ import 'service_stub.dart'
 ### 10.3. Native Debug Symbols & Deobfuscation
 - **Native Debug Symbols**: Always specify `ndk { debugSymbolLevel = "SYMBOL_TABLE" }` in `buildTypes.release` in `android/app/build.gradle.kts`. This packages native C/C++ debug symbol tables (for FFmpeg, ONNX Runtime, and the Flutter engine) directly into the App Bundle (`.aab`), completely eliminating the missing debug symbols warning in Google Play Console.
 
+### 10.4. 16 KB Page Size & NDK Compatibility
+- **NDK r28+ Enforcement**: Keep `ndkVersion = "28.2.13676358"` (NDK r28c+) in `android/app/build.gradle.kts` and `android/build.gradle.kts` so all native libraries are compiled with 16 KB page-size runtime support.
+- **Exclude Legacy DataStore Native Counter**: Always exclude `**/libdatastore_shared_counter.so` under `packaging.jniLibs.excludes` in `android/app/build.gradle.kts`. That library is shipped prebuilt with an older NDK (`r25c`) inside `androidx.datastore:datastore-core-android`, is only used by `MultiProcessDataStoreFactory` (never loaded by single-process `shared_preferences_android`), and triggers Google Play Console's 16 KB older-NDK crash warning if packaged.
+
 ---
 
 ## 11. Assistant Replies & User Interaction

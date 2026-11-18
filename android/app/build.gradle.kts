@@ -68,6 +68,14 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            // Exclude unused multi-process DataStore native library compiled with older NDK (r25c),
+            // which triggers Google Play's 16 KB older NDK crash warning.
+            excludes += listOf("**/libdatastore_shared_counter.so")
+        }
+    }
+
     lint {
         checkReleaseBuilds = false
         abortOnError = false
